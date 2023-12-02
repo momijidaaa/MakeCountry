@@ -24,7 +24,7 @@ MC.system.runInterval(() => {
             addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
         }
     } else {
-        addScore(`tax`,`mc_timer`,-1)
+        addScore(`tax`, `mc_timer`, -1)
         if (MC.world.scoreboard.getObjective(`mc_timer`).getScore(`tax`) === 10) {
             MC.world.sendMessage(`§a[MakeCountry]\n§r税金回収の時間です`)
             for (const p of MC.world.scoreboard.getObjective(`mc_pcountries`).getScores()) {
@@ -236,40 +236,30 @@ MC.world.afterEvents.entityHurt.subscribe((ev) => {
 
 
 
-MC.world.afterEvents.blockPlace.subscribe((ev) => {
+MC.world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     if (ev.block.hasTag(`core`)) {
         if (ev.player.hasTag(`countryOwner`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === getScore(ev.player, `mc_pcountries`) && ev.dimension.id === `minecraft:overworld`) {
             ev.player.sendMessage(`§aコアを置きました`)
             return
         } else {
             ev.player.sendMessage(`§cここには置けません`)
-            ev.player.sendMessage(`§aコアをアイテム化しました`)
-            let core = ev.block.getItemStack()
-            core.nameTag = `${configs.coreName}`
-            MC.world.getDimension(ev.dimension.id).spawnItem(core, ev.player.location)
-            ev.dimension.fillBlocks(ev.block.location, ev.block.location, airBlock)
+            ev.cancel = true
             return
         }
     }
     if (ev.dimension.id !== `minecraft:overworld`) return
     if (configs.noPlaceInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
-        const item = ev.block.getItemStack(1, true)
-        ev.dimension.fillBlocks(ev.block.location, ev.block.location, airBlock)
-        ev.dimension.spawnItem(item, ev.player.location)
+        ev.cancel = true
     }
     if (configs.noPlaceInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
-        const item = ev.block.getItemStack(1, true)
-        ev.dimension.fillBlocks(ev.block.location, ev.block.location, airBlock)
-        ev.dimension.spawnItem(item, ev.player.location)
+        ev.cancel = true
     }
     if (configs.noPlaceInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.player, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)))) {
-        const item = ev.block.getItemStack(1, true)
-        ev.dimension.fillBlocks(ev.block.location, ev.block.location, airBlock)
-        ev.dimension.spawnItem(item, ev.player.location)
+        ev.cancel = true
     }
 })
 
-MC.world.afterEvents.blockBreak.subscribe((ev) => {
+MC.world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     if (ev.dimension.id !== `minecraft:overworld`) return
     if (ev.brokenBlockPermutation.hasTag(`core`)) {
         if (ev.dimension.id !== `minecraft:overworld`) return
@@ -293,279 +283,32 @@ MC.world.afterEvents.blockBreak.subscribe((ev) => {
                     MC.world.scoreboard.getObjective(`mc_warNow${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`).removeParticipant(`${f.participant.displayName}`)
                 }
                 MC.world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`))}§r§aは§r\n${winners}の計${winnersAmount}ヶ国に敗れた`)
-                ev.dimension.fillBlocks(ev.block.location, ev.block.location, ev.brokenBlockPermutation)
+                ev.cancel = true
                 return
             }
             addScore(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`, `mc_core`, -1)
             ev.dimension.fillBlocks(ev.block.location, ev.block.location, ev.brokenBlockPermutation)
             return
         } else if (!getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) { } else if (getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0) {
-            ev.block.setPermutation(ev.brokenBlockPermutation)
+            ev.cancel = true
             ev.block.getComponent(``)
             return
         }
     } else {
         if (configs.noBreakInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
-            if (ev.brokenBlockPermutation.type.id === `minecraft:chest` || ev.brokenBlockPermutation.type.id === `minecraft:trapped_chest` || ev.brokenBlockPermutation.type.id === `minecraft:barrel`) {
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                MC.system.run(() => {
-                    let killBlock = 0
-                    /**
-                     * @type {MC.Container}
-                     */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 3 })) {
-                        /**
-                         * @type {MC.EntityItemComponent}
-                         */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (itemItem.itemStack.typeId === ev.brokenBlockPermutation.type.id && killBlock === 0) {
-                            killBlock = 1
-                            item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                            continue
-                        }
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else if (ev.brokenBlockPermutation.type.id.endsWith(`shulker_box`)) {
-                ev.block.setPermutation(MC.BlockPermutation.resolve(`minecraft:barrel`))
-                MC.system.run(() => {
-                    /**
-                    * @type {MC.Container}
-                    */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (!itemItem.itemStack.typeId.endsWith(`shulker_box`)) continue
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else if (ev.block.typeId.endsWith(`furnace`) || ev.block.typeId === `minecraft:smoker`) {
-                ev.block.setPermutation(MC.BlockPermutation.resolve(`minecraft:barrel`))
-                MC.system.run(() => {
-                    /**
-                    * @type {MC.Container}
-                    */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else {
-                let itemFirst = 0
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                let itemId = ""
-                MC.system.runTimeout(() => {
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (itemFirst === 0) {
-                            itemFirst = 1
-                            itemId = itemItem.itemStack.typeId
-                            item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                            continue
-                        }
-                        if (itemItem.typeId !== itemId) continue
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-
-                }, 1)
-            }
-
+            ev.cancel = true
+            ev.player.sendMessage(`§c荒野でのブロック破壊はできません`)
             return
         }
         if (configs.noBreakInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
-            if (ev.brokenBlockPermutation.type.id === `minecraft:tallgrass` || ev.brokenBlockPermutation.type.id === `double_plant`) {
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                return
-            }
-            ev.player.sendMessage(`§c特別区域でのブロック破壊は禁止されています`)
-            ev.player.runCommand(`title @s subtitle sendLogToDiscord ${ev.player.name} が 特別区域 でブロックを破壊しました\n(ブロックID: ${ev.brokenBlockPermutation.type.id} , 座標: ${ev.block.location.x},${ev.block.location.y},${ev.block.location.z} )`)
-            ev.player.runCommand(`title @s subtitle §a`)
-            if (ev.brokenBlockPermutation.type.id === `minecraft:chest` || ev.brokenBlockPermutation.type.id === `minecraft:trapped_chest` || ev.brokenBlockPermutation.type.id === `minecraft:barrel`) {
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                MC.system.run(() => {
-                    let killBlock = 0
-                    /**
-                     * @type {MC.Container}
-                     */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 3 })) {
-                        /**
-                         * @type {MC.EntityItemComponent}
-                         */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (itemItem.itemStack.typeId === ev.brokenBlockPermutation.type.id && killBlock === 0) {
-                            killBlock = 1
-                            item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                            continue
-                        }
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else if (ev.brokenBlockPermutation.type.id.indexOf(`shulker_box`) !== -1) {
-                ev.block.setPermutation(MC.BlockPermutation.resolve(`minecraft:barrel`))
-                MC.system.run(() => {
-                    /**
-                    * @type {MC.Container}
-                    */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (!itemItem.itemStack.typeId.endsWith(`shulker_box`)) continue
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else if (ev.block.typeId.endsWith(`furnace`) || ev.block.typeId === `minecraft:smoker`) {
-                ev.block.setPermutation(MC.BlockPermutation.resolve(`minecraft:barrel`))
-                MC.system.run(() => {
-                    /**
-                    * @type {MC.Container}
-                    */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else {
-                let itemFirst = 0
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                let itemId = ""
-                MC.system.runTimeout(() => {
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (itemFirst === 0) {
-                            itemFirst = 1
-                            itemId = itemItem.itemStack.typeId
-                            item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                            continue
-                        }
-                        if (itemItem.typeId !== itemId) continue
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
+            ev.cancel = true
+            ev.player.sendMessage(`§c特別区域でのブロック破壊はできません`)
 
-                }, 1)
-            }
             return
         }
         if (configs.noBreakInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.player, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)))) {
-            if (ev.brokenBlockPermutation.type.id === `minecraft:tallgrass` || ev.brokenBlockPermutation.type.id === `double_plant`) {
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                return
-            }
-            for (const target of MC.world.getPlayers()) {
-                if (getScore(target, `mc_pcountries`) !== getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && !target.isOp()) continue
-                target.sendMessage(`${ev.player.name} §r§cが ${getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`))} §r§cでブロックを破壊しました\n(ブロックID: ${ev.brokenBlockPermutation.type.id} , 座標: ${ev.block.location.x},${ev.block.location.y},${ev.block.location.z} )`)
-
-
-            }
-            ev.player.sendMessage(`§c他国でのブロック破壊は禁止されています`)
-            ev.player.runCommand(`title @s subtitle sendLogToDiscord ${ev.player.name} が ${getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`))} でブロックを破壊しました\n(ブロックID: ${ev.brokenBlockPermutation.type.id} , 座標: ${ev.block.location.x},${ev.block.location.y},${ev.block.location.z} )`)
-            ev.player.runCommand(`title @s subtitle §a`)
-            if (ev.brokenBlockPermutation.type.id === `minecraft:chest` || ev.brokenBlockPermutation.type.id === `minecraft:trapped_chest` || ev.brokenBlockPermutation.type.id === `minecraft:barrel`) {
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                MC.system.run(() => {
-                    let killBlock = 0
-                    /**
-                     * @type {MC.Container}
-                     */
-
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 3 })) {
-                        /**
-                         * @type {MC.EntityItemComponent}
-                         */
-                        const itemItem = item.getComponent(`minecraft:item`)
-
-
-                        if (itemItem.itemStack.typeId === ev.brokenBlockPermutation.type.id && killBlock === 0) {
-                            killBlock = 1
-                            item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                            continue
-                        }
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else if (ev.brokenBlockPermutation.type.id.endsWith(`shulker_box`)) {
-                ev.block.setPermutation(MC.BlockPermutation.resolve(`minecraft:barrel`))
-                MC.system.run(() => {
-                    /**
-                    * @type {MC.Container}
-                    */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (!itemItem.itemStack.typeId.endsWith(`shulker_box`)) continue
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else if (ev.block.typeId.endsWith(`furnace`) || ev.block.typeId === `minecraft:smoker`) {
-                ev.block.setPermutation(MC.BlockPermutation.resolve(`minecraft:barrel`))
-                MC.system.run(() => {
-                    /**
-                    * @type {MC.Container}
-                    */
-                    const containerBlock = ev.dimension.getBlock(ev.block.location).getComponent(`minecraft:inventory`).container
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        containerBlock.addItem(itemItem.itemStack)
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                })
-            } else {
-                let itemFirst = 0
-                ev.block.setPermutation(ev.brokenBlockPermutation)
-                let itemId = ""
-                MC.system.runTimeout(() => {
-                    for (const item of ev.dimension.getEntities({ type: `minecraft:item`, location: ev.block.location, maxDistance: 5 })) {
-                        /**
-                        * @type {MC.EntityItemComponent}
-                        */
-                        const itemItem = item.getComponent(`minecraft:item`)
-                        if (itemFirst === 0) {
-                            itemFirst = 1
-                            itemId = itemItem.itemStack.typeId
-                            item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                            continue
-                        }
-                        if (itemItem.typeId !== itemId) continue
-                        item.teleport({ x: item.location.x, y: -100, z: item.location.z })
-                    }
-                }, 1)
-            }
+            ev.player.sendMessage(`§c他国でブロック破壊はできません`)
+            ev.cancel = true
             return
         }
         if (ev.brokenBlockPermutation.hasTag(`log`)) {
