@@ -19,7 +19,7 @@
 		{
 			"description": "",
 			"type": "script",
-			"entry": "scripts/main.js",
+			"entry": "scripts/index.js",
 			"uuid": "953996f9-1f72-4396-9897-977d005770bd",
 			"version": [
 				1,
@@ -31,7 +31,7 @@
 	"dependencies": [
 		{
 			"module_name": "@minecraft/server",
-			"version": "1.4.0-beta"
+			"version": "1.8.0-beta"
 		},
 		{
 			"module_name": "@minecraft/server-ui",

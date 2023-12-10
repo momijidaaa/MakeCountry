@@ -1,11 +1,11 @@
 import { Player, system, world } from "../world";
-import { PlayerHandler } from "../../lib/utils/handler/player";
+import { PlayerHandler } from "../../lib/utils/playerHandler";
 import config from "../../config";
 
 /**
- * @typedef {import("../../@types/lib/commands.d.ts").RegisteredWorldCommandData} RegisteredCommandData
- * @typedef {import("../../@types/lib/commands.d.ts").WorldCommandData} CommandData
- * @typedef {import("../../@types/lib/commands.d.ts").WorldCommandOption} CommandOption
+ * @typedef {import("../../@types/lib/commands").RegisteredWorldCommandData} RegisteredCommandData
+ * @typedef {import("../../@types/lib/commands").WorldCommandData} CommandData
+ * @typedef {import("../../@types/lib/commands").WorldCommandOption} CommandOption
  */
 
 const prefix = config.commands.prefix;

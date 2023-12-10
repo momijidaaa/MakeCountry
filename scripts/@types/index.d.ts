@@ -9,6 +9,5 @@ declare module "@minecraft/server" {
         readonly distId: string;
         readonly permission: 0 | 1 | 2 | 3 | 4 | 5;
         readonly gamemode: 0 | 1 | 2 | 3;
-        freeze(state: boolean): boolean;
     }
 }

@@ -1,6 +1,7 @@
 import * as MC from "@minecraft/server"
-import { configs } from "./config"
 import { convertChunk, setScore , getNameScore , getScore , addScore, findCountry, isWarNowCountry, getNumberScore, isPeaceCountry, isFriendCountry, getCountoryAdjacentChunkAmount} from "./function"
+import config from "./config";
+
 
 MC.world.afterEvents.worldInitialize.subscribe(({propertyRegistry}) => {
   const property = new MC.DynamicPropertiesDefinition();
@@ -12,10 +13,10 @@ MC.world.afterEvents.worldInitialize.subscribe(({propertyRegistry}) => {
 MC.world.beforeEvents.chatSend.subscribe((ev)=>{
     ev.sendToTargets = true
     if(ev.message.startsWith(`:`)) return
-    if(!ev.message.startsWith(configs.prefix)) {
+    if(!ev.message.startsWith(config.prefix)) {
         let land = getNameScore(`mc_countries`,getScore(ev.sender,`mc_pcountries`))
         if(getScore(ev.sender,`mc_pcountries`) === 0) {
-            land = configs.noCountry
+            land = config.noCountry
             if(ev.sender.hasTag(`mc_cc`)) ev.sender.removeTag(`mc_cc`) 
         }
         if(ev.sender.hasTag(`mc_cc`)) {
@@ -26,16 +27,16 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
             }
             return
         }
-        if(!configs.countryLeft) {
+        if(!config.countryLeft) {
             MC.world.sendMessage(`<${ev.sender.name}> ${ev.message}`)
             return
         }
         
         MC.world.sendMessage(`<§a${land} §r| ${ev.sender.name}> ${ev.message}`)
-        if(!configs.sendChatToWebSocket) ev.cancel = true
+        if(!config.sendChatToWebSocket) ev.cancel = true
         return
     }
-    if(!configs.sendCommandToWebSocket) ev.cancel = true
+    if(!config.sendCommandToWebSocket) ev.cancel = true
     MC.system.run(()=>{
         let command
         try {
@@ -44,11 +45,11 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
             command = ev.message
         }
         switch(command) {
-            case `${configs.prefix}money`: {
+            case `${config.prefix}money`: {
                 ev.sender.sendMessage(`§a所持金: ${MC.world.scoreboard.getObjective(`mc_money`).getScore(ev.sender)}`)
                 break;
             }
-            case `${configs.prefix}setup`: {
+            case `${config.prefix}setup`: {
                 if(!ev.sender.isOp()) {
                     ev.sender.sendMessage(`§c必要な権限がありません`)
                     break;
@@ -62,8 +63,8 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 },2)
                 break;
             }
-            case `${configs.prefix}msend`: {
-                if(!ev.message.endsWith(`${configs.prefix}msend`)  && typeof Number(ev.message.split(` `)[1]) === 'number' && ev.message.split(/(?<=^[^ ]+?) /)[1].split(/(?<=^[^ ]+?) /)[1]) {
+            case `${config.prefix}msend`: {
+                if(!ev.message.endsWith(`${config.prefix}msend`)  && typeof Number(ev.message.split(` `)[1]) === 'number' && ev.message.split(/(?<=^[^ ]+?) /)[1].split(/(?<=^[^ ]+?) /)[1]) {
                     if(!MC.world.getDimension(ev.sender.dimension.id).getEntities({type: `minecraft:player`,name: `${ev.message.split(/(?<=^[^ ]+?) /)[1].split(/(?<=^[^ ]+?) /)[1]}`})[0]) {
                         ev.sender.sendMessage(`§c同ディメンションに対象プレイヤーが見つかりません`)
                         break;
@@ -86,11 +87,11 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                     MC.world.getDimension(ev.sender.dimension.id).getEntities({name: `${ev.message.split(/(?<=^[^ ]+?) /)[1].split(/(?<=^[^ ]+?) /)[1]}`})[0].sendMessage(`${ev.sender.name} §r§aから ${Math.floor(Number(ev.message.split(` `)[1]))}円 を受け取りました`)
                     break;
                 } else {
-                    ev.sender.sendMessage(`§c構文が間違っている可能性があります\n§b${configs.prefix}msend <Number> <PlayerName>\n§cプレイヤー名は"プレイヤー名"の形にしてはいけません`)
+                    ev.sender.sendMessage(`§c構文が間違っている可能性があります\n§b${config.prefix}msend <Number> <PlayerName>\n§cプレイヤー名は"プレイヤー名"の形にしてはいけません`)
                     break;
                 }
             }
-            case `${configs.prefix}checkchunk`: {
+            case `${config.prefix}checkchunk`: {
                 if(!getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) || getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) === 0) {
                     ev.sender.sendMessage(`§a現在のチャンクは荒野です`)
                     break;
@@ -102,13 +103,13 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 ev.sender.sendMessage(`§a現在のチャンクは§r ${getNameScore(`mc_countries`,getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`))}§r§a の領土です`)
                 break
             }
-            case `${configs.prefix}sethome`: {
+            case `${config.prefix}sethome`: {
                 if(ev.sender.dimension.id !== `minecraft:overworld`) {
                     ev.sender.sendMessage(`§cHomeをセットできるのはオーバーワールドのみです`)
                     break
                 }
                 if(!getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) || getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) === 0) {
-                    ev.sender.sendMessage(`§a${Math.floor(ev.sender.location.x)} ${Math.floor(ev.sender.location.y)} ${Math.floor(ev.sender.location.z)} にHomeをセットしました\n§b${configs.prefix}home §aでいつでも来れます`)
+                    ev.sender.sendMessage(`§a${Math.floor(ev.sender.location.x)} ${Math.floor(ev.sender.location.y)} ${Math.floor(ev.sender.location.z)} にHomeをセットしました\n§b${config.prefix}home §aでいつでも来れます`)
                     ev.sender.setDynamicProperty(`homePoint`,`${Math.floor(ev.sender.location.x)} ${Math.floor(ev.sender.location.y)} ${Math.floor(ev.sender.location.z)}`)
                     break;
                 }
@@ -117,16 +118,16 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                     break
                 }
                 if(getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) === getScore(ev.sender,`mc_pcountries`)) {
-                    ev.sender.sendMessage(`§a${Math.floor(ev.sender.location.x)} ${Math.floor(ev.sender.location.y)} ${Math.floor(ev.sender.location.z)} にHomeをセットしました\n§b${configs.prefix}home §aでいつでも来れます`)
+                    ev.sender.sendMessage(`§a${Math.floor(ev.sender.location.x)} ${Math.floor(ev.sender.location.y)} ${Math.floor(ev.sender.location.z)} にHomeをセットしました\n§b${config.prefix}home §aでいつでも来れます`)
                     ev.sender.setDynamicProperty(`homePoint`,`${Math.floor(ev.sender.location.x)} ${Math.floor(ev.sender.location.y)} ${Math.floor(ev.sender.location.z)}`)
                     break;
                 }
                 ev.sender.sendMessage(`§c他国の領土にHomeを設定することはできません`)
                 break
             }
-            case `${configs.prefix}home`: {
+            case `${config.prefix}home`: {
                 if(!ev.sender.getDynamicProperty(`homePoint`)) {
-                    ev.sender.sendMessage(`§cHomeがセットされていません\n§b${configs.prefix}sethome §cを使ってHomeを設定できます`)
+                    ev.sender.sendMessage(`§cHomeがセットされていません\n§b${config.prefix}sethome §cを使ってHomeを設定できます`)
                     break;
                 }
                 const loc = ev.sender.getDynamicProperty(`homePoint`).split(` `)
@@ -141,15 +142,15 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 ev.sender.teleport({x: Number(loc[0]) , y: Number(loc[1]) , z: Number(loc[2])},{dimension: MC.world.getDimension(`overworld`)})
                 break
             }
-            case `${configs.prefix}checkhome`: {
+            case `${config.prefix}checkhome`: {
                 if(!ev.sender.getDynamicProperty(`homePoint`)) {
-                    ev.sender.sendMessage(`§cHomeがセットされていません\n§b${configs.prefix}sethome §cを使ってHomeを設定できます`)
+                    ev.sender.sendMessage(`§cHomeがセットされていません\n§b${config.prefix}sethome §cを使ってHomeを設定できます`)
                     break;
                 }
                 ev.sender.sendMessage(`§a現在のHomeは(${ev.sender.getDynamicProperty(`homePoint`)})にセットされてます`)
                 break
             }
-            case `${configs.prefix}adminchunk`: {
+            case `${config.prefix}adminchunk`: {
                 if(!ev.sender.hasTag(`mc_admin`)) {
                     ev.sender.sendMessage(`§c権限がありません`)
                     break
@@ -158,7 +159,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 setScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`,-1)
                 break;
             }
-            case `${configs.prefix}resetchunk`: {
+            case `${config.prefix}resetchunk`: {
                 if(!ev.sender.hasTag(`mc_admin`)) {
                     ev.sender.sendMessage(`§c権限がありません`)
                     break
@@ -167,9 +168,9 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 MC.world.scoreboard.getObjective(`mc_chunk`).removeParticipant(convertChunk(ev.sender.location.x,ev.sender.location.z))
                 break;
             }
-            case `${configs.prefix}buychunk`: {
+            case `${config.prefix}buychunk`: {
                 if(getScore(ev.sender,`mc_pcountries`) < 1) {
-                    ev.sender.sendMessage(`§c先に建国をしてください\n§b${configs.prefix}makecountry`)
+                    ev.sender.sendMessage(`§c先に建国をしてください\n§b${config.prefix}makecountry`)
                     break
                 }
                 if(!ev.sender.hasTag(`countryAdmin`) && !ev.sender.hasTag(`countryOwner`)) {
@@ -178,8 +179,8 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 if(ev.sender.dimension.id !== `minecraft:overworld`) {
                     ev.sender.sendMessage(`§cこのコマンドはオーバーワールドでしか使えません`)
                 }
-                if(getScore(ev.sender,`mc_money`) < configs.buyChunkCost) {
-                    ev.sender.sendMessage(`§c金が足りません(必要金額: ${configs.buyChunkCost})`)
+                if(getScore(ev.sender,`mc_money`) < config.buyChunkCost) {
+                    ev.sender.sendMessage(`§c金が足りません(必要金額: ${config.buyChunkCost})`)
                     break
                 }
                 if(getCountoryAdjacentChunkAmount(convertChunk(ev.sender.location.x,ev.sender.location.z),getScore(ev.sender,`mc_pcountries`)) === 0) {
@@ -188,7 +189,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 }
                 if(!getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) || getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`) === 0) {
                     ev.sender.sendMessage(`§aこのチャンクを購入しました`)
-                    addScore(ev.sender,`mc_money`,-1 * configs.buyChunkCost)
+                    addScore(ev.sender,`mc_money`,-1 * config.buyChunkCost)
                     setScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`,getScore(ev.sender,`mc_pcountries`))
                     break;
                 } 
@@ -199,7 +200,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 ev.sender.sendMessage(`§cこのチャンクは§r ${getNameScore(`mc_countries`,getScore(convertChunk(ev.sender.location.x,ev.sender.location.z),`mc_chunk`))}§r§c の領土なので購入不可です`)
                 break
             }
-            case `${configs.prefix}cc`: {
+            case `${config.prefix}cc`: {
                 if(getScore(ev.sender,`mc_pcountries`) < 1) {
                     ev.sender.sendMessage(`§cあなたは国に所属していません`)
                     break
@@ -215,7 +216,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                     break
                 }
             }
-            case `${configs.prefix}countrychat`: {
+            case `${config.prefix}countrychat`: {
                 if(getScore(ev.sender,`mc_pcountries`) < 1) {
                     ev.sender.sendMessage(`§cあなたは国に所属していません`)
                     break
@@ -231,12 +232,12 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                     break
                 }
             }
-            case `${configs.prefix}report`: {
-                ev.sender.runCommand(`title @s subtitle reportToDiscord ${ev.message.substring(configs.prefix.length + 6)}`)    
+            case `${config.prefix}report`: {
+                ev.sender.runCommand(`title @s subtitle reportToDiscord ${ev.message.substring(config.prefix.length + 6)}`)    
                 ev.sender.runCommand(`title @s subtitle §a`)
                 break
             }
-            case `${configs.prefix}sellchunk`: {
+            case `${config.prefix}sellchunk`: {
                 if(getScore(ev.sender,`mc_pcountries`) < 1) {
                     ev.sender.sendMessage(`§cあなたは国を持っていません`)
                     break
@@ -259,18 +260,18 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                     ev.sender.sendMessage(`§cこのチャンクを所有していません`)
                     break
                 }
-                addScore(ev.sender,`mc_money`,configs.sellChunk)
+                addScore(ev.sender,`mc_money`,config.sellChunk)
                 MC.world.scoreboard.getObjective(`mc_chunk`).removeParticipant(convertChunk(ev.sender.location.x,ev.sender.location.z))
-                ev.sender.sendMessage(`§aこのチャンクを${configs.sellChunk}円で売りました`)
+                ev.sender.sendMessage(`§aこのチャンクを${config.sellChunk}円で売りました`)
                 break
             }
-            case `${configs.prefix}help`: {
-                ev.sender.sendMessage(`[MakeCountry] コマンド一覧\n§b${configs.prefix}checkchunk §f現在のチャンクの情報を確認します\n§b${configs.prefix}money §f所持金を確認します\n§b${configs.prefix}msend <Number> <PlayerName> §f指定した相手に指定した金額を送金します\n§b${configs.prefix}help §fコマンド一覧を出します\n§b${configs.prefix}makecountry §f国を作るアイテムを手に入れます\n§b${configs.prefix}settingcountry §f国を管理するアイテムを手に入れます\n§b${configs.prefix}buychunk §f現在のチャンクを買います\n§b${configs.prefix}sellchunk §f現在のチャンクが自分の領土だった場合売ります\n§b${configs.prefix}dofwar req <国名> §f宣戦布告をします\n§b${configs.prefix}dofwar delete <国名> §f宣戦布告を破棄します\n§b${configs.prefix}alliance req <国名> §f同盟の申請をします\n§b${configs.prefix}alliance check §f同盟の確認をします\n§b${configs.prefix}alliance delete <国名> §f同盟を破棄します\n§b${configs.prefix}peacechange §f平和主義を切り替えます(クールタイム: ${configs.untilNextChangePeace}分)\n§b${configs.prefix}countrylist §f国の一覧を表示します\n§b${configs.prefix}sethome §fいつでもテレポートできるHomeを設定します\n§b${configs.prefix}home §fセットしたHomeにテレポートします\n§b${configs.prefix}checkhome §f現在のHomeを確認します\n§b${configs.prefix}surrender §f現在戦争している全ての国に対して降伏します\n§b${configs.prefix}leavecountry §f所属国から抜けます\n§b${configs.prefix}deposit <Number> §f所属国の国庫に指定した金額を入金します§b${configs.prefix}kill §f自滅します§b${configs.prefix}report <message> §fモデレーターに報告します`)
-                if(ev.sender.isOp()) ev.sender.sendMessage(`§b${configs.prefix}setup §fアドオンをセットアップします`)
-                if(ev.sender.hasTag(`mc_admin`)) ev.sender.sendMessage(`§b${configs.prefix}adminchunk §f現在のチャンクを特別区域にする\n§b${configs.prefix}resetchunk §f現在のチャンクを荒野にリセットする`)
+            case `${config.prefix}help`: {
+                ev.sender.sendMessage(`[MakeCountry] コマンド一覧\n§b${config.prefix}checkchunk §f現在のチャンクの情報を確認します\n§b${config.prefix}money §f所持金を確認します\n§b${config.prefix}msend <Number> <PlayerName> §f指定した相手に指定した金額を送金します\n§b${config.prefix}help §fコマンド一覧を出します\n§b${config.prefix}makecountry §f国を作るアイテムを手に入れます\n§b${config.prefix}settingcountry §f国を管理するアイテムを手に入れます\n§b${config.prefix}buychunk §f現在のチャンクを買います\n§b${config.prefix}sellchunk §f現在のチャンクが自分の領土だった場合売ります\n§b${config.prefix}dofwar req <国名> §f宣戦布告をします\n§b${config.prefix}dofwar delete <国名> §f宣戦布告を破棄します\n§b${config.prefix}alliance req <国名> §f同盟の申請をします\n§b${config.prefix}alliance check §f同盟の確認をします\n§b${config.prefix}alliance delete <国名> §f同盟を破棄します\n§b${config.prefix}peacechange §f平和主義を切り替えます(クールタイム: ${config.untilNextChangePeace}分)\n§b${config.prefix}countrylist §f国の一覧を表示します\n§b${config.prefix}sethome §fいつでもテレポートできるHomeを設定します\n§b${config.prefix}home §fセットしたHomeにテレポートします\n§b${config.prefix}checkhome §f現在のHomeを確認します\n§b${config.prefix}surrender §f現在戦争している全ての国に対して降伏します\n§b${config.prefix}leavecountry §f所属国から抜けます\n§b${config.prefix}deposit <Number> §f所属国の国庫に指定した金額を入金します§b${config.prefix}kill §f自滅します§b${config.prefix}report <message> §fモデレーターに報告します`)
+                if(ev.sender.isOp()) ev.sender.sendMessage(`§b${config.prefix}setup §fアドオンをセットアップします`)
+                if(ev.sender.hasTag(`mc_admin`)) ev.sender.sendMessage(`§b${config.prefix}adminchunk §f現在のチャンクを特別区域にする\n§b${config.prefix}resetchunk §f現在のチャンクを荒野にリセットする`)
                 break
             }
-            case `${configs.prefix}surrender`: {
+            case `${config.prefix}surrender`: {
                 if(!ev.sender.hasTag(`countryOwner` || getScore(ev.sender,`mc_pcountries`) < 1)) {
                     ev.sender.sendMessage(`§c権限がありません`)
                     break
@@ -292,17 +293,17 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 MC.world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`,getScore(ev.sender,`mc_pcountries`))}§r§aは§r\n${winners}の計${winnersAmount}ヶ国に降伏した`)
                 break
             }
-            case `${configs.prefix}makecountry`: {
+            case `${config.prefix}makecountry`: {
                 ev.sender.runCommandAsync(`clear @s karo:countrycreate`)
                 ev.sender.runCommandAsync(`give @s karo:countrycreate`)
                 break
             }
-            case `${configs.prefix}settingcountry`: {
+            case `${config.prefix}settingcountry`: {
                 ev.sender.runCommandAsync(`clear @s karo:countryadmin`)
                 ev.sender.runCommandAsync(`give @s karo:countryadmin`)
                 break
             }
-            case `${configs.prefix}leavecountry`: {
+            case `${config.prefix}leavecountry`: {
                 if(getScore(ev.sender,`mc_pcountries`) < 1) {
                     ev.sender.sendMessage(`§c国に所属していません`)
                     break
@@ -317,7 +318,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 setScore(ev.sender,`mc_pcountries`,0)
                 break
             }
-            case `${configs.prefix}deposit`: {
+            case `${config.prefix}deposit`: {
                 if(!ev.message.split(` `)[1]) {
                     ev.sender.sendMessage(`§cコマンドの構文が間違っています`)
                     break
@@ -326,7 +327,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                     ev.sender.sendMessage(`§c数字を入力してください`)
                     break
                 }
-                if(!ev.message.endsWith(`${configs.prefix}deposit`) && typeof Number(ev.message.split(` `)[1]) === 'number') {
+                if(!ev.message.endsWith(`${config.prefix}deposit`) && typeof Number(ev.message.split(` `)[1]) === 'number') {
                     if(getScore(ev.sender,`mc_pcountries`) < 1) {
                         ev.sender.sendMessage(`§c国に所属していません`)
                         break
@@ -347,13 +348,13 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 ev.sender.sendMessage(`§cコマンドの構文が間違っています`)
                 break
             }
-            case `${configs.prefix}alliance`: {
+            case `${config.prefix}alliance`: {
                 if(!ev.sender.hasTag(`countryOwner`) || getScore(ev.sender,`mc_pcountries`) < 1) {
                     ev.sender.sendMessage(`§c権限がありません`)
                     break
                 }
                 if(!ev.message.split(` `)[1]) {
-                    ev.sender.sendMessage(`§cサブコマンドが入力されていません\nサブコマンド一覧\n§b${configs.prefix}alliance req <国名> §f同盟の申請をします\n§b${configs.prefix}alliance check §f同盟の確認をします\n§b${configs.prefix}alliance delete <国名> §f同盟を破棄します`)
+                    ev.sender.sendMessage(`§cサブコマンドが入力されていません\nサブコマンド一覧\n§b${config.prefix}alliance req <国名> §f同盟の申請をします\n§b${config.prefix}alliance check §f同盟の確認をします\n§b${config.prefix}alliance delete <国名> §f同盟を破棄します`)
                     break
                 }
                 switch(ev.message.split(` `)[1]) {
@@ -417,13 +418,13 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                         break
                     }
                     default: {
-                        ev.sender.sendMessage(`§c存在しないサブコマンドです\nサブコマンド一覧\n§b${configs.prefix}alliance req <国名> §f同盟の申請をします\n§b${configs.prefix}alliance check §f同盟の確認をします\n§b${configs.prefix}alliance delete <国名> §f同盟を破棄します`)
+                        ev.sender.sendMessage(`§c存在しないサブコマンドです\nサブコマンド一覧\n§b${config.prefix}alliance req <国名> §f同盟の申請をします\n§b${config.prefix}alliance check §f同盟の確認をします\n§b${config.prefix}alliance delete <国名> §f同盟を破棄します`)
                         break
                     }
                 }
                 break
             }
-            case `${configs.prefix}countrylist`: {
+            case `${config.prefix}countrylist`: {
                 ev.sender.sendMessage(`§a[MakeCountry] §r国のリスト`)
                 for(const country of MC.world.scoreboard.getObjective(`mc_countries`).getScores().filter(kuni => kuni.score > 0)) {
                     let peace = `§cNo`
@@ -434,11 +435,11 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 }
                 break;
             }
-            case `${configs.prefix}kill`: {
+            case `${config.prefix}kill`: {
                 ev.sender.runCommand(`kill @s`)
                 break;
             }
-            case `${configs.prefix}peacechange`: {
+            case `${config.prefix}peacechange`: {
                 if(!ev.sender.hasTag(`countryOwner` || getScore(ev.sender,`mc_pcountries`) < 1)) {
                     ev.sender.sendMessage(`§c権限がありません`)
                     break
@@ -450,21 +451,21 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                 if(isPeaceCountry(getNameScore(`mc_countries`,getScore(ev.sender,`mc_pcountries`)))) {
                     ev.sender.sendMessage(`§a平和主義を解除しました`)
                     setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_peace`,0)
-                    setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_ptimer`,configs.untilNextChangePeace)
+                    setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_ptimer`,config.untilNextChangePeace)
                     break
                 }
                 ev.sender.sendMessage(`§a平和主義にしました`)
                 setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_peace`,1)
-                setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_ptimer`,configs.untilNextChangePeace)
+                setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_ptimer`,config.untilNextChangePeace)
                 break
             }
-            case `${configs.prefix}dofwar`: {
+            case `${config.prefix}dofwar`: {
                 if(!ev.sender.hasTag(`countryOwner` || getScore(ev.sender,`mc_pcountries`) < 1)) {
                     ev.sender.sendMessage(`§c権限がありません`)
                     break
                 }
                 if(!ev.message.split(` `)[1]) {
-                    ev.sender.sendMessage(`§cサブコマンドが入力されていません\nサブコマンド一覧\n§b${configs.prefix}dofwar req <国名> §f宣戦布告をします\n§b${configs.prefix}alliance delete <国名> §f宣戦布告を破棄します`)
+                    ev.sender.sendMessage(`§cサブコマンドが入力されていません\nサブコマンド一覧\n§b${config.prefix}dofwar req <国名> §f宣戦布告をします\n§b${config.prefix}alliance delete <国名> §f宣戦布告を破棄します`)
                     break
                 }
                 switch(ev.message.split(` `)[1]) {
@@ -501,7 +502,7 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                             break
                         }
                         setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_dow${country.number}`,1)
-                        setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_limit${country.number}`,configs.untilStartWar)
+                        setScore(`${getScore(ev.sender,`mc_pcountries`)}`,`mc_limit${country.number}`,config.untilStartWar)
                         ev.sender.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`,getScore(ev.sender,`mc_pcountries`))} §r§aが§r ${country.name} §r§aに宣戦布告した`)
                         break;
                     }
@@ -527,14 +528,14 @@ MC.world.beforeEvents.chatSend.subscribe((ev)=>{
                         break;
                     }
                     default: {
-                        ev.sender.sendMessage(`§c存在しないサブコマンドです\nサブコマンド一覧\n§b${configs.prefix}dofwar req <国名> §f宣戦布告をします\n§b${configs.prefix}alliance delete <国名> §f宣戦布告を破棄します`)
+                        ev.sender.sendMessage(`§c存在しないサブコマンドです\nサブコマンド一覧\n§b${config.prefix}dofwar req <国名> §f宣戦布告をします\n§b${config.prefix}alliance delete <国名> §f宣戦布告を破棄します`)
                         break
                     }
                 }
                 break
             }
             default:{
-                if(configs.notCommandError) ev.sender.sendMessage(`§c存在しないコマンド: ${command}`)
+                if(config.notCommandError) ev.sender.sendMessage(`§c存在しないコマンド: ${command}`)
                 break;
             }
         }

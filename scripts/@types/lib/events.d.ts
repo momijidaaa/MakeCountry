@@ -20,8 +20,8 @@ type WorldEventTypes = {
     // a
     
     // b
-    "blockExplode": BlockExplodeAfterEvent;
-    "buttonPush": ButtonPushAfterEvent;
+    "afterBlockExplode": BlockExplodeAfterEvent;
+    "afterButtonPush": ButtonPushAfterEvent;
 
     // c
     "afterChatSend": ChatSendAfterEvent;
@@ -32,17 +32,17 @@ type WorldEventTypes = {
     "beforeDataDrivenEntityTriggerEvent": DataDrivenEntityTriggerBeforeEvent;
 
     // e
-    "effectAdd": EffectAddAfterEvent;
-    "entityDie": EntityDieAfterEvent;
-    "entityHealthChanged": EntityHealthChangedAfterEvent;
-    "entityHitBlock": EntityHitBlockAfterEvent;
-    "entityHitEntity": EntityHitEntityAfterEvent;
-    "entityHurt": EntityHurtAfterEvent;
-    "entityLoad": EntityLoadAfterEvent;
+    "afterEffectAdd": EffectAddAfterEvent;
+    "afterEntityDie": EntityDieAfterEvent;
+    "afterEntityHealthChanged": EntityHealthChangedAfterEvent;
+    "afterEntityHitBlock": EntityHitBlockAfterEvent;
+    "afterEntityHitEntity": EntityHitEntityAfterEvent;
+    "afterEntityHurt": EntityHurtAfterEvent;
+    "afterEntityLoad": EntityLoadAfterEvent;
     "error": ErrorAfterEvent;
     "afterEntityRemove": EntityRemoveAfterEvent;
     "beforeEntityRemove": EntityRemoveBeforeEvent;
-    "entitySpawn": EntitySpawnAfterEvent;
+    "afterEntitySpawn": EntitySpawnAfterEvent;
     "afterExplosion": ExplosionAfterEvent;
     "beforeExplosion": ExplosionBeforeEvent;
 
@@ -50,24 +50,17 @@ type WorldEventTypes = {
     
     // g
 
-    "afterGuildChat": GuildChatAfterEvent;
-    "beforeGuildChat": GuildChatBeforeEvent;
-    "guildJoin": GuildJoinAfterEvent;
-    "guildLeave": GuildLeaveAfterEvent;
-    "afterGuildRemove": GuildRemoveAfterEvent;
-    "beforeGuildRemove": GuildRemoveBeforeEvent;
-
     // h
 
     // i
-    "itemCompleteUse": ItemCompleteUseAfterEvent;
+    "afterItemCompleteUse": ItemCompleteUseAfterEvent;
     "afterItemDefinitionEvent": ItemDefinitionAfterEventSignal;
     "beforeItemDefinitionEvent": ItemDefinitionBeforeEventSignal;
-    "itemReleaseUse": ItemReleaseUseAfterEvent;
-    "itemStartUse": ItemStartUseAfterEvent;
-    "itemStartUseOn": ItemStartUseOnAfterEvent;
-    "itemStopUse": ItemStopUseAfterEvent;
-    "itemStopUseOn": ItemStopUseOnAfterEvent;
+    "afterItemReleaseUse": ItemReleaseUseAfterEvent;
+    "afterItemStartUse": ItemStartUseAfterEvent;
+    "afterItemStartUseOn": ItemStartUseOnAfterEvent;
+    "afterItemStopUse": ItemStopUseAfterEvent;
+    "afterItemStopUseOn": ItemStopUseOnAfterEvent;
     "afterItemUse": ItemUseAfterEvent;
     "beforeItemUse": ItemUseBeforeEvent;
     "afterItemUseOn": ItemUseOnAfterEvent;
@@ -78,35 +71,36 @@ type WorldEventTypes = {
     // k
 
     // l
-    "leverAction": LeverActionAfterEvent;
+    "afterLeverAction": LeverActionAfterEvent;
 
     // m
-    "messageReceive": MessageReceiveAfterEvent;
+    "afterMessageReceive": MessageReceiveAfterEvent;
 
     // n
 
     // o
     
     // p
-    "pistonActivate": PistonActivateAfterEvent;
-    "playerAttack": PlayerAttackAfterEvent;
+    "afterPistonActivate": PistonActivateAfterEvent;
+    "beforePistonActivate": PistonActivateBeforeEvent;
+    "afterPlayerAttack": PlayerAttackAfterEvent;
     "afterPlayerBreakBlock": PlayerBreakBlockAfterEvent;
     "beforePlayerBreakBlock": PlayerBreakBlockBeforeEvent;
-    "playerDimensionChange": PlayerDimensionChangeAfterEvent;
+    "afterPlayerDimensionChange": PlayerDimensionChangeAfterEvent;
     "afterPlayerInteractWithBlock": PlayerInteractWithBlockAfterEvent;
     "beforePlayerInteractWithBlock": PlayerInteractWithBlockBeforeEvent;
     "afterPlayerInteractWithEntity": PlayerInteractWithEntityAfterEvent;
     "beforePlayerInteractWithEntity": PlayerInteractWithEntityBeforeEvent;
-    "playerJoin": PlayerJoinAfterEvent;
+    "afterPlayerJoin": PlayerJoinAfterEvent;
     "afterPlayerLeave": PlayerLeaveAfterEvent;
     "beforePlayerLeave": PlayerLeaveBeforeEvent;
     "afterPlayerPlaceBlock": PlayerPlaceBlockAfterEvent;
     "beforePlayerPlaceBlock": PlayerPlaceBlockBeforeEvent;
-    "playerSpawn": PlayerSpawnAfterEvent;
-    "pressurePlatePop": PressurePlatePopAfterEvent;
-    "pressurePlatePush": PressurePlatePushAfterEvent;
-    "projectileHitBlock": ProjectileHitBlockAfterEvent;
-    "projectileHitEntity": ProjectileHitEntityAfterEvent;
+    "afterPlayerSpawn": PlayerSpawnAfterEvent;
+    "afterPressurePlatePop": PressurePlatePopAfterEvent;
+    "afterPressurePlatePush": PressurePlatePushAfterEvent;
+    "afterProjectileHitBlock": ProjectileHitBlockAfterEvent;
+    "afterProjectileHitEntity": ProjectileHitEntityAfterEvent;
 
     // q
 
@@ -114,22 +108,22 @@ type WorldEventTypes = {
     "ready": ReadyAfterEvent;
 
     // s
-    "scriptEventReceive": ScriptEventCommandMessageAfterEvent;
-    "sendCustomCommand": SendCustomCommandAfterEvent;
+    "afterScriptEventReceive": ScriptEventCommandMessageAfterEvent;
+    "afterSendCustomCommand": SendCustomCommandAfterEvent;
 
     // t
-    "targetBlockHit": TargetBlockHitAfterEvent;
+    "afterTargetBlockHit": TargetBlockHitAfterEvent;
     "tick": TickAfterEvent;
-    "tripWireTrip": TripWireTripAfterEvent;
+    "afterTripWireTrip": TripWireTripAfterEvent;
 
     // u
 
     // v
 
     // w
-    "weatherChange": WeatherChangeAfterEvent;
-    "worldInitialize": WorldInitializeAfterEvent;
-    "watchdogTerminate": WatchdogTerminateBeforeEvent;
+    "afterWeatherChange": WeatherChangeAfterEvent;
+    "afterWorldInitialize": WorldInitializeAfterEvent;
+    "afterWatchdogTerminate": WatchdogTerminateBeforeEvent;
 
     // x
 
@@ -142,72 +136,9 @@ type WorldEventTypes = {
  * @beta
  * @author yuki2825624
  */
-declare class GuildChatAfterEvent {
-    private constructor ();
-    readonly sender: Account;
-    readonly guild: Guild;
-    readonly message: string;
-}
-
-/**
- * @beta
- * @author yuki2825624
- */
-declare class GuildChatBeforeEvent {
-    private constructor ();
-    readonly sender: Account;
-    readonly guild: Guild;
-    message: string;
-    cancel: boolean;
-    sendToPlayers: boolean;
-}
-
-/**
- * @beta
- * @author yuki2825624
- */
 declare class ErrorAfterEvent {
     private constructor ();
     readonly error: Error;
-}
-
-/**
- * @beta
- * @author yuki2825624
- */
-declare class GuildJoinAfterEvent {
-    private constructor ();
-    readonly guild: Guild;
-    readonly account: Account;
-}
-
-/**
- * @beta
- * @author yuki2825624
- */
-declare class GuildLeaveAfterEvent {
-    private constructor ();
-    readonly guild: Guild;
-    readonly account: Account;
-}
-
-/**
- * @beta
- * @author yuki2825624
- */
-declare class GuildRemoveAfterEvent {
-    private constructor ();
-    readonly removedGuildId: string;
-    readonly removedGuildName: string;
-}
-
-/**
- * @beta
- * @author yuki2825624
- */
-declare class GuildRemoveBeforeEvent {
-    private constructor ();
-    readonly removedGuild: Guild;
 }
 
 /**

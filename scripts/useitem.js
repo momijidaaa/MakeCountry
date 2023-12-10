@@ -1,7 +1,7 @@
-import { Entity, world ,ItemStack, system,MolangVariableMap,BlockPermutation} from "@minecraft/server";
 import * as UI from "@minecraft/server-ui"
 import { addScore, convertChunk, getNameScore, getNumberScore, getScore, isPeaceCountry, setScore } from "./function";
-import { configs } from "./config";
+import config from "./config";
+
 
 world.afterEvents.itemUse.subscribe((ev)=>{
     switch(ev.itemStack.typeId){
@@ -247,8 +247,8 @@ export function countryCreate(source, countryName) {
     if(typeof sourcecountry === 'undefined' || sourcecountry !== 0) {
       source.sendMessage(`§c既に国に所属している場合、作成することは出来ません。`)
     }
-    if(getScore(source,`mc_money`) < configs.makeCountryCost) {
-      source.sendMessage(`§c建国には${configs.makeCountryCost}円が必要です`)
+    if(getScore(source,`mc_money`) < config.makeCountryCost) {
+      source.sendMessage(`§c建国には${config.makeCountryCost}円が必要です`)
       return;
     }
     if(getScore(convertChunk(source.location.x,source.location.z),`mc_chunk`) > 0) {
@@ -277,7 +277,7 @@ export function countryCreate(source, countryName) {
     }
     const countryMaxNumber = Math.max(...countrysAmount)
     source.sendMessage(`§a国§r「 ${countryName} §r」§aを作成しました。`)
-    setScore(source,`mc_money`,getScore(source,`mc_money`) - configs.makeCountryCost)
+    setScore(source,`mc_money`,getScore(source,`mc_money`) - config.makeCountryCost)
     setScore(convertChunk(source.location.x,source.location.z),`mc_chunk`,countryMaxNumber + 1)
     source.addTag(`countryOwner`)
     const countryAdminItem = new ItemStack(`karo:countryadmin`)
@@ -300,8 +300,8 @@ export function countryCreate(source, countryName) {
     world.scoreboard.getObjective(`countrymoney`).setScore(`${countryMaxNumber + 1}`,0)
     world.scoreboard.getObjective(`mc_core`).setScore(`${countryMaxNumber + 1}`,0)
     world.scoreboard.getObjective(`mc_notax`).setScore(`${countryMaxNumber + 1}`,0)
-    if(configs.firstPeace) world.scoreboard.getObjective(`mc_peace`).setScore(`${countryMaxNumber + 1}`,1)
-    if(!configs.firstPeace) world.scoreboard.getObjective(`mc_peace`).setScore(`${countryMaxNumber + 1}`,0)
+    if(config.firstPeace) world.scoreboard.getObjective(`mc_peace`).setScore(`${countryMaxNumber + 1}`,1)
+    if(!config.firstPeace) world.scoreboard.getObjective(`mc_peace`).setScore(`${countryMaxNumber + 1}`,0)
     world.scoreboard.getObjective(`countrymoneyper`).setScore(`${countryMaxNumber + 1}`,1)
     world.scoreboard.getObjective(`mc_countries`).setScore(`${countryName}`,countryMaxNumber + 1)
     world.scoreboard.getObjective(`mc_pcountries`).setScore(source,countryMaxNumber + 1)
@@ -394,10 +394,10 @@ export function DeclarationOfWarExecute(source,number){
         world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`,Number(country[number].participant.displayName))} §rと ${getNameScore(`mc_countries`,getScore(source,`mc_pcountries`))} §rの戦争が始まりました`)
         world.scoreboard.getObjective(`mc_dow${getScore(source,`mc_pcountries`)}`).removeParticipant(country[number].participant.displayName)
         world.scoreboard.getObjective(`mc_limit${getScore(source,`mc_pcountries`)}`).removeParticipant(country[number].participant.displayName)
-        if(getScore(`${country[number].score}`)) addScore(`${country[number].score}`,`mc_core`,configs.coreDurableValue)
-        if(!getScore(`${country[number].score}`)) setScore(`${country[number].score}`,`mc_core`,configs.coreDurableValue)
-        if(getScore(`${getScore(source,`mc_pcountries`)}`)) addScore(`${getScore(source,`mc_pcountries`)}`,`mc_core`,configs.coreDurableValue)
-        if(!getScore(`${getScore(source,`mc_pcountries`)}`)) setScore(`${getScore(source,`mc_pcountries`)}`,`mc_core`,configs.coreDurableValue)
+        if(getScore(`${country[number].score}`)) addScore(`${country[number].score}`,`mc_core`,config.coreDurableValue)
+        if(!getScore(`${country[number].score}`)) setScore(`${country[number].score}`,`mc_core`,config.coreDurableValue)
+        if(getScore(`${getScore(source,`mc_pcountries`)}`)) addScore(`${getScore(source,`mc_pcountries`)}`,`mc_core`,config.coreDurableValue)
+        if(!getScore(`${getScore(source,`mc_pcountries`)}`)) setScore(`${getScore(source,`mc_pcountries`)}`,`mc_core`,config.coreDurableValue)
       }
   })
 }

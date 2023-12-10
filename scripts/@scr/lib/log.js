@@ -15,7 +15,7 @@ export class Logger {
 
     debug(message, ...optionalParams) {
         console.warn("§d[Debug]", message, ...optionalParams);
-    }
+    } 
 
     timer(label) {
         if (!this.#timerActive[label]) {

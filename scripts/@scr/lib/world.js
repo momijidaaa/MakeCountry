@@ -1,9 +1,8 @@
 import { world, system, Player } from "@minecraft/server";
-import { CommandManager } from "./commands";
 import { EventEmitter } from "./events";
 import { Logger } from "./log";
 import { Formatter } from "./format";
-import { Vec3 } from "../../lib/utils/vec3";
+import { CommandManager } from "./commands";
 import { MainDB } from "../../lib/database";
 import { msToTime } from "../../lib/utils/formatter";
 import config from "../../config";
@@ -64,12 +63,11 @@ export class WorldBuilder {
 
     #load() {
         try {
-
             // a
 
             // b
-            world.afterEvents.blockExplode.subscribe((ev) => { if (this.active) this.events.emit("blockExplode", ev); });
-            world.afterEvents.buttonPush.subscribe((ev) => { if (this.active) this.events.emit("buttonPush", ev); });
+            world.afterEvents.blockExplode.subscribe((ev) => { if (this.active) this.events.emit("afterBlockExplode", ev); });
+            world.afterEvents.buttonPush.subscribe((ev) => { if (this.active) this.events.emit("afterButtonPush", ev); });
 
             // c
             world.afterEvents.chatSend.subscribe((ev) => { if (this.active) this.events.emit("afterChatSend", ev); });
@@ -80,7 +78,7 @@ export class WorldBuilder {
                     ev.cancel = true;
                     const [commandName, ...args] = ev.message.trim().slice(config.commands.prefix.length).trim().split(/ +/);
                     if (!commandName) return;
-                    this.events.emit("sendCustomCommand", { sender: sender, commandName: commandName, message: args.length === 0 ? undefined : args.join(" ") });
+                    this.events.emit("afterSendCustomCommand", { sender: sender, commandName: commandName, message: args.length === 0 ? undefined : args.join(" ") });
                 } else {
                     const playerTimeout = MainDB.get("timeout");
                     if (playerTimeout.has(sender.distId)) {
@@ -93,17 +91,17 @@ export class WorldBuilder {
             });
 
             // d
-            world.afterEvents.dataDrivenEntityTrigger.subscribe((ev) => { if (this.active) this.events.emit("afterDataDrivenEntityTriggerEvent", ev); });
+            world.afterEvents.dataDrivenEntityTriggerEvent.subscribe((ev) => { if (this.active) this.events.emit("afterDataDrivenEntityTriggerEvent", ev); });
             world.beforeEvents.dataDrivenEntityTriggerEvent.subscribe((ev) => { if (this.active) this.events.emit("beforeDataDrivenEntityTriggerEvent", ev); });
 
             //e
-            world.afterEvents.effectAdd.subscribe((ev) => { if (this.active) this.events.emit("effectAdd", ev); });
-            world.afterEvents.entityDie.subscribe((ev) => { if (this.active) this.events.emit("entityDie", ev); });
-            world.afterEvents.entityHealthChanged.subscribe((ev) => { if (this.active) this.events.emit("entityHealthChanged", ev); });
-            world.afterEvents.entityHitBlock.subscribe((ev) => { if (this.active) this.events.emit("entityHitBlock", ev); });
-            world.afterEvents.entityHitEntity.subscribe((ev) => { if (this.active) this.events.emit("entityHitEntity", ev); });
-            world.afterEvents.entityHurt.subscribe((ev) => { if (this.active) this.events.emit("entityHurt", ev); });
-            world.afterEvents.entityLoad.subscribe((ev) => { if (this.active) this.events.emit("entityLoad", ev); });
+            world.afterEvents.effectAdd.subscribe((ev) => { if (this.active) this.events.emit("afterEffectAdd", ev); });
+            world.afterEvents.entityDie.subscribe((ev) => { if (this.active) this.events.emit("afterEntityDie", ev); });
+            world.afterEvents.entityHealthChanged.subscribe((ev) => { if (this.active) this.events.emit("afterEntityHealthChanged", ev); });
+            world.afterEvents.entityHitBlock.subscribe((ev) => { if (this.active) this.events.emit("afterEntityHitBlock", ev); });
+            world.afterEvents.entityHitEntity.subscribe((ev) => { if (this.active) this.events.emit("afterEntityHitEntity", ev); });
+            world.afterEvents.entityHurt.subscribe((ev) => { if (this.active) this.events.emit("afterEntityHurt", ev); });
+            world.afterEvents.entityLoad.subscribe((ev) => { if (this.active) this.events.emit("afterEntityLoad", ev); });
             world.afterEvents.entityRemove.subscribe((ev) => { if (this.active) this.events.emit("afterEntityRemove", ev); });
             world.beforeEvents.entityRemove.subscribe((ev) => { if (this.active) this.events.emit("beforeEntityRemove", ev); });
             world.afterEvents.entitySpawn.subscribe((ev) => {
@@ -114,13 +112,12 @@ export class WorldBuilder {
                     const maxDistance = Math.max(player.fallDistance * 0.25, 1.62);
                     for (let item of player.dimension.getEntities({ location: player.getHeadLocation(), maxDistance: Math.min(maxDistance, 4) })) {
                         if (item.id === entity.id) {
-                            const distance = Vec3.distance(Vec3.from(player.getHeadLocation()), Vec3.from(ev.entity.location));
                             player.wavArmTime = Date.now();
                         }
                     }
                 }
 
-                this.events.emit("entitySpawn", ev);
+                this.events.emit("afterEntitySpawn", ev);
             });
             world.afterEvents.explosion.subscribe((ev) => { if (this.active) this.events.emit("afterExplosion", ev); });
             world.beforeEvents.explosion.subscribe((ev) => { if (this.active) this.events.emit("beforeExplosion", ev); });
@@ -132,14 +129,14 @@ export class WorldBuilder {
             //h
 
             //i
-            world.afterEvents.itemCompleteUse.subscribe((ev) => { if (this.active) this.events.emit("itemCompleteUse", ev); });
+            world.afterEvents.itemCompleteUse.subscribe((ev) => { if (this.active) this.events.emit("afterItemCompleteUse", ev); });
             world.afterEvents.itemDefinitionEvent.subscribe((ev) => { if (this.active) this.events.emit("afterItemDefinitionEvent", ev); });
             world.beforeEvents.itemDefinitionEvent.subscribe((ev) => { if (this.active) this.events.emit("beforeItemDefinitionEvent", ev); });
-            world.afterEvents.itemReleaseUse.subscribe((ev) => { if (this.active) this.events.emit("itemReleaseUse", ev); });
-            world.afterEvents.itemStartUse.subscribe((ev) => { if (this.active) this.events.emit("itemStartUse", ev); });
-            world.afterEvents.itemStartUseOn.subscribe((ev) => { if (this.active) this.events.emit("itemStartUseOn", ev); });
-            world.afterEvents.itemStopUse.subscribe((ev) => { if (this.active) this.events.emit("itemStopUse", ev); });
-            world.afterEvents.itemStopUseOn.subscribe((ev) => { if (this.active) this.events.emit("itemStopUseOn", ev); });
+            world.afterEvents.itemReleaseUse.subscribe((ev) => { if (this.active) this.events.emit("afterItemReleaseUse", ev); });
+            world.afterEvents.itemStartUse.subscribe((ev) => { if (this.active) this.events.emit("afterItemStartUse", ev); });
+            world.afterEvents.itemStartUseOn.subscribe((ev) => { if (this.active) this.events.emit("afterItemStartUseOn", ev); });
+            world.afterEvents.itemStopUse.subscribe((ev) => { if (this.active) this.events.emit("afterItemStopUse", ev); });
+            world.afterEvents.itemStopUseOn.subscribe((ev) => { if (this.active) this.events.emit("afterItemStopUseOn", ev); });
             world.afterEvents.itemUse.subscribe((ev) => {
                 if (!this.active) return;
                 const { source: player } = ev;
@@ -160,17 +157,18 @@ export class WorldBuilder {
             //k
 
             //l
-            world.afterEvents.leverAction.subscribe((ev) => { if (this.active) this.events.emit("leverAction", ev); });
+            world.afterEvents.leverAction.subscribe((ev) => { if (this.active) this.events.emit("afterLeverAction", ev); });
 
             //m
-            world.afterEvents.messageReceive.subscribe((ev) => { if (this.active) this.events.emit("messageReceive", ev); });
+            world.afterEvents.messageReceive.subscribe((ev) => { if (this.active) this.events.emit("afterMessageReceive", ev); });
 
             //n
 
             //o
 
             //p
-            world.afterEvents.pistonActivate.subscribe((ev) => { if (this.active) this.events.emit("pistonActivate", ev); });
+            world.afterEvents.pistonActivate.subscribe((ev) => { if (this.active) this.events.emit("afterPistonActivate", ev); });
+            world.beforeEvents.pistonActivate.subscribe((ev) => { if (this.active) this.events.emit("beforePistonActivate", ev); });
             world.afterEvents.playerBreakBlock.subscribe((ev) => {
                 if (!this.active) return;
                 const { player } = ev;
@@ -183,7 +181,7 @@ export class WorldBuilder {
             world.beforeEvents.playerInteractWithBlock.subscribe((ev) => { if (this.active) this.events.emit("beforePlayerInteractWithBlock", ev); });
             world.afterEvents.playerInteractWithEntity.subscribe((ev) => { if (this.active) this.events.emit("afterPlayerInteractWithEntity", ev); });
             world.beforeEvents.playerInteractWithEntity.subscribe((ev) => { if (this.active) this.events.emit("beforePlayerInteractWithEntity", ev); });
-            world.afterEvents.playerJoin.subscribe((ev) => { if (this.active) this.events.emit("playerJoin", ev); });
+            world.afterEvents.playerJoin.subscribe((ev) => { if (this.active) this.events.emit("afterPlayerJoin", ev); });
             world.afterEvents.playerLeave.subscribe((ev) => { if (this.active) this.events.emit("afterPlayerLeave", ev); });
             world.beforeEvents.playerLeave.subscribe((ev) => { if (this.active) this.events.emit("beforePlayerLeave", ev); });
             world.afterEvents.playerPlaceBlock.subscribe((ev) => {
@@ -193,11 +191,11 @@ export class WorldBuilder {
                 this.events.emit("afterPlayerPlaceBlock", ev);
             });
             world.beforeEvents.playerPlaceBlock.subscribe((ev) => { if (this.active) this.events.emit("beforePlayerPlaceBlock", ev); });
-            world.afterEvents.playerSpawn.subscribe((ev) => { if (this.active) this.events.emit("playerSpawn", ev); });
-            world.afterEvents.pressurePlatePop.subscribe((ev) => { if (this.active) this.events.emit("pressurePlatePop", ev); });
-            world.afterEvents.pressurePlatePush.subscribe((ev) => { if (this.active) this.events.emit("pressurePlatePush", ev); });
-            world.afterEvents.projectileHitBlock.subscribe((ev) => { if (this.active) this.events.emit("projectileHitBlock", ev); });
-            world.afterEvents.projectileHitEntity.subscribe((ev) => { if (this.active) this.events.emit("projectileHitEntity", ev); });
+            world.afterEvents.playerSpawn.subscribe((ev) => { if (this.active) this.events.emit("afterPlayerSpawn", ev); });
+            world.afterEvents.pressurePlatePop.subscribe((ev) => { if (this.active) this.events.emit("afterPressurePlatePop", ev); });
+            world.afterEvents.pressurePlatePush.subscribe((ev) => { if (this.active) this.events.emit("afterPressurePlatePush", ev); });
+            world.afterEvents.projectileHitBlock.subscribe((ev) => { if (this.active) this.events.emit("afterProjectileHitBlock", ev); });
+            world.afterEvents.projectileHitEntity.subscribe((ev) => { if (this.active) this.events.emit("afterProjectileHitEntity", ev); });
 
             //q
 
@@ -207,12 +205,12 @@ export class WorldBuilder {
             system.afterEvents.scriptEventReceive.subscribe((ev) => {
                 if (!this.active) return;
                 const { id, sourceEntity: entity } = ev;
-                if (id === "action:attack" && entity instanceof Player && Date.now() - (entity.wavArmTime ?? -Infinity) > 210) this.events.emit("playerAttack", { player: entity });
-                else this.events.emit("scriptEventReceive", ev);
+                if (id === "action:attack" && entity instanceof Player && Date.now() - (entity.wavArmTime ?? -Infinity) > 210) this.events.emit("afterPlayerAttack", { player: entity });
+                else this.events.emit("afterScriptEventReceive", ev);
             });
 
             //t
-            world.afterEvents.targetBlockHit.subscribe((ev) => { if (this.active) this.events.emit("targetBlockHit", ev); });
+            world.afterEvents.targetBlockHit.subscribe((ev) => { if (this.active) this.events.emit("afterTargetBlockHit", ev); });
             let tickData = { currentTick: 0, deltaTime: 0.05, tps: 20 }, lastTickDate = Date.now(), avgDeltaTime = [];
             system.runInterval(() => {
                 if (!this.active) return;
@@ -231,16 +229,16 @@ export class WorldBuilder {
                 tickData.currentTick++;
 
             }, 1);
-            world.afterEvents.tripWireTrip.subscribe((ev) => { if (this.active) this.events.emit("tripWireTrip", ev); });
+            world.afterEvents.tripWireTrip.subscribe((ev) => { if (this.active) this.events.emit("afterTripWireTrip", ev); });
 
             //u
 
             //v
 
             //w
-            world.afterEvents.weatherChange.subscribe((ev) => { if (this.active) this.events.emit("weatherChange", ev); });
-            world.afterEvents.worldInitialize.subscribe((ev) => { if (this.active) this.events.emit("worldInitialize", ev); });
-            system.beforeEvents.watchdogTerminate.subscribe((ev) => { if (this.active) this.events.emit("watchdogTerminate", ev); });
+            world.afterEvents.weatherChange.subscribe((ev) => { if (this.active) this.events.emit("afterWeatherChange", ev); });
+            world.afterEvents.worldInitialize.subscribe((ev) => { if (this.active) this.events.emit("afterWorldInitialize", ev); });
+            system.beforeEvents.watchdogTerminate.subscribe((ev) => { if (this.active) this.events.emit("afterWatchdogTerminate", ev); });
 
             //x
 
@@ -254,19 +252,6 @@ export class WorldBuilder {
                 this.events.emit("ready", {});
                 system.runTimeout(() => this.active = true, 1);
             }, 1);
-
-            this.formatter.set("guildChat", ([id, message]) => {
-                const account = this.accounts.get(id);
-                const name = account.name;
-                const guild = account.guild;
-                const tag = guild.owner.id === id ? "§bowner§r" : "§amember§r";
-                return `[${tag}] ${name}§r >> ${message}§r`;
-            });
-
-            this.formatter.set("sendChat", ([id, message]) => {
-                const account = this.accounts.get(id);
-                return `§2| §6${account.name} §g>>§r ${message}`;
-            })
         } catch (e) {
             this.logger.error(e, e.stack);
         }

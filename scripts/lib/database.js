@@ -43,7 +43,7 @@ class WorldDatabase extends Database {
     reload() {
         try {
             for (let id of world.getDynamicPropertyIds().filter((id) => id.startsWith(`${this.name}#`))) {
-                world.logger.debug(id.replace(`${this.name}#`, ""), world.getDynamicProperty(id));
+                //world.logger.debug(id.replace(`${this.name}#`, ""), world.getDynamicProperty(id));
                 super.set(id.replace(`${this.name}#`, ""), JSON.parse(world.getDynamicProperty(id)));
             }
         } catch (e) {
@@ -234,7 +234,6 @@ export class MainDB {
     static databases = [];
 }
 
-MainDB.add(new WorldDatabase("logs"));
 MainDB.add(new WorldDatabase("timeout"));
 MainDB.add(new WorldDatabase("freeze"));
 MainDB.add(new WorldDatabase("disconnect"));

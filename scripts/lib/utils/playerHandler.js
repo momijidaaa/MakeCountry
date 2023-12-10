@@ -1,8 +1,8 @@
-import { Player, system, world } from "../../../@scr/world";
-import { MainDB } from "../../database";
-import { parseTime, timeToMs } from "../formatter";
-import { notify } from "../utils";
-import { Vec3 } from "../vec3";
+import { Player, system, world } from "../../@scr/world";
+import { parseTime, timeToMs } from "./formatter";
+import { notify } from "./utils";
+import { MainDB } from "../database";
+import { Vec3 } from "./vec3";
 
 /**
  * @beta
@@ -56,8 +56,7 @@ export class PlayerHandler {
                 time: freezeTime > 0 ? freezeTime + Date.now() : null,
                 dimensionId: player.dimension.id,
                 location: Vec3.from(player.location).fixed(2).toString(),
-                rotation: Vec3.from(player.getRotation()).fixed(2).toString(),
-                slot: player.selectedSlot
+                rotation: Vec3.from(player.getRotation()).fixed(2).toString()
             }
             playerFreeze.set(player.distId, value)
             notify(`${player.name} has been freezed.`);
@@ -138,20 +137,16 @@ export class PlayerHandler {
         }
     }
 
-    static load () {
+    static load() {
         try { 
             const playerFreeze = MainDB.get("freeze");
             world.events.on("tick", (ev) => {
                 const { currentTick } = ev;
-                const object = JSON.stringify([ ...playerFreeze ]);
-                world.logger.log(object);
                 for (let player of world.getPlayers()) {
-                    world.logger.debug(playerFreeze.get(player.distId));
                     if (playerFreeze.has(player.distId)) {
                         world.logger.debug(`${player.name} has been freezed.`);
-                        const { dimensionId, location, rotation, slot } = playerFreeze.get(player.distId);
+                        const { dimensionId, location, rotation } = playerFreeze.get(player.distId);
                         player.teleport(Vec3.from(location), { rotation: Vec3.from(rotation), dimension: world.getDimension(dimensionId) });
-                        player.selectedSlot = slot;
                         if (currentTick % 2 === 0) {
                             player.runCommandAsync("inputpermission set @s movement disabled");
                             player.runCommandAsync("inputpermission set @s camera disabled");
@@ -165,4 +160,4 @@ export class PlayerHandler {
     }
 }
 
-PlayerHandler.load();
+system.runTimeout(PlayerHandler.load);

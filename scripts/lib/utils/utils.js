@@ -1,5 +1,4 @@
 import { world } from "../../@scr/world";
-export * from "./cdate/index"
 
 /**
  * @beta
