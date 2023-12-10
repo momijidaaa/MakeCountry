@@ -152,7 +152,6 @@ export const configs = {
     showCoreDurableValueOnBreak: true, //戦争中のコア破壊時に耐久値をアクションバー表示するか
     coreDurableValue: 50 , //コアの耐久地
     untilNextChangePeace: 180 , //平和主義の状態を切り替えた後、次に変えるときのクールタイム(分) デフォルト値(180分(3時間))
-    coreName: `§d国のコア`, //コアの名前
     noExplodeInCountry: false, //各国の領土内で爆発物が爆発しないようにするか
     taxTime: 720, //税金を何分ごとに徴収するか(現実時間) デフォルト値(1440分(24時間))
     taxFreeTime: 3, //建国から何回目の徴収まで免税にするか(デフォルトでは3)
