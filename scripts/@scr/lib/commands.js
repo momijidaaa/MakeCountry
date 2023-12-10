@@ -16,7 +16,9 @@ const prefix = config.commands.prefix;
 export class CommandManager {
     load() {
 
-        world.events.on("sendCustomCommand", (ev) => {
+        world.logger.debug(commands.getAll().map(c => c.name).join(", "));
+
+        world.events.on("afterSendCustomCommand", (ev) => {
             const { sender: player, commandName, message } = ev;
             if (commandName) {
                 const cmd = this.getAll().find(c => c.name === commandName || c.aliases.includes(commandName)), option = { flags: new Map(), member: undefined };
@@ -88,7 +90,7 @@ commands.register({
     ],
     aliases: ["h", "?"]
 }, (player, args) => {
-    const CanUseCommands = commands.getAll().filter(c => c.permission <= player.permission);
+    const CanUseCommands = commands.getAll()//.filter(c => c.permission <= player.permission);
     let helpPage = args[0] ? Number(args[0]) : 1;
     if (Math.ceil(CanUseCommands.length / 7) < helpPage) return player.sendMessage(`§cページ: ${helpPage} は無効です。`);
     if (helpPage > 0) {
@@ -107,6 +109,18 @@ commands.register({
             player.sendMessage(`§cコマンド: "${args[0]}"は登録されていないか、実行する権限がありません。`);
         }
     }
+})
+
+commands.register({
+    name: "test",
+    description: "Test",
+    usages: [
+        "test ?h",
+        "test <player: name>"
+    ],
+    target: { self: true }
+}, (player, args, option) => {
+    
 })
 
 commands.register({
@@ -147,8 +161,8 @@ commands.register({
     description: "プレイヤーをキックします",
     usages: [
         "kick ?h",
-        "ban <player: name>",
-        "ban <player: name> ?m [message: string]",
+        "kick <player: name>",
+        "kick <player: name> ?m [message: string]",
         "kick <player: name> ?r [reason: string]"
     ],
     aliases: ["k"],
@@ -253,20 +267,20 @@ commands.register({
     world.logger.debug(player.name)
     if (flags.has("true")) {
         player.addTag("notify");
-        player.sendMessage("§a管理者通知を有効にしました。");
+        player.sendMessage("§a管理者通知を§b有効§aにしました。");
     }
     else if (flags.has("false")) {
         player.removeTag("notify");
-        player.sendMessage("§c管理者通知を無効にしました。");
+        player.sendMessage("§a管理者通知を§c無効§aにしました。");
     }
     else {
         if (player.hasTag("notify")) {
             player.removeTag("notify")
-            player.sendMessage("§c管理者通知を無効にしました。");
+            player.sendMessage("§a管理者通知を§c無効§aにしました。");
         }
         else {
             player.addTag("notify");
-            player.sendMessage("§a管理者通知を有効にしました。");
+            player.sendMessage("§a管理者通知を§b有効§aにしました。");
         }
     }
 })

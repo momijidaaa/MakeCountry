@@ -165,6 +165,10 @@ export default {
             valid: true,
             permission: 1
         },
+        test: {
+            valid: true,
+            permission: 2,
+        },
         ban: {
             valid: true,
             permission: 4
