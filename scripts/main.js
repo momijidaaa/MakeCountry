@@ -1,8 +1,8 @@
-import * as MC from "@minecraft/server"
+import { world } from "./@scr/world";
 import "commands.js"
 import "useitem.js"
 import { getNameScore, getScore, setScore, addScore, convertChunk, isWarNowCountry, findCountry, getRandomInteger, isFriendCountry } from "./function";
-import { configs } from "./config"
+import config from "./config"
 
 new Date()
 
@@ -18,8 +18,8 @@ MC.system.runInterval(() => {
     if (!MC.world.getPlayers({ tags: [`mc_admin`] })[0]) return;
     //税金処理
     if (!MC.world.scoreboard.getParticipants().find(a => a.displayName === `tax`)) {
-        MC.world.sendMessage(`§a徴収システム始動開始(徴収間隔(${configs.taxTime}分))`)
-        MC.world.scoreboard.getObjective(`mc_timer`).setScore(`tax`, configs.taxTime)
+        MC.world.sendMessage(`§a徴収システム始動開始(徴収間隔(${config.taxTime}分))`)
+        MC.world.scoreboard.getObjective(`mc_timer`).setScore(`tax`, config.taxTime)
         for (const ptimer of MC.world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
             addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
         }
@@ -41,15 +41,15 @@ MC.system.runInterval(() => {
                 const all_score = MC.world.scoreboard.getObjective(`mc_chunk`).getScores();
                 const chunks = all_score.filter(nameScore => nameScore.score === c.score);
                 addScore(`${c.score}`, `mc_days`, 1)
-                if (getScore(`${c.score}`, `mc_days`) < configs.taxFreeTime) continue
-                addScore(`${c.score}`, `countrymoney`, Math.floor(configs.taxAmount * chunks.length * -1))
+                if (getScore(`${c.score}`, `mc_days`) < config.taxFreeTime) continue
+                addScore(`${c.score}`, `countrymoney`, Math.floor(config.taxAmount * chunks.length * -1))
                 if (getScore(`${c.score}`, `mc_peace`) === 1) {
-                    addScore(`${c.score}`, `countrymoney`, Math.floor(configs.taxPeaceAmount * chunks.length * -1))
+                    addScore(`${c.score}`, `countrymoney`, Math.floor(config.taxPeaceAmount * chunks.length * -1))
                 }
                 if (getScore(`${c.score}`, `countrymoney`) < 0) addScore(`${c.score}`, `mc_notax`, 1)
                 if (getScore(`${c.score}`, `countrymoney`) > -1) setScore(`${c.score}`, `mc_notax`, 0)
                 //mc_notax(赤字状態が続いたら国を削除)
-                if (getScore(`${c.score}`, `mc_notax`) >= configs.deleteCountryReasonNoMoney) {
+                if (getScore(`${c.score}`, `mc_notax`) >= config.deleteCountryReasonNoMoney) {
                     const members = MC.world.scoreboard.getObjective(`mc_pcountries`).getScores()
                     const chunks = MC.world.scoreboard.getObjective(`mc_chunk`).getScores()
                     for (let i = 0; i < members.length; i++) {
@@ -62,8 +62,8 @@ MC.system.runInterval(() => {
                     MC.world.scoreboard.getObjective(`mc_peace`).removeParticipant(`${c.score}`)
                     MC.world.scoreboard.getObjective(`mc_peace`).removeParticipant(`${c.score}`)
                     MC.world.scoreboard.getObjective(`mc_days`).removeParticipant(`${c.score}`)
-                    MC.world.sendMessage(`§a国「§r${c.participant.displayName}§r§a」が削除されました\n(理由: ${configs.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
-                    MC.world.getDimension(`overworld`).runCommand(`title @s subtitle sendLogToDiscord 国「${c.participant.displayName}」が削除されました\n(理由: ${configs.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
+                    MC.world.sendMessage(`§a国「§r${c.participant.displayName}§r§a」が削除されました\n(理由: ${config.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
+                    MC.world.getDimension(`overworld`).runCommand(`title @s subtitle sendLogToDiscord 国「${c.participant.displayName}」が削除されました\n(理由: ${config.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
                     MC.world.getDimension(`overworld`).runCommand(`title @s subtitle §a`)
                     for (const f of MC.world.scoreboard.getObjective(`mc_friend${c.score}`).getScores()) {
                         MC.world.scoreboard.getObjective(`mc_friend${f.participant.displayName}`).removeParticipant(`${c.score}`)
@@ -82,7 +82,7 @@ MC.system.runInterval(() => {
                     MC.world.scoreboard.getObjective(`mc_countries`).removeParticipant(c.participant)
                 }
             }
-            setScore(`tax`, `mc_timer`, configs.taxTime)
+            setScore(`tax`, `mc_timer`, config.taxTime)
             for (const ptimer of MC.world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
                 addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
             }
@@ -98,10 +98,10 @@ MC.system.runInterval(() => {
                     MC.world.scoreboard.getObjective(`mc_warNow${country.score}`).setScore(limits.participant.displayName, 1)
                     MC.world.scoreboard.getObjective(`mc_warNow${limits.participant.displayName}`).setScore(`${country.score}`, 1)
                     MC.world.scoreboard.getObjective(`mc_limit${country.score}`).removeParticipant(limits.participant)
-                    if (getScore(`${country.score}`)) addScore(`${country.score}`, `mc_core`, configs.coreDurableValue)
-                    if (!getScore(`${country.score}`)) setScore(`${country.score}`, `mc_core`, configs.coreDurableValue)
-                    if (getScore(`${limits.participant.displayName}`)) addScore(`${limits.participant.displayName}`, `mc_core`, configs.coreDurableValue)
-                    if (!getScore(`${limits.participant.displayName}`)) setScore(`${limits.participant.displayName}`, `mc_core`, configs.coreDurableValue)
+                    if (getScore(`${country.score}`)) addScore(`${country.score}`, `mc_core`, config.coreDurableValue)
+                    if (!getScore(`${country.score}`)) setScore(`${country.score}`, `mc_core`, config.coreDurableValue)
+                    if (getScore(`${limits.participant.displayName}`)) addScore(`${limits.participant.displayName}`, `mc_core`, config.coreDurableValue)
+                    if (!getScore(`${limits.participant.displayName}`)) setScore(`${limits.participant.displayName}`, `mc_core`, config.coreDurableValue)
                     MC.world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`, Number(limits.participant.displayName))}§r と ${country.participant.displayName}§r の戦争が始まった`)
                     continue
                 }
@@ -115,33 +115,33 @@ MC.system.runInterval(() => {
 const airBlock = MC.BlockPermutation.resolve('minecraft:air')
 
 MC.world.beforeEvents.itemUseOn.subscribe((ev) => {
-    if (configs.noUseInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
+    if (config.noUseInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
         ev.cancel = true
     }
-    if (configs.noUseInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
+    if (config.noUseInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
         ev.cancel = true
     }
-    if (configs.noUseInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.source, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.source, `mc_pcountries`)))) {
+    if (config.noUseInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.source, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.source, `mc_pcountries`)))) {
         ev.cancel = true
     }
 })
 
 MC.world.beforeEvents.explosion.subscribe((ev) => {
-    if (configs.noExplodeInWilderness && !getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`)) ev.cancel = true
-    if (configs.noExplodeInSpecialZone && getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`) === -1) ev.cancel = true
-    if (configs.noExplodeInCountry && getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`) > 0) ev.cancel = true
+    if (config.noExplodeInWilderness && !getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`)) ev.cancel = true
+    if (config.noExplodeInSpecialZone && getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`) === -1) ev.cancel = true
+    if (config.noExplodeInCountry && getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`) > 0) ev.cancel = true
 })
 
 MC.world.afterEvents.entityDie.subscribe((ev) => {
     try {
         if (!(ev.damageSource.damagingEntity instanceof MC.Player)) { return }
         try {
-            const random = getRandomInteger(configs[`${ev.deadEntity.typeId.split(`:`)[1]}KillReward`].min, configs[`${ev.deadEntity.typeId.split(`:`)[1]}KillReward`].max)
-            if (configs.showRewardMessage) ev.damageSource.damagingEntity.onScreenDisplay.setActionBar(`§6+${random}`)
+            const random = getRandomInteger(config[`${ev.deadEntity.typeId.split(`:`)[1]}KillReward`].min, config[`${ev.deadEntity.typeId.split(`:`)[1]}KillReward`].max)
+            if (config.showRewardMessage) ev.damageSource.damagingEntity.onScreenDisplay.setActionBar(`§6+${random}`)
             addScore(ev.damageSource.damagingEntity, `mc_money`, random)
         } catch (error) {
-            const random = getRandomInteger(configs.oreMiningReward.min, configs.otherMobkillReward.max)
-            if (configs.showRewardMessage) ev.damageSource.damagingEntity.onScreenDisplay.setActionBar(`§6+${random}`)
+            const random = getRandomInteger(config.oreMiningReward.min, config.otherMobkillReward.max)
+            if (config.showRewardMessage) ev.damageSource.damagingEntity.onScreenDisplay.setActionBar(`§6+${random}`)
             addScore(ev.damageSource.damagingEntity, `mc_money`, random)
         }
     } catch (error) {
@@ -154,7 +154,7 @@ MC.world.afterEvents.entitySpawn.subscribe((ev) => {
     try {
         if (ev.entity.typeId !== `minecraft:player` && ev.entity.typeId !== `minecraft:item` && ev.entity.typeId !== `minecraft:xp_orb`) {
             if (!getScore(convertChunk(ev.entity.location.x, ev.entity.location.z), `mc_chunk`)) return
-            if (getScore(convertChunk(ev.entity.location.x, ev.entity.location.z), `mc_chunk`) === -1 && configs.noSpawnEntityInSpecialZone) {
+            if (getScore(convertChunk(ev.entity.location.x, ev.entity.location.z), `mc_chunk`) === -1 && config.noSpawnEntityInSpecialZone) {
                 ev.entity.teleport({ x: ev.entity.location.x, y: -100, z: ev.entity.location.z })
             }
         }
@@ -166,7 +166,7 @@ MC.world.afterEvents.entitySpawn.subscribe((ev) => {
 MC.system.runInterval(() => {
     for (const p of MC.world.getAllPlayers()) {
         let land = getNameScore(`mc_countries`, getScore(p, `mc_pcountries`))
-        if (getScore(p, `mc_pcountries`) === 0) land = configs.noCountry
+        if (getScore(p, `mc_pcountries`) === 0) land = config.noCountry
         p.nameTag = `§a${land} §r| ${p.name}`
         if (typeof getScore(p, `mc_nowc`) === 'undefined') {
             if (typeof getScore(convertChunk(Math.floor(p.location.x), Math.floor(p.location.z)), `mc_chunk`) === 'number') setScore(p, `mc_nowc`, getScore(convertChunk(Math.floor(p.location.x), Math.floor(p.location.z)), `mc_chunk`))
@@ -202,7 +202,7 @@ MC.world.afterEvents.itemStartUseOn.subscribe((ev) => {
 
 MC.world.afterEvents.entityHurt.subscribe((ev) => {
     if (!(ev.damageSource.damagingEntity instanceof MC.Player)) return
-    if (configs.noMobAttackInWilderness && !getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`)) {
+    if (config.noMobAttackInWilderness && !getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`)) {
         /**
          * @type {MC.EntityHealthComponent}
          */
@@ -210,7 +210,7 @@ MC.world.afterEvents.entityHurt.subscribe((ev) => {
         health.setCurrentValue(health.currentValue + ev.damage)
         return
     }
-    if (configs.noMobAttackInSpecialZone && getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`) === -1) {
+    if (config.noMobAttackInSpecialZone && getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`) === -1) {
         /**
         * @type {MC.EntityHealthComponent}
         */
@@ -218,7 +218,7 @@ MC.world.afterEvents.entityHurt.subscribe((ev) => {
         health.setCurrentValue(health.currentValue + ev.damage)
         return
     }
-    if (configs.noMobAttackInCountry && getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`) !== getScore(ev.damageSource.damagingEntity, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.damageSource.damagingEntity, `mc_pcountries`)))) {
+    if (config.noMobAttackInCountry && getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`) !== getScore(ev.damageSource.damagingEntity, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.damageSource.damagingEntity, `mc_pcountries`)))) {
         if (ev.hurtEntity instanceof MC.Player && isWarNowCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.damageSource.damagingEntity, `mc_pcountries`)))) {
             return
         }
@@ -248,13 +248,13 @@ MC.world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
         }
     }
     if (ev.dimension.id !== `minecraft:overworld`) return
-    if (configs.noPlaceInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
+    if (config.noPlaceInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
         ev.cancel = true
     }
-    if (configs.noPlaceInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
+    if (config.noPlaceInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
         ev.cancel = true
     }
-    if (configs.noPlaceInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.player, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)))) {
+    if (config.noPlaceInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.player, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)))) {
         ev.cancel = true
     }
 })
@@ -266,11 +266,11 @@ MC.world.beforeEvents.playerBreakBlock.subscribe((ev) => {
         if (ev.player.hasTag(`countryOwner`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === getScore(ev.player, `mc_pcountries`)) {
             ev.player.sendMessage(`§aコアをアイテム化しました`)
             let core = ev.brokenBlockPermutation.getItemStack()
-            core.nameTag = `${configs.coreName}`
+            core.nameTag = `${config.coreName}`
             MC.world.getDimension(ev.dimension.id).spawnItem(core, ev.player.location)
         } else if (getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && isWarNowCountry(getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)), getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)))) {
-            if (configs.coreBreakMessage) ev.player.sendMessage(`§a敵国のコアを破壊しました。その調子です`)
-            if (configs.showCoreDurableValueOnBreak) ev.player.onScreenDisplay.setActionBar(`§aコアの残り耐久値: ${getScore(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`, `mc_core`)}`)
+            if (config.coreBreakMessage) ev.player.sendMessage(`§a敵国のコアを破壊しました。その調子です`)
+            if (config.showCoreDurableValueOnBreak) ev.player.onScreenDisplay.setActionBar(`§aコアの残り耐久値: ${getScore(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`, `mc_core`)}`)
             //ここから下に戦時中の処理
             if (getScore(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`, `mc_core`) === 0) {
                 let winners = ""
@@ -295,38 +295,38 @@ MC.world.beforeEvents.playerBreakBlock.subscribe((ev) => {
             return
         }
     } else {
-        if (configs.noBreakInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
+        if (config.noBreakInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
             ev.cancel = true
             ev.player.sendMessage(`§c荒野でのブロック破壊はできません`)
             return
         }
-        if (configs.noBreakInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
+        if (config.noBreakInSpecialZone && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === -1) {
             ev.cancel = true
             ev.player.sendMessage(`§c特別区域でのブロック破壊はできません`)
 
             return
         }
-        if (configs.noBreakInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.player, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)))) {
+        if (config.noBreakInCountry && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.player, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)))) {
             ev.player.sendMessage(`§c他国でブロック破壊はできません`)
             ev.cancel = true
             return
         }
         if (ev.brokenBlockPermutation.hasTag(`log`)) {
-            const random = getRandomInteger(configs.woodCutReward.min, configs.woodCutReward.max)
-            if (configs.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`)
+            const random = getRandomInteger(config.woodCutReward.min, config.woodCutReward.max)
+            if (config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`)
             addScore(ev.player, `mc_money`, random)
             return
         }
         if (ev.brokenBlockPermutation.type.id.endsWith(`_ore`)) {
-            const random = getRandomInteger(configs.oreMiningReward.min, configs.oreMiningReward.max)
-            if (configs.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`)
+            const random = getRandomInteger(config.oreMiningReward.min, config.oreMiningReward.max)
+            if (config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`)
             addScore(ev.player, `mc_money`, random)
             return
         }
         if (ev.brokenBlockPermutation.hasTag(`stone`) || ev.brokenBlockPermutation.type.id === `minecraft:deepslate`) {
-            const random = getRandomInteger(configs.stoneMiningReward.min, configs.stoneMiningReward.max)
+            const random = getRandomInteger(config.stoneMiningReward.min, config.stoneMiningReward.max)
             addScore(ev.player, `mc_money`, random)
-            if (configs.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`)
+            if (config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`)
             return
         }
     }

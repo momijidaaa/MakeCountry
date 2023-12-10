@@ -1,13 +1,13 @@
 /* 
--+設定について+-
-false = いいえ
-true = はい
+    -+設定について+-
+    false = いいえ
+    true = はい
 
-min = 最小値
-max = 最大値
+    min = 最小値
+    max = 最大値
 */
 
-export const configs = {
+export default {
 
     //チャットの設定
     countryLeft: true, //チャット時に名前の横に国籍を表示するか
