@@ -148,9 +148,6 @@ export const configs = {
     otherMobkillReward: {min: 1,max: 10}, //その他のエンティティを倒したときにもらえるお金の変域
 
     //その他の設定
-    coreBreakMessage: true, //戦争中のコア破壊時にメッセージを表示するか
-    showCoreDurableValueOnBreak: true, //戦争中のコア破壊時に耐久値をアクションバー表示するか
-    coreDurableValue: 50 , //コアの耐久地
     untilNextChangePeace: 180 , //平和主義の状態を切り替えた後、次に変えるときのクールタイム(分) デフォルト値(180分(3時間))
     noExplodeInCountry: false, //各国の領土内で爆発物が爆発しないようにするか
     taxTime: 720, //税金を何分ごとに徴収するか(現実時間) デフォルト値(1440分(24時間))
