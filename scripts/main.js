@@ -1,4 +1,4 @@
-import { world } from "./@scr/world";
+import { world, system } from "./@scr/world";
 import "commands.js"
 import "useitem.js"
 import { getNameScore, getScore, setScore, addScore, convertChunk, isWarNowCountry, findCountry, getRandomInteger, isFriendCountry } from "./function";
@@ -6,39 +6,39 @@ import config from "./config"
 
 new Date()
 
-MC.world.afterEvents.playerSpawn.subscribe((ev) => {
-    if (!MC.world.getPlayers({ tags: [`mc_admin`] })[0]) return;
+world.afterEvents.playerSpawn.subscribe((ev) => {
+    if (!world.getPlayers({ tags: [`mc_admin`] })[0]) return;
     ev.player.runCommandAsync(`scoreboard players add @a mc_money 0`)
     ev.player.runCommandAsync(`scoreboard players add @a mc_pcountries 0`)
 })
 
 //1分ごとにまわす
-MC.system.runInterval(() => {
+system.runInterval(() => {
     //setup前の場合処理を止める
-    if (!MC.world.getPlayers({ tags: [`mc_admin`] })[0]) return;
+    if (!world.getPlayers({ tags: [`mc_admin`] })[0]) return;
     //税金処理
-    if (!MC.world.scoreboard.getParticipants().find(a => a.displayName === `tax`)) {
-        MC.world.sendMessage(`§a徴収システム始動開始(徴収間隔(${config.taxTime}分))`)
-        MC.world.scoreboard.getObjective(`mc_timer`).setScore(`tax`, config.taxTime)
-        for (const ptimer of MC.world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
+    if (!world.scoreboard.getParticipants().find(a => a.displayName === `tax`)) {
+        world.sendMessage(`§a徴収システム始動開始(徴収間隔(${config.taxTime}分))`)
+        world.scoreboard.getObjective(`mc_timer`).setScore(`tax`, config.taxTime)
+        for (const ptimer of world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
             addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
         }
     } else {
         addScore(`tax`, `mc_timer`, -1)
-        if (MC.world.scoreboard.getObjective(`mc_timer`).getScore(`tax`) === 10) {
-            MC.world.sendMessage(`§a[MakeCountry]\n§r税金回収の時間です`)
-            for (const p of MC.world.scoreboard.getObjective(`mc_pcountries`).getScores()) {
+        if (world.scoreboard.getObjective(`mc_timer`).getScore(`tax`) === 10) {
+            world.sendMessage(`§a[MakeCountry]\n§r税金回収の時間です`)
+            for (const p of world.scoreboard.getObjective(`mc_pcountries`).getScores()) {
                 if (p.score < 1) continue
                 addScore(`${p.score}`, `countrymoney`, Math.floor(getScore(p.participant, `mc_money`) / 100 * getScore(`${p.score}`, `countrymoneyper`)))
                 addScore(p.participant, `mc_money`, Math.floor(getScore(p.participant, `mc_money`) / 100 * getScore(`${p.score}`, `countrymoneyper`) * -1))
             }
-            for (const ptimer of MC.world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
+            for (const ptimer of world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
                 addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
             }
-        } else if (MC.world.scoreboard.getObjective(`mc_timer`).getScore(`tax`) === 0) {
-            MC.world.sendMessage(`§a[MakeCountry]\n§r国維持費回収の時間です`)
-            for (const c of MC.world.scoreboard.getObjective(`mc_countries`).getScores().filter(kuni => kuni.score > 0)) {
-                const all_score = MC.world.scoreboard.getObjective(`mc_chunk`).getScores();
+        } else if (world.scoreboard.getObjective(`mc_timer`).getScore(`tax`) === 0) {
+            world.sendMessage(`§a[MakeCountry]\n§r国維持費回収の時間です`)
+            for (const c of world.scoreboard.getObjective(`mc_countries`).getScores().filter(kuni => kuni.score > 0)) {
+                const all_score = world.scoreboard.getObjective(`mc_chunk`).getScores();
                 const chunks = all_score.filter(nameScore => nameScore.score === c.score);
                 addScore(`${c.score}`, `mc_days`, 1)
                 if (getScore(`${c.score}`, `mc_days`) < config.taxFreeTime) continue
@@ -50,59 +50,59 @@ MC.system.runInterval(() => {
                 if (getScore(`${c.score}`, `countrymoney`) > -1) setScore(`${c.score}`, `mc_notax`, 0)
                 //mc_notax(赤字状態が続いたら国を削除)
                 if (getScore(`${c.score}`, `mc_notax`) >= config.deleteCountryReasonNoMoney) {
-                    const members = MC.world.scoreboard.getObjective(`mc_pcountries`).getScores()
-                    const chunks = MC.world.scoreboard.getObjective(`mc_chunk`).getScores()
+                    const members = world.scoreboard.getObjective(`mc_pcountries`).getScores()
+                    const chunks = world.scoreboard.getObjective(`mc_chunk`).getScores()
                     for (let i = 0; i < members.length; i++) {
-                        if (members[i].score === c.score) MC.world.scoreboard.getObjective(`mc_pcountries`).setScore(members[i].participant, 0)
+                        if (members[i].score === c.score) world.scoreboard.getObjective(`mc_pcountries`).setScore(members[i].participant, 0)
                     }
                     for (let i = 0; i < chunks.length; i++) {
-                        if (chunks[i].score === c.score) MC.world.scoreboard.getObjective(`mc_chunk`).removeParticipant(chunks[i].participant)
+                        if (chunks[i].score === c.score) world.scoreboard.getObjective(`mc_chunk`).removeParticipant(chunks[i].participant)
                     }
-                    MC.world.scoreboard.getObjective(`mc_people`).removeParticipant(`${c.score}`)
-                    MC.world.scoreboard.getObjective(`mc_peace`).removeParticipant(`${c.score}`)
-                    MC.world.scoreboard.getObjective(`mc_peace`).removeParticipant(`${c.score}`)
-                    MC.world.scoreboard.getObjective(`mc_days`).removeParticipant(`${c.score}`)
-                    MC.world.sendMessage(`§a国「§r${c.participant.displayName}§r§a」が削除されました\n(理由: ${config.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
-                    MC.world.getDimension(`overworld`).runCommand(`title @s subtitle sendLogToDiscord 国「${c.participant.displayName}」が削除されました\n(理由: ${config.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
-                    MC.world.getDimension(`overworld`).runCommand(`title @s subtitle §a`)
-                    for (const f of MC.world.scoreboard.getObjective(`mc_friend${c.score}`).getScores()) {
-                        MC.world.scoreboard.getObjective(`mc_friend${f.participant.displayName}`).removeParticipant(`${c.score}`)
+                    world.scoreboard.getObjective(`mc_people`).removeParticipant(`${c.score}`)
+                    world.scoreboard.getObjective(`mc_peace`).removeParticipant(`${c.score}`)
+                    world.scoreboard.getObjective(`mc_peace`).removeParticipant(`${c.score}`)
+                    world.scoreboard.getObjective(`mc_days`).removeParticipant(`${c.score}`)
+                    world.sendMessage(`§a国「§r${c.participant.displayName}§r§a」が削除されました\n(理由: ${config.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
+                    world.getDimension(`overworld`).runCommand(`title @s subtitle sendLogToDiscord 国「${c.participant.displayName}」が削除されました\n(理由: ${config.deleteCountryReasonNoMoney}回連続で赤字が続いたため)`)
+                    world.getDimension(`overworld`).runCommand(`title @s subtitle §a`)
+                    for (const f of world.scoreboard.getObjective(`mc_friend${c.score}`).getScores()) {
+                        world.scoreboard.getObjective(`mc_friend${f.participant.displayName}`).removeParticipant(`${c.score}`)
                     }
-                    for (const f of MC.world.scoreboard.getObjective(`mc_warNow${c.score}`).getScores()) {
-                        MC.world.scoreboard.getObjective(`mc_warNow${f.participant.displayName}`).removeParticipant(`${c.score}`)
+                    for (const f of world.scoreboard.getObjective(`mc_warNow${c.score}`).getScores()) {
+                        world.scoreboard.getObjective(`mc_warNow${f.participant.displayName}`).removeParticipant(`${c.score}`)
                     }
-                    MC.world.scoreboard.getObjective(`mc_core`).removeParticipant(`${c.score}`)
-                    MC.world.scoreboard.removeObjective(`mc_friend${c.score}`)
-                    MC.world.scoreboard.removeObjective(`mc_warNow${c.score}`)
-                    MC.world.scoreboard.removeObjective(`mc_dow${c.score}`)
-                    MC.world.scoreboard.removeObjective(`mc_freq${c.score}`)
-                    MC.world.scoreboard.getObjective(`countrymoneyper`).removeParticipant(`${c.score}`)
-                    MC.world.scoreboard.getObjective(`countrymoney`).removeParticipant(`${c.score}`)
-                    MC.world.scoreboard.removeObjective(`mc_limit${c.score}`)
-                    MC.world.scoreboard.getObjective(`mc_countries`).removeParticipant(c.participant)
+                    world.scoreboard.getObjective(`mc_core`).removeParticipant(`${c.score}`)
+                    world.scoreboard.removeObjective(`mc_friend${c.score}`)
+                    world.scoreboard.removeObjective(`mc_warNow${c.score}`)
+                    world.scoreboard.removeObjective(`mc_dow${c.score}`)
+                    world.scoreboard.removeObjective(`mc_freq${c.score}`)
+                    world.scoreboard.getObjective(`countrymoneyper`).removeParticipant(`${c.score}`)
+                    world.scoreboard.getObjective(`countrymoney`).removeParticipant(`${c.score}`)
+                    world.scoreboard.removeObjective(`mc_limit${c.score}`)
+                    world.scoreboard.getObjective(`mc_countries`).removeParticipant(c.participant)
                 }
             }
             setScore(`tax`, `mc_timer`, config.taxTime)
-            for (const ptimer of MC.world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
+            for (const ptimer of world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
                 addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
             }
         } else {
-            for (const ptimer of MC.world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
+            for (const ptimer of world.scoreboard.getObjective(`mc_ptimer`).getScores().filter(peace => peace.score > 0)) {
                 addScore(`${ptimer.participant.displayName}`, `mc_ptimer`, -1)
             }
         }
-        for (const country of MC.world.scoreboard.getObjective(`mc_countries`).getScores().filter(kuni => kuni.score > 0)) {
-            for (const limits of MC.world.scoreboard.getObjective(`mc_limit${country.score}`).getScores()) {
+        for (const country of world.scoreboard.getObjective(`mc_countries`).getScores().filter(kuni => kuni.score > 0)) {
+            for (const limits of world.scoreboard.getObjective(`mc_limit${country.score}`).getScores()) {
                 if (limits.score === 0) {
-                    MC.world.scoreboard.getObjective(`mc_dow${country.score}`).removeParticipant(limits.participant.displayName)
-                    MC.world.scoreboard.getObjective(`mc_warNow${country.score}`).setScore(limits.participant.displayName, 1)
-                    MC.world.scoreboard.getObjective(`mc_warNow${limits.participant.displayName}`).setScore(`${country.score}`, 1)
-                    MC.world.scoreboard.getObjective(`mc_limit${country.score}`).removeParticipant(limits.participant)
+                    world.scoreboard.getObjective(`mc_dow${country.score}`).removeParticipant(limits.participant.displayName)
+                    world.scoreboard.getObjective(`mc_warNow${country.score}`).setScore(limits.participant.displayName, 1)
+                    world.scoreboard.getObjective(`mc_warNow${limits.participant.displayName}`).setScore(`${country.score}`, 1)
+                    world.scoreboard.getObjective(`mc_limit${country.score}`).removeParticipant(limits.participant)
                     if (getScore(`${country.score}`)) addScore(`${country.score}`, `mc_core`, config.coreDurableValue)
                     if (!getScore(`${country.score}`)) setScore(`${country.score}`, `mc_core`, config.coreDurableValue)
                     if (getScore(`${limits.participant.displayName}`)) addScore(`${limits.participant.displayName}`, `mc_core`, config.coreDurableValue)
                     if (!getScore(`${limits.participant.displayName}`)) setScore(`${limits.participant.displayName}`, `mc_core`, config.coreDurableValue)
-                    MC.world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`, Number(limits.participant.displayName))}§r と ${country.participant.displayName}§r の戦争が始まった`)
+                    world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`, Number(limits.participant.displayName))}§r と ${country.participant.displayName}§r の戦争が始まった`)
                     continue
                 }
                 addScore(limits.participant.displayName, `mc_limit${country.score}`, -1)
@@ -114,7 +114,7 @@ MC.system.runInterval(() => {
 
 const airBlock = MC.BlockPermutation.resolve('minecraft:air')
 
-MC.world.beforeEvents.itemUseOn.subscribe((ev) => {
+world.beforeEvents.itemUseOn.subscribe((ev) => {
     if (config.noUseInWilderness && !getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)) {
         ev.cancel = true
     }
@@ -126,13 +126,13 @@ MC.world.beforeEvents.itemUseOn.subscribe((ev) => {
     }
 })
 
-MC.world.beforeEvents.explosion.subscribe((ev) => {
+world.beforeEvents.explosion.subscribe((ev) => {
     if (config.noExplodeInWilderness && !getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`)) ev.cancel = true
     if (config.noExplodeInSpecialZone && getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`) === -1) ev.cancel = true
     if (config.noExplodeInCountry && getScore(convertChunk(ev.source.location.x, ev.source.location.z), `mc_chunk`) > 0) ev.cancel = true
 })
 
-MC.world.afterEvents.entityDie.subscribe((ev) => {
+world.afterEvents.entityDie.subscribe((ev) => {
     try {
         if (!(ev.damageSource.damagingEntity instanceof MC.Player)) { return }
         try {
@@ -150,7 +150,7 @@ MC.world.afterEvents.entityDie.subscribe((ev) => {
 
 })
 
-MC.world.afterEvents.entitySpawn.subscribe((ev) => {
+world.afterEvents.entitySpawn.subscribe((ev) => {
     try {
         if (ev.entity.typeId !== `minecraft:player` && ev.entity.typeId !== `minecraft:item` && ev.entity.typeId !== `minecraft:xp_orb`) {
             if (!getScore(convertChunk(ev.entity.location.x, ev.entity.location.z), `mc_chunk`)) return
@@ -163,8 +163,8 @@ MC.world.afterEvents.entitySpawn.subscribe((ev) => {
     }
 })
 
-MC.system.runInterval(() => {
-    for (const p of MC.world.getAllPlayers()) {
+system.runInterval(() => {
+    for (const p of world.getAllPlayers()) {
         let land = getNameScore(`mc_countries`, getScore(p, `mc_pcountries`))
         if (getScore(p, `mc_pcountries`) === 0) land = config.noCountry
         p.nameTag = `§a${land} §r| ${p.name}`
@@ -186,11 +186,11 @@ MC.system.runInterval(() => {
     }
 }, 20)
 
-MC.world.afterEvents.itemStartUseOn.subscribe((ev) => {
+world.afterEvents.itemStartUseOn.subscribe((ev) => {
     if (ev.block.typeId !== `minecraft:chest` && !ev.block.typeId.endsWith(`shulker_box`) && ev.block.typeId !== `minecraft:barrel` && !ev.block.typeId.endsWith(`furnace`) && ev.block.typeId !== `minecraft:smoker`) return
     if (getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) !== getScore(ev.source, `mc_pcountries`) && !isFriendCountry(getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)), getNameScore(`mc_countries`, getScore(ev.source, `mc_pcountries`)))) {
-        ev.source.teleport(MC.world.getDefaultSpawnLocation())
-        for (const target of MC.world.getPlayers()) {
+        ev.source.teleport(world.getDefaultSpawnLocation())
+        for (const target of world.getPlayers()) {
             if (getScore(target, `mc_pcountries`) !== getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && !target.isOp()) continue
             target.sendMessage(`${ev.source.name} §r§cが ${getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`))} §r§cでコンテナ系ブロックを開きました\n(ブロックID: ${ev.block.typeId} , 座標: ${ev.block.location.x},${ev.block.location.y},${ev.block.location.z} )`)
         }
@@ -200,7 +200,7 @@ MC.world.afterEvents.itemStartUseOn.subscribe((ev) => {
     }
 })
 
-MC.world.afterEvents.entityHurt.subscribe((ev) => {
+world.afterEvents.entityHurt.subscribe((ev) => {
     if (!(ev.damageSource.damagingEntity instanceof MC.Player)) return
     if (config.noMobAttackInWilderness && !getScore(convertChunk(ev.hurtEntity.location.x, ev.hurtEntity.location.z), `mc_chunk`)) {
         /**
@@ -236,7 +236,7 @@ MC.world.afterEvents.entityHurt.subscribe((ev) => {
 
 
 
-MC.world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
+world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     if (ev.block.hasTag(`core`)) {
         if (ev.player.hasTag(`countryOwner`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) === getScore(ev.player, `mc_pcountries`) && ev.dimension.id === `minecraft:overworld`) {
             ev.player.sendMessage(`§aコアを置きました`)
@@ -259,7 +259,7 @@ MC.world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     }
 })
 
-MC.world.beforeEvents.playerBreakBlock.subscribe((ev) => {
+world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     if (ev.dimension.id !== `minecraft:overworld`) return
     if (ev.brokenBlockPermutation.hasTag(`core`)) {
         if (ev.dimension.id !== `minecraft:overworld`) return
@@ -267,7 +267,7 @@ MC.world.beforeEvents.playerBreakBlock.subscribe((ev) => {
             ev.player.sendMessage(`§aコアをアイテム化しました`)
             let core = ev.brokenBlockPermutation.getItemStack()
             core.nameTag = `${config.coreName}`
-            MC.world.getDimension(ev.dimension.id).spawnItem(core, ev.player.location)
+            world.getDimension(ev.dimension.id).spawnItem(core, ev.player.location)
         } else if (getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) && getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`) > 0 && isWarNowCountry(getNameScore(`mc_countries`, getScore(ev.player, `mc_pcountries`)), getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)))) {
             if (config.coreBreakMessage) ev.player.sendMessage(`§a敵国のコアを破壊しました。その調子です`)
             if (config.showCoreDurableValueOnBreak) ev.player.onScreenDisplay.setActionBar(`§aコアの残り耐久値: ${getScore(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`, `mc_core`)}`)
@@ -275,14 +275,14 @@ MC.world.beforeEvents.playerBreakBlock.subscribe((ev) => {
             if (getScore(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`, `mc_core`) === 0) {
                 let winners = ""
                 let winnersAmount = 0
-                for (const f of MC.world.scoreboard.getObjective(`mc_warNow${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`).getScores()) {
-                    MC.world.sendMessage(`${getNameScore(`mc_countries`, Number(f.participant.displayName))} ${f.participant.displayName} ${f.score}`)
+                for (const f of world.scoreboard.getObjective(`mc_warNow${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`).getScores()) {
+                    world.sendMessage(`${getNameScore(`mc_countries`, Number(f.participant.displayName))} ${f.participant.displayName} ${f.score}`)
                     winners = winners + getNameScore(`mc_countries`, Number(f.participant.displayName)) + `§r\n`
                     winnersAmount++
-                    MC.world.scoreboard.getObjective(`mc_warNow${f.participant.displayName}`).removeParticipant(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`)
-                    MC.world.scoreboard.getObjective(`mc_warNow${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`).removeParticipant(`${f.participant.displayName}`)
+                    world.scoreboard.getObjective(`mc_warNow${f.participant.displayName}`).removeParticipant(`${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`)
+                    world.scoreboard.getObjective(`mc_warNow${getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`)}`).removeParticipant(`${f.participant.displayName}`)
                 }
-                MC.world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`))}§r§aは§r\n${winners}の計${winnersAmount}ヶ国に敗れた`)
+                world.sendMessage(`§c[MakeCountry]§r\n${getNameScore(`mc_countries`, getScore(convertChunk(ev.block.location.x, ev.block.location.z), `mc_chunk`))}§r§aは§r\n${winners}の計${winnersAmount}ヶ国に敗れた`)
                 ev.cancel = true
                 return
             }
