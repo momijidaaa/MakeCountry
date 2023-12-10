@@ -6,7 +6,7 @@ import { Formatter } from "./format";
 import { Vec3 } from "../../lib/utils/vec3";
 import { MainDB } from "../../lib/database";
 import { msToTime } from "../../lib/utils/formatter";
-import config from "../../data/config";
+import config from "../../config";
 
 export class WorldBuilder {
     constructor() {

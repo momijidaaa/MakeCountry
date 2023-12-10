@@ -1,5 +1,5 @@
 import { Player, system, world } from "../world";
-import config from "../../data/config";
+import config from "../../config";
 import { PlayerHandler } from "../../lib/utils/handler/player";
 
 /**

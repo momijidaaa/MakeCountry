@@ -162,5 +162,49 @@ export const configs = {
     deleteCountryReasonNoMoney: 4, //何回連続で徴収時に赤字になったら国を自動的に消すか
     untilStartWar: 4320, //宣戦布告から戦争開始まで最大何分間の猶予を与えるか(現実時間) デフォルト値(4320分(72時間))
 
-    prefix: `!` //専用コマンドの一番最初の文字(デフォルトでは!)
+    commands: { // commands.jsとconfig.commandsは統一 (大文字不可)
+        valid: true,
+        prefix: "!",
+        help: {
+            valid: true,
+            permission: 1
+        },
+        ban: {
+            valid: true,
+            permission: 4
+        },
+        unban: {
+            valid: true,
+            permission: 4
+        },
+        kick: {
+            valid: true,
+            permission: 3
+        },
+        disconnect: {
+            valid: true,
+            permission: 3
+        },
+        freeze: {
+            valid: true,
+            permission: 3
+        },
+        unfreeze: {
+            valid: true,
+            permission: 3
+        },
+        timeout: {
+            valid: true,
+            permission: 3
+        },
+        untimeout: {
+            valid: true,
+            permission: 3
+        },
+        notify: {
+            valid: true,
+            permission: 3
+        }
+    },
+    list: {}
 };
