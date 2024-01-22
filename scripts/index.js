@@ -1,0 +1,17 @@
+import { world } from "@minecraft/server";
+
+//プレイヤーが来た時
+world.afterEvents.playerSpawn.subscribe((ev)=>{
+    const { initialSpawn , player } = ev;
+    if(initialSpawn) {
+        if(!world.getDynamicProperty(`player_${player.id}`)) {
+            world.setDynamicProperty(`player_${player.id}`,`{"name": "${player.name}","money": 0 ,"country": {name: "" ,"roles": []}}`);
+        };
+        /**
+         * @type {{"name": string,"money": number ,"country": {name: string ,"roles": [string]}}}
+         */
+        const status = JSON.parse(world.getDynamicProperty(`player_${player.id}`));
+        status.name = player.name;
+        world.setDynamicProperty(`player_${player.id}`,JSON.stringify(status));
+    };
+});
