@@ -5,7 +5,7 @@ import * as DyProp from "./lib/DyProp";
 world.afterEvents.playerSpawn.subscribe((ev)=>{
     const { initialSpawn , player } = ev;
     if(initialSpawn) {
-        if(!world.getDynamicProperty(`player_${player.id}`)) {
+        if(!DyProp.get(`player_${player.id}`)) {
             world.setDynamicProperty(`player_${player.id}`,`{"name": "${player.name}","money": 0 ,"country": {name: "" ,"role": ""}}`);
         };
         /**
