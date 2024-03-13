@@ -2,17 +2,17 @@
 	"format_version": 2,
 	"header": {
 		"description": "建国鯖に必要な要素が大量に詰まっているアドオン\nMade by かろん",
-		"name": "Make Country v.1.20.10",
-		"uuid": "4349c04b-6386-44b5-a33d-3f1c7588dfb0",
+		"name": "Make Country v.1.20.70",
+		"uuid": "95738e96-76ca-47f1-8c50-8929b4bf447d",
 		"version": [
 			1,
 			0,
-			1
+			0
 		],
 		"min_engine_version": [
 			1,
-			19,
-			40
+			20,
+			70
 		]
 	},
 	"modules": [
@@ -20,7 +20,7 @@
 			"description": "",
 			"type": "script",
 			"entry": "scripts/index.js",
-			"uuid": "953996f9-1f72-4396-9897-977d005770bd",
+			"uuid": "10c44dcf-7f48-4040-9c50-8923464d74bc",
 			"version": [
 				1,
 				0,
@@ -31,18 +31,11 @@
 	"dependencies": [
 		{
 			"module_name": "@minecraft/server",
-			"version": "1.8.0-beta"
+			"version": "1.10.0-beta"
 		},
 		{
 			"module_name": "@minecraft/server-ui",
 			"version": "1.2.0-beta"
 		}
-	],
-	"metadata": {
-		"generated_with": {
-			"bridge": [
-				"1.8.5"
-			]
-		}
-	}
+	]
 }

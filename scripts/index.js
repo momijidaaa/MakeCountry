@@ -1,4 +1,5 @@
 import { world } from "@minecraft/server";
+import * as DyProp from "./lib/DyProp";
 
 //プレイヤーが来た時
 world.afterEvents.playerSpawn.subscribe((ev)=>{
