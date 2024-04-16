@@ -15,4 +15,4 @@ world.afterEvents.playerSpawn.subscribe((ev)=>{
         status.name = player.name;
         world.setDynamicProperty(`player_${player.id}`,JSON.stringify(status));
     };
-});z
+});
