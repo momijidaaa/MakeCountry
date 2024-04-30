@@ -29,6 +29,8 @@
  * admin: 全機能
  * kickMembers: プレイヤーをキック
  * roleChange: ロールの変更
+ * landBuy: 土地の購入
+ * landSell: 土地の売却
 */
 
 import { world } from "@minecraft/server";
@@ -60,6 +62,7 @@ world.afterEvents.worldInitialize.subscribe(() => {
     
     if(!rawPlayersData) world.setDynamicProperty(`players`,"{}");
     if(!rawRolesData) world.setDynamicProperty(`roles`,"{}");
+    if(!rawCountryData) world.setDynamicProperty(`countries`,"{}");
 });
 
 playersData = JSON.parse(playersData);
