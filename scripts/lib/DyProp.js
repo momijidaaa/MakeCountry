@@ -28,7 +28,7 @@ export async function set(id, value) {
 /**
  * DyProp get string data for ID
  * @param {String} id Dyprop ID
- * @returns {Array} Array data
+ * @returns {string|undefined} String or Undefined
  */
 export async function get(id) {
     let array = [];

@@ -34,6 +34,7 @@
 */
 
 import { world } from "@minecraft/server";
+import * as DyProp from "./DyProp";
 
 /**
  * @type {{[key: string]: { name: string, roles: [string], money: number }}}
@@ -52,17 +53,25 @@ let countryData = "";
 
 //ワールド解放時にプレイヤーデータとロールデータを読み込み
 world.afterEvents.worldInitialize.subscribe(() => {
-    const rawPlayersData = world.getDynamicProperty(`players`);
-    const rawRolesData = world.getDynamicProperty(`roles`);
-    const rawCountryData = world.getDynamicProperty(`countries`);
+    const nextPlayerNum = DyProp.get(`nextPlayerNum`);
+    const nextRoleNum = DyProp.get(`nextRoleNum`);
+    const nextCountryNum = DyProp.get(`nextCountryNum`);
+
+    const rawPlayersData = DyProp.get(`players`);
+    const rawRolesData = DyProp.get(`roles`);
+    const rawCountryData = DyProp.get(`countries`);
 
     playersData = rawPlayersData ?? "{}";
     rolesData = rawRolesData ?? "{}";
     countryData = rawCountryData ?? "{}";
     
-    if(!rawPlayersData) world.setDynamicProperty(`players`,"{}");
-    if(!rawRolesData) world.setDynamicProperty(`roles`,"{}");
-    if(!rawCountryData) world.setDynamicProperty(`countries`,"{}");
+    if(!rawPlayersData) DyProp.set(`players`,"{}");
+    if(!rawRolesData) DyProp.set(`roles`,"{}");
+    if(!rawCountryData) DyProp.set(`countries`,"{}");
+    if(!nextPlayerNum) DyProp.set(`nextPlayerNum`,"1");
+    if(!nextRoleNum) DyProp.set(`nextRoleNum`,"1");
+    if(!nextCountryNum) DyProp.set(`nextCountryNum`,"1");
+
 });
 
 playersData = JSON.parse(playersData);
