@@ -1,9 +1,20 @@
 /**
  * gridデータのフォーマット
- * {  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,      permission: {[roleId: string]: [[permission: string]: string]}}}
+ * {  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]}}}
+ * 
+ * 国データのフォーマット
+ * {
+ *   "1": {
+ *     name: "テスト王国", //国の名前
+ *     funds: 100000, //国の金データ
+ *     lands: [ "1_1" , "1_2" ], //領土にしてるチャンクのデータ
+ *     members: [ "10001" ], //メンバーのデータ
+ *     roles: [ "1" , "2" ] //ロールのデータ
+ *   }
+ * }
  */
 
-import { world } from "@minecraft/server";
+import { Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 
 // 領土データを管理するやつ
@@ -46,22 +57,25 @@ export function convertChunk(rawX, rawZ) {
 
 // 国のデータを保存する配列
 // ユニークなIDを管理する変数
-let nextCountryId = DyProp.get(`nextCountryId`) ?? 1;
-if (typeof nextCountryId === "string") nextCountryId = Number(nextCountryId);
+let nextCountryId = DyProp.get(`nextCountryId`) ?? "1";
 
 // 新しい国を追加する関数
 /**
  * 
  * @param {string} name 
- * @param {*} capital 
- * @param {*} population 
- * @param {*} resources 
- * @param {*} territories 
+ * @param {Player} owner 
+ * @param {string} firstLand
+ * @returns {void} 
  */
-function addCountry(name, capital, population, resources, territories) {
+function addCountry(name, owner, firstLand) {
     let newCountry = {
-        nextCountryId: {
-            lands: [] // 領土情報を追加
+        [nextCountryId]: {
+            name: "テスト王国", //国の名前
+            owner: owner.getDynamicProperty(`id`),
+            funds: 0, //国の金データ
+            lands: [ firstLand ], //領土にしてるチャンクのデータ
+            members: [], //メンバーのデータ
+            roles: ["1", "2" , "3"], //ロールのデータ
         }
     }
 }
