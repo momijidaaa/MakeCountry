@@ -13,7 +13,7 @@ grid = JSON.parse(grid);
 //国データを管理
 let countries = DyProp.get(`countries`) ?? "{}";
 countries = JSON.parse(countries);
- 
+
 /**
  * データ内のセルを取得する関数
  * @param {number} rawX マイクラのX座標
@@ -38,16 +38,16 @@ export function getChunkData(rawX, rawZ) {
  * @param {number} rawZ マイクラのZ座標
  * @returns {[x: number,z: number]} それぞれの座標を16で割って四捨五入
  */
-export function convertChunk(rawX,rawZ) {
-        const x = Math.floor(rawX / 16);
-        const z = Math.floor(rawZ / 16);
-        return [x,z];
+export function convertChunk(rawX, rawZ) {
+    const x = Math.floor(rawX / 16);
+    const z = Math.floor(rawZ / 16);
+    return [x, z];
 }
 
 // 国のデータを保存する配列
 // ユニークなIDを管理する変数
 let nextCountryId = DyProp.get(`nextCountryId`) ?? 1;
-if(typeof nextCountryId === "string") nextCountryId = Number(nextCountryId);
+if (typeof nextCountryId === "string") nextCountryId = Number(nextCountryId);
 
 // 新しい国を追加する関数
 /**
@@ -60,14 +60,10 @@ if(typeof nextCountryId === "string") nextCountryId = Number(nextCountryId);
  */
 function addCountry(name, capital, population, resources, territories) {
     let newCountry = {
-        id: nextCountryId++,
-        name: name,
-        capital: capital,
-        population: population,
-        resources: resources,
-        territories: territories // 領土情報を追加
-    };
-    countries.push(newCountry);
+        nextCountryId: {
+            lands: [] // 領土情報を追加
+        }
+    }
 }
 
 /**
@@ -89,8 +85,8 @@ export function MakeCountry(player, countryName) {
      * @type {{"country": string,"special": boolean}|`noCountry`}
      */
     const chunkStatus = world.getDynamicProperty(`chunk_${convertChunk(player.location.x, player.location.z)}`) ?? `noCountry`;
-    if(chunkStatus !== `noCountry`) {
-        if(chunkStatus.country.length !== 0) {
+    if (chunkStatus !== `noCountry`) {
+        if (chunkStatus.country.length !== 0) {
             player.sendMessage(`§cこのチャンクは国があるため建国できません`);
             return;
         } else {
@@ -98,7 +94,7 @@ export function MakeCountry(player, countryName) {
             return;
         };
     };
-    if(status.money < configs.makeCountryCost) {
+    if (status.money < configs.makeCountryCost) {
         player.sendMessage(`§c建国には${configs.makeCountryCost}${configs}必要です(${configs.makeCountryCost - status.money}${configs.CurrencyUnit})`);
     };
 };
