@@ -99,35 +99,37 @@ export function hasPermission(playerId, permission) {
         for (let roleId of playersData[playerId].roles) {
             if (rolesData[roleId] && rolesData[roleId].permission.includes(permission)) {
                 return true;
-            }
-        }
-    }
+            };
+        };
+    };
     return false;
-}
+};
 
 /**
  * メンバーにロールを追加する関数
  * @param {string} playerId プレイヤーのID
  * @param {string} roleId ロールのID
  */
-export function addRoleToMember(playerId, roleId) {
+export function MemberAddRole(playerId, roleId) {
     if (playersData[playerId] && rolesData[roleId]) {
         if (!playersData[playerId].roles.includes(roleId)) {
             playersData[playerId].roles.push(roleId);
-        }
-    }
-}
+            DyProp.set(`players`,JSON.stringify(playersData));
+        };
+    };
+};
 
 /**
  * メンバーからロールを削除する関数
  * @param {string} playerId プレイヤーのID
  * @param {string} roleId ロールのID
  */
-export function removeRoleFromMember(playerId, roleId) {
+export function MemberRemoveRole(playerId, roleId) {
     if (playersData[playerId]) {
         playersData[playerId].roles = playersData[playerId].roles.filter(role => role !== roleId);
-    }
-}
+        DyProp.set(`players`,JSON.stringify(playersData));
+    };
+};
 
 /**
  * ロールを削除する関数
@@ -136,29 +138,31 @@ export function removeRoleFromMember(playerId, roleId) {
 export function deleteRole(roleId) {
     if (rolesData[roleId]) {
         delete rolesData[roleId];
+        DyProp.set(`roles`,JSON.stringify(rolesData));
         // 関連するメンバーから削除
         for (let playerId in playersData) {
             if (playersData[playerId].roles.includes(roleId)) {
-                removeRoleFromMember(playerId, roleId);
-            }
-        }
-        console.log(`Role "${roleId}" deleted successfully.`);
+                MemberRemoveRole(playerId, roleId);
+            };
+        };
+        console.warn(`Role "${roleId}" deleted successfully.`);
     } else {
-        console.log(`Role "${roleId}" not found.`);
-    }
-}
+        console.warn(`Role "${roleId}" not found.`);
+    };
+};
 
 /**
  * ロールの権限を編集する関数
  * @param {string} roleId ロールのID
  * @param {string} newPermissions 権限のID
  */
-export function editRolePermissions(roleId, newPermissions) {
+export function addRolePermissions(roleId, newPermissions) {
     if (rolesData[roleId]) {
         rolesData[roleId].permission = newPermissions;
-        console.log(`Permissions of role "${roleId}" updated successfully.`);
+        DyProp.set(`roles`,JSON.stringify(rolesData));
+        console.warn(`Permissions of role "${roleId}" updated successfully.`);
     } else {
-        console.log(`Role "${roleId}" not found.`);
+        console.warn(`Role "${roleId}" not found.`);
     }
 }
 
@@ -171,9 +175,10 @@ export function editRolePermissions(roleId, newPermissions) {
 export function changeRolePriority(roleId, newPriority, countryId) {
     if (countryData[countryId] && countryData[countryId].roles.includes(roleId)) {
         rolesData[roleId].priority = newPriority;
-        console.log(`Priority of role "${roleId}" in country ${countryId} changed to ${newPriority}.`);
+        DyProp.set(`roles`,JSON.stringify(rolesData));
+        console.warn(`Priority of role "${roleId}" in country ${countryId} changed to ${newPriority}.`);
     } else {
-        console.log(`Role "${roleId}" not found in country ${countryId}.`);
+        console.warn(`Role "${roleId}" not found in country ${countryId}.`);
     }
 }
 
@@ -182,11 +187,53 @@ export function changeRolePriority(roleId, newPriority, countryId) {
  * @param {string} roleId ロールのID
  * @param {string} permissionToRemove 削除する権限の文字列
  */
-export function removeRolePermission(roleId, permissionToRemove) {
+export function MemberRemoveRolePermission(roleId, permissionToRemove) {
     if (rolesData[roleId]) {
         rolesData[roleId].permission = rolesData[roleId].permission.filter(permission => permission !== permissionToRemove);
-        console.log(`Permission "${permissionToRemove}" removed from role "${roleId}".`);
+        DyProp.set(`roles`,JSON.stringify(rolesData));
+        console.warn(`Permission "${permissionToRemove}" removed from role "${roleId}".`);
     } else {
-        console.log(`Role "${roleId}" not found.`);
+        console.warn(`Role "${roleId}" not found.`);
     }
+}
+
+/**
+ * 
+ * @param {string} countryId 国のID
+ * @param {string} roleName ロールの名前
+ * @param {[string]} permissions 権限の設定
+ * @returns 
+ */
+export function createRole(countryId, roleName, permissions = []) {
+    const country = countryData[countryId];
+    if (!country) {
+        console.warn(`Country with ID ${countryId} not found.`);
+        return;
+    }
+
+    // 新しいロールの優先度を決定する
+    let lowestPriority = 1;
+    for (const roleId of country.roles) {
+        if (rolesData[roleId].priority < lowestPriority) {
+            lowestPriority = rolesData[roleId].priority;
+        }
+    }
+    // 新しいロールの優先度を一番低い優先度の1つ下に設定する
+    const newPriority = lowestPriority - 1;
+
+    // 新しいロールを作成して追加する
+    let newRoleId = DyProp.get(`nextRoleNum`) ?? "1";
+    newRoleId = Number(newRoleId)
+    rolesData[newRoleId] = {
+        name: roleName,
+        permission: permissions,
+        priority: newPriority
+    };
+    // 国のロールリストに新しいロールを追加する
+    country.roles.push(newRoleId);
+    DyProp.set(`nextRoleNum`,`${newRoleId + 1}`)
+    DyProp.set(`roles`, JSON.stringify(rolesData));
+    DyProp.set(`countries`, JSON.stringify(countryData));
+
+    console.warn(`New role "${roleName}" added to country ${countryId} with priority ${newPriority}.`);
 }
