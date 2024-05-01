@@ -1,16 +1,26 @@
+/**
+ * gridデータのフォーマット
+ * {  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,      permission: {[roleId: string]: [[permission: string]: string]}}}
+ */
+
 import { world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 
 // 領土データを管理するやつ
-let grid = DyProp.get(`grid`) ?? {};
-if(typeof grid === "string") grid = JSON.parse(grid);
+let grid = DyProp.get(`grid`) ?? "{}";
+grid = JSON.parse(grid);
 
 //国データを管理
-let countries = DyProp.get(`countries`) ?? [];
-if(typeof countries === "string") countries = JSON.parse(countries);
-
-// データ内のセルを取得する関数
-function getChunkData(rawX, rawZ) {
+let countries = DyProp.get(`countries`) ?? "{}";
+countries = JSON.parse(countries);
+ 
+/**
+ * データ内のセルを取得する関数
+ * @param {number} rawX マイクラのX座標
+ * @param {number} rawZ マイクラのZ座標 
+ * @returns {undefined|{  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,      permission: {[roleId: string]: [string]}}}}
+ */
+export function getChunkData(rawX, rawZ) {
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
     if (!grid[x]) {
@@ -22,7 +32,13 @@ function getChunkData(rawX, rawZ) {
     return grid[x][z];
 }
 
-function convertChunk(rawX,rawZ) {
+/**
+ * マイクラの座標をチャンクのデータに変換
+ * @param {number} rawX マイクラのX座標
+ * @param {number} rawZ マイクラのZ座標
+ * @returns {[x: number,z: number]} それぞれの座標を16で割って四捨五入
+ */
+export function convertChunk(rawX,rawZ) {
         const x = Math.floor(rawX / 16);
         const z = Math.floor(rawZ / 16);
         return [x,z];
@@ -34,6 +50,14 @@ let nextCountryId = DyProp.get(`nextCountryId`) ?? 1;
 if(typeof nextCountryId === "string") nextCountryId = Number(nextCountryId);
 
 // 新しい国を追加する関数
+/**
+ * 
+ * @param {string} name 
+ * @param {*} capital 
+ * @param {*} population 
+ * @param {*} resources 
+ * @param {*} territories 
+ */
 function addCountry(name, capital, population, resources, territories) {
     let newCountry = {
         id: nextCountryId++,
