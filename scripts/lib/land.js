@@ -22,6 +22,9 @@ let grid = DyProp.get(`grid`) ?? "{}";
 grid = JSON.parse(grid);
 
 //国データを管理
+/**
+ * @type {{[key: string]: {name: string, funds: number, lands: [string], members: [string], roles: [string]}}}
+ */
 let countries = DyProp.get(`countries`) ?? "{}";
 countries = JSON.parse(countries);
 
@@ -73,9 +76,9 @@ function addCountry(name, owner, firstLand) {
             name: "テスト王国", //国の名前
             owner: owner.getDynamicProperty(`id`),
             funds: 0, //国の金データ
-            lands: [ firstLand ], //領土にしてるチャンクのデータ
+            lands: [firstLand], //領土にしてるチャンクのデータ
             members: [], //メンバーのデータ
-            roles: ["1", "2" , "3"], //ロールのデータ
+            roles: ["1", "2", "3"], //ロールのデータ
         }
     }
 }
