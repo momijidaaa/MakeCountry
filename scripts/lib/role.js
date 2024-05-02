@@ -198,7 +198,7 @@ export function MemberRemoveRolePermission(roleId, permissionToRemove) {
 }
 
 /**
- * 
+ * ロールを作成する関数
  * @param {string} countryId 国のID
  * @param {string} roleName ロールの名前
  * @param {[string]} permissions 権限の設定
