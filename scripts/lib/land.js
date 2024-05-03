@@ -1,20 +1,20 @@
 /**
  * gridデータのフォーマット
- * {  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]}}}
+ * {  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]} ,dimension: string}}
  * 
  * 国データのフォーマット
  * {
  *   "1": {
  *     name: "テスト王国", //国の名前
  *     funds: 100000, //国の金データ
- *     lands: [ "1_1" , "1_2" ], //領土にしてるチャンクのデータ
+ *     lands: [ "1_1_overworld" , "1_2_end" ], //領土にしてるチャンクのデータ
  *     members: [ "10001" ], //メンバーのデータ
  *     roles: [ "1" , "2" ] //ロールのデータ
  *   }
  * }
  */
 
-import { Player, world } from "@minecraft/server";
+import { Dimension, Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 
 // 領土データを管理するやつ
@@ -32,18 +32,13 @@ countries = JSON.parse(countries);
  * データ内のセルを取得する関数
  * @param {number} rawX マイクラのX座標
  * @param {number} rawZ マイクラのZ座標 
- * @returns {undefined|{  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,      permission: {[roleId: string]: [string]}}}}
+ * @param {Dimension} dimension ディメンション
+ * @returns {undefined|{  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,      permission: {[roleId: string]: [string]},dimension: string}}}
  */
-export function getChunkData(rawX, rawZ) {
+export function getChunkData(rawX, rawZ, dimension = `overworld`) {
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
-    if (!grid[x]) {
-        grid[x] = {};
-    }
-    if (!grid[x][z]) {
-        grid[x][z] = { land: null, owner: null, permission: 0 };
-    }
-    return grid[x][z];
+    return grid[`${x}_${y}_${dimension.id.replace(`minecraft:`,``)}`];
 }
 
 /**
@@ -65,7 +60,7 @@ let nextCountryId = DyProp.get(`nextCountryId`) ?? "1";
 // 新しい国を追加する関数
 /**
  * 
- * @param {string} name 
+ * @param {string} name 国の名前
  * @param {Player} owner 
  * @param {string} firstLand
  * @returns {void} 
@@ -73,7 +68,7 @@ let nextCountryId = DyProp.get(`nextCountryId`) ?? "1";
 function addCountry(name, owner, firstLand) {
     let newCountry = {
         [nextCountryId]: {
-            name: "テスト王国", //国の名前
+            name: name, //国の名前
             owner: owner.getDynamicProperty(`id`),
             funds: 0, //国の金データ
             lands: [firstLand], //領土にしてるチャンクのデータ
