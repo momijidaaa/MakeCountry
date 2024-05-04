@@ -14,23 +14,44 @@
  *   "3": { name: "moderator", permission: ["moderator"] , priority: 2} 
  * }
  * 
- * 国データ フォーマット
+ * 国データのフォーマット
  * {
- *   "1": {
- *     name: "テスト王国", //国の名前
- *     funds: 100000, //国の金データ
- *     lands: [ "1_1" , "1_2" ], //領土にしてるチャンクのデータ
- *     members: [ "10001" ], //メンバーのデータ
- *     roles: [ "1" , "2" ] //ロールのデータ
+ *   [key: string]: {
+ *     name: string, //国の名前
+ *     power: number, //国力
+ *     funds: number, //国の金データ
+ *     lands: [string], //領土にしてるチャンクのデータ
+ *     members: [string], //メンバーのデータ
+ *     roles: [string], //ロールのデータ
+ *     pacifism: [boolean], //平和主義
+ *     enemy: [string], //敵対国
+ *     ally: [string], //同盟国
+ *     neutral: [string], //中立国
+ *     warnow: [string] 戦争中の国
  *   }
  * }
  * 
  * 権限一覧
  * admin: 全機能
+ * countryManagement: 国のスポーンポイントなどの設定
+ * budgetManagement: 資金管理
+ * inviteMembers: 新たなプレイヤーを招待
  * kickMembers: プレイヤーをキック
  * roleChange: ロールの変更
+ * landOperation: 土地の操作
+ * territoryOperation: 領土設定
  * landBuy: 土地の購入
  * landSell: 土地の売却
+ * resourcepoint: リソースポイントの操作
+ * build: 建築
+ * break: 破壊
+ * use: 使用
+ * taxOperation: 税金設定操作
+ * dofwar: 宣戦布告
+ * alliance: 同盟
+ * peacechange: 平和主義の切り替え
+ * surrender: 戦争に降伏
+ * armsManagement: 兵器管理
 */
 
 import { world } from "@minecraft/server";
@@ -47,7 +68,7 @@ let playersData = "";
 let rolesData = "";
 
 /**
- * @type {{[key: string]: { name: string, funds: number, lands: [string], members: [string], roles: [string] }}}
+ * @type {{[key: string]: {name: string, power: number,funds: number, lands: [string], members: [string], roles: [string] ,pacifism: [boolean], enemy: [string], ally: [string], neutral: [string], warnow: [string]}}}
  */
 let countryData = "";
 
@@ -167,19 +188,60 @@ export function addRolePermissions(roleId, newPermissions) {
 }
 
 /**
- * 国のロールの優先度を変更する関数
+ * ロールの優先度を変更し、他のロールの優先度も調整する関数
  * @param {string} roleId ロールのID
- * @param {number} newPriority 優先度のナンバー(数字が低い方が優先度高い)
+ * @param {number} newPriority 新しい優先度
  * @param {string} countryId 国のID
  */
 export function changeRolePriority(roleId, newPriority, countryId) {
-    if (countryData[countryId] && countryData[countryId].roles.includes(roleId)) {
-        rolesData[roleId].priority = newPriority;
-        DyProp.set(`roles`,JSON.stringify(rolesData));
-        console.warn(`Priority of role "${roleId}" in country ${countryId} changed to ${newPriority}.`);
-    } else {
-        console.warn(`Role "${roleId}" not found in country ${countryId}.`);
+    const country = countryData[countryId];
+    if (!country) {
+        console.warn(`Country with ID ${countryId} not found.`);
+        return;
     }
+
+    const role = rolesData[roleId];
+    if (!role) {
+        console.warn(`Role with ID ${roleId} not found.`);
+        return;
+    }
+
+    // ロールの優先度を変更
+    role.priority = newPriority;
+
+    // 他のロールの優先度を調整
+    const rolesInCountry = country.roles.filter(id => id !== roleId).map(id => rolesData[id]);
+    rolesInCountry.sort((a, b) => a.priority - b.priority);
+
+    // 新しい優先度が最上位（1）になる場合
+    if (newPriority === 1) {
+        let adjustedPriority = 2;
+        for (const otherRole of rolesInCountry) {
+            otherRole.priority = adjustedPriority++;
+        }
+    }
+    // 新しい優先度が最下位になる場合
+    else if (newPriority > rolesInCountry.length) {
+        let adjustedPriority = 1;
+        for (const otherRole of rolesInCountry) {
+            otherRole.priority = adjustedPriority++;
+        }
+        role.priority = adjustedPriority;
+    }
+    // それ以外の場合
+    else {
+        let adjustedPriority = 1;
+        for (const otherRole of rolesInCountry) {
+            // 新しい優先度と同じ値のロールがすでに存在する場合、他のロールの優先度を1つずつ減少させる
+            if (adjustedPriority === newPriority) {
+                adjustedPriority++;
+            }
+            otherRole.priority = adjustedPriority++;
+        }
+    }
+    // データを保存
+    DyProp.set(`roles`, JSON.stringify(rolesData));
+    console.warn(`Priority of role "${roleId}" in country ${countryId} changed to ${newPriority}.`);
 }
 
 /**
@@ -237,3 +299,12 @@ export function createRole(countryId, roleName, permissions = []) {
 
     console.warn(`New role "${roleName}" added to country ${countryId} with priority ${newPriority}.`);
 }
+
+/**
+ * 建国時に自動で初期のロールを設定
+ * @param {string} countryId 
+ */
+export function firstRoleSetUp(countryId) {
+    createRole(countryId,`Staff`,[`admin`]);
+    createRole(countryId,`Member`,[`build`,`break`,`use`]);
+};

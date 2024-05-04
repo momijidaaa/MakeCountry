@@ -4,26 +4,49 @@
  * 
  * 国データのフォーマット
  * {
- *   "1": {
- *     name: "テスト王国", //国の名前
- *     funds: 100000, //国の金データ
- *     lands: [ "1_1_overworld" , "1_2_end" ], //領土にしてるチャンクのデータ
- *     members: [ "10001" ], //メンバーのデータ
- *     roles: [ "1" , "2" ] //ロールのデータ
+ *   [key: string]: {
+ *     name: string, //国の名前
+ *     power: number, //国力
+ *     funds: number, //国の金データ
+ *     lands: [string], //領土にしてるチャンクのデータ
+ *     members: [string], //メンバーのデータ
+ *     roles: [string], //ロールのデータ
+ *     pacifism: [boolean], //平和主義
+ *     enemy: [string], //敵対国
+ *     ally: [string], //同盟国
+ *     neutral: [string], //中立国
+ *     warnow: [string] 戦争中の国
  *   }
  * }
+ * 
+ *  * プレイヤーデータ フォーマット
+ * 
+ * {
+ *     [key: string]: { name: string, roles: [string], money: number, country: string|undefined }
+ * } 
  */
 
 import { Dimension, Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
+import { firstRoleSetUp } from "./role";
 
 // 領土データを管理するやつ
+/**
+ * @type {{  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]} ,dimension: string}}}
+ */
 let grid = DyProp.get(`grid`) ?? "{}";
 grid = JSON.parse(grid);
 
+//プレイヤーデータのインポート
+/**
+ * @type {{ [key: string]: { name: string,  roles: [string], money: number, country: string|undefined }}}
+ */
+let playersData = DyProp.get(`players`) ?? `{}`;
+playersData = JSON.parse(playersData);
+
 //国データを管理
 /**
- * @type {{[key: string]: {name: string, funds: number, lands: [string], members: [string], roles: [string]}}}
+ * @type {{[key: string]: {name: string, power: number,funds: number, lands: [string], members: [string], roles: [string] ,pacifism: [boolean], enemy: [string], ally: [string], neutral: [string], warnow: [string]}}}
  */
 let countries = DyProp.get(`countries`) ?? "{}";
 countries = JSON.parse(countries);
@@ -38,97 +61,99 @@ countries = JSON.parse(countries);
 export function getChunkData(rawX, rawZ, dimension = `overworld`) {
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
-    return grid[`${x}_${y}_${dimension.id.replace(`minecraft:`,``)}`];
+    return grid[`${x}_${z}_${dimension.id.replace(`minecraft:`, ``)}`];
 }
 
 /**
  * マイクラの座標をチャンクのデータに変換
  * @param {number} rawX マイクラのX座標
  * @param {number} rawZ マイクラのZ座標
- * @returns {[x: number,z: number]} それぞれの座標を16で割って四捨五入
+ * @param {Dimension} dimension ディメンション
+ * @returns {string} それぞれの座標を16で割って四捨五入してディメンション入れたキーを返す
  */
-export function convertChunk(rawX, rawZ) {
+export function convertChunk(rawX, rawZ, dimension) {
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
-    return [x, z];
+    return `${x}_${z}_${dimension.id.replace(`minecraft:`, ``)}`;
 }
 
 // 国のデータを保存する配列
 // ユニークなIDを管理する変数
 let nextCountryId = DyProp.get(`nextCountryId`) ?? "1";
 
-// 新しい国を追加する関数
 /**
- * 
+ * 国自体を作成
  * @param {string} name 国の名前
  * @param {Player} owner 
  * @param {string} firstLand
  * @returns {void} 
  */
 function addCountry(name, owner, firstLand) {
-    let newCountry = {
-        [nextCountryId]: {
-            name: name, //国の名前
-            owner: owner.getDynamicProperty(`id`),
-            funds: 0, //国の金データ
-            lands: [firstLand], //領土にしてるチャンクのデータ
-            members: [], //メンバーのデータ
-            roles: ["1", "2", "3"], //ロールのデータ
-        }
-    }
-}
+    const defaultCountryMoneyString = world.getDynamicProperty(`defaultCountryMoney`) ?? `1000`;
+    const defaultCountryMoneyNumber = Number(defaultCountryMoneyString);
+    /**
+     * @type {string}
+     */
+    const playerId = owner.getDynamicProperty(`player_${owner.id}`);
+
+    countries[nextCountryId] = {
+        name: name, //国の名前
+        owner: playerId,
+        funds: defaultCountryMoneyNumber, //国の金データ
+        lands: [firstLand], //領土にしてるチャンクのデータ
+        members: [playerId], //メンバーのデータ
+        roles: [], //ロールのデータ
+    };
+    DyProp.set(`countries`,countries);
+    firstRoleSetUp(nextCountryId);
+    playersData[playerId].country = nextCountryId
+    DyProp.set(`players`,playersData);
+    nextCountryId = `${Number(nextCountryId) + 1}`;
+    DyProp.set(`nextCountryId`, `${Number(nextCountryId)}`);
+};
 
 /**
- * 
+ * 国を作る関数
  * @param {Player} player 
  * @param {string} countryName 
  */
 export function MakeCountry(player, countryName) {
     /**
-    * @type {{"name": string,"money": number ,"country": {name: string ,"role": string}}}
-    */
-    const status = world.getDynamicProperty(`player_${player.id}`);
-
-    if (status.country.name !== 0) {
-        player.sendMessage(`§cあなたは既に国に所属しています`);
+     * @type {string|undefined}
+     */
+    const playerId = player.getDynamicProperty(`player_${player.id}`)
+    if (!playerId) {
+        player.sendMessage(`§cプレイヤーデータが登録されていません`);
         return;
     };
     /**
-     * @type {{"country": string,"special": boolean}|`noCountry`}
-     */
-    const chunkStatus = world.getDynamicProperty(`chunk_${convertChunk(player.location.x, player.location.z)}`) ?? `noCountry`;
-    if (chunkStatus !== `noCountry`) {
-        if (chunkStatus.country.length !== 0) {
-            player.sendMessage(`§cこのチャンクは国があるため建国できません`);
-            return;
-        } else {
-            player.sendMessage(`§cこのチャンクには建国できません`);
-            return;
-        };
+    * @type {{"name": string,"money": number ,"country": undefined|string}}
+    */
+    const status = playersData[playerId];
+
+    if (typeof status.country !== undefined) {
+        player.sendMessage(`§cあなたは既に国に所属しています`);
+        return;
     };
-    if (status.money < configs.makeCountryCost) {
-        player.sendMessage(`§c建国には${configs.makeCountryCost}${configs}必要です(${configs.makeCountryCost - status.money}${configs.CurrencyUnit})`);
+    const { x: lx, z: lz } = player.location
+    const chunkStatus = getChunkData(lx, lz, player.dimension);
+    if (chunkStatus) {
+        player.sendMessage(`§cこのチャンクには建国できません`);
+        return;
     };
+    const needMoneyString = world.getDynamicProperty(`needMoneyForMakeCountry`) ?? `10000`;
+    const needMoneyNumber = Number(needMoneyString);
+    if (status.money < needMoneyNumber) {
+        player.sendMessage(`§c建国には${needMoneyNumber}${configs}必要です(${needMoneyNumber - status.money}${needMoneyNumber})`);
+        return
+    };
+    status.money -= needMoneyNumber;
+    playersData[playerId] = status;
+    DyProp.set(`players`,playersData);
+    addCountry(countryName,player,convertChunk(lx, lz, player.dimension));
 };
 
 // 国を削除する関数
 function removeCountry(countryId) {
     countries = countries.filter(country => country.id !== countryId);
 }
-
-// 使用例
-let japanTerritories = [{ x: 3, y: 5 }, { x: 4, y: 5 }, { x: 3, y: 6 }];
-addCountry("Japan", "Tokyo", 126800000, ["rice", "fish", "electronics"], japanTerritories);
-
-let usaTerritories = [{ x: 8, y: 12 }, { x: 9, y: 12 }, { x: 10, y: 12 }];
-addCountry("USA", "Washington D.C.", 331000000, ["corn", "wheat", "oil"], usaTerritories);
-
-let germanyTerritories = [{ x: 15, y: 20 }, { x: 16, y: 20 }, { x: 15, y: 21 }];
-addCountry("Germany", "Berlin", 83100000, ["automobiles", "machinery", "chemicals"], germanyTerritories);
-
-console.log(countries);
-
-// Japan を削除する
-removeCountry(1);
-
-console.log(countries);
