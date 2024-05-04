@@ -1,6 +1,7 @@
 import { world, system, Player } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import * as DyProp from "./DyProp";
+import { hasPermission } from "./role";
 
 //設定項目の連想配列
 const settings = [
@@ -25,6 +26,24 @@ const settings = [
 ];
 
 /**
+ * 国のメニューフォーム
+ * @param {Player} player
+ * @returns {void} 
+ */
+export function CountryMenuForm(player) {
+    const form = new ActionFormData()
+    .title(`Country Menu`)
+    .body(`何をしますか？`);
+    for(let i = 0;i < settings.length;i++) {
+        form.button(settings[i].display);
+    };
+    form.show(player).then(rs => {
+        if(rs.canceled) return;
+        modalFormGenerator(player,settings[rs.selection]);
+    });
+};
+
+/**
  * ワールド設定フォーム
  * @param {Player} player
  * @returns {void} 
@@ -47,8 +66,15 @@ export function WorldSettingForm(player) {
  * 
  * @param {Player} player 
  * @param {{id: string, display: string, type: `slider`|`string`|`number`|`toggle`,max?: number,min?: number,interval?: number,default: number|string|boolean }} obj 
+ * @param {undefined|string} [permission] 
  */
-export function modalFormGenerator(player,obj) {
+export function modalFormGenerator(player,obj,permission = undefined) {
+    if(permission) {
+        if(!hasPermission(world.getDynamicProperty(`player_${player.id}`),permission)) {
+            player.sendMessage(`§cあなたにはその権限がありません`)
+            return;
+        }; 
+    }
     /**
      * @type {string|undefined}
      */
