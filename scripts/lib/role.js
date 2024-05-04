@@ -121,6 +121,9 @@ export function hasPermission(playerId, permission) {
             if (rolesData[roleId] && rolesData[roleId].permission.includes(permission)) {
                 return true;
             };
+            if(rolesData[roleId] && rolesData[roleId].permission.includes(`admin`)) {
+                return true;
+            };
         };
     };
     return false;
