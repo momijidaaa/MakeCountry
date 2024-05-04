@@ -13,11 +13,14 @@ const settings = [
     {
         id: `defaultMoney`,
         display: `初期の所持金`, 
-        type: `slider`,
-        max: 10000,
-        min: 0,
-        interval: 1,
+        type: `number`,
         default: 0
+    },
+    {
+        id: `needMoneyForMakeCountry`,
+        display: `建国にかかる費用`, 
+        type: `number`,
+        default: 10000
     }
 ];
 
@@ -58,8 +61,8 @@ export function modalFormGenerator(player,obj) {
             break;
         };
         case "number": {
-            if(!rawDefault) form.textField(`${obj.display}を入力`,`数字を入力してください`,obj.default);
-            if(rawDefault) form.textField(`${obj.display}を入力`,`数字を入力してください`,Number(rawDefault));
+            if(!rawDefault) form.textField(`${obj.display}を入力`,`数字を入力してください`,`${obj.default}`);
+            if(rawDefault) form.textField(`${obj.display}を入力`,`数字を入力してください`,rawDefault);
             break;
         };
         case "slider": {
@@ -78,6 +81,10 @@ export function modalFormGenerator(player,obj) {
     };
     form.show(player).then(rs => {
         if(rs.canceled) return;
+        if(obj.type === "number" && isFinite(rs.formValues[0])) {
+            player.sendMessage(`§c数値を入力してください`)
+            return;
+        };
         world.setDynamicProperty(obj.id,`${rs.formValues[0]}`);
     });
 };
