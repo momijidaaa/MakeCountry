@@ -103,7 +103,7 @@ countryData = JSON.parse(countryData);
  * ロールを持っているかどうかをチェックする関数
  * @param {string} playerId プレイヤーのID
  * @param {string} roleId ロールのID
- * @returns 
+ * @returns {boolean}
  */
 export function hasRole(playerId, roleId) {
     return playersData[playerId] && playersData[playerId].roles.includes(roleId);
@@ -113,7 +113,7 @@ export function hasRole(playerId, roleId) {
  * プレイヤーが特定の権限を持っているかどうかをチェックする関数
  * @param {string} playerId プレイヤーのID
  * @param {string} permission 権限の文字列
- * @returns 
+ * @returns {boolean}
  */
 export function hasPermission(playerId, permission) {
     if (playersData[playerId]) {
@@ -133,6 +133,7 @@ export function hasPermission(playerId, permission) {
  * メンバーにロールを追加する関数
  * @param {string} playerId プレイヤーのID
  * @param {string} roleId ロールのID
+ * @returns {void}
  */
 export function MemberAddRole(playerId, roleId) {
     if (playersData[playerId] && rolesData[roleId]) {
@@ -147,6 +148,7 @@ export function MemberAddRole(playerId, roleId) {
  * メンバーからロールを削除する関数
  * @param {string} playerId プレイヤーのID
  * @param {string} roleId ロールのID
+ * @returns {void}
  */
 export function MemberRemoveRole(playerId, roleId) {
     if (playersData[playerId]) {
@@ -158,6 +160,7 @@ export function MemberRemoveRole(playerId, roleId) {
 /**
  * ロールを削除する関数
  * @param {string} roleId ロールのID
+ * @returns {void}
  */
 export function deleteRole(roleId) {
     if (rolesData[roleId]) {
@@ -179,6 +182,7 @@ export function deleteRole(roleId) {
  * ロールの権限を編集する関数
  * @param {string} roleId ロールのID
  * @param {string} newPermissions 権限のID
+ * @returns {void}
  */
 export function addRolePermissions(roleId, newPermissions) {
     if (rolesData[roleId]) {
@@ -195,6 +199,7 @@ export function addRolePermissions(roleId, newPermissions) {
  * @param {string} roleId ロールのID
  * @param {number} newPriority 新しい優先度
  * @param {string} countryId 国のID
+ * @returns {void}
  */
 export function changeRolePriority(roleId, newPriority, countryId) {
     const country = countryData[countryId];
@@ -251,6 +256,7 @@ export function changeRolePriority(roleId, newPriority, countryId) {
  * ロールの権限を削除する関数
  * @param {string} roleId ロールのID
  * @param {string} permissionToRemove 削除する権限の文字列
+ * @returns {void}
  */
 export function MemberRemoveRolePermission(roleId, permissionToRemove) {
     if (rolesData[roleId]) {
@@ -267,7 +273,7 @@ export function MemberRemoveRolePermission(roleId, permissionToRemove) {
  * @param {string} countryId 国のID
  * @param {string} roleName ロールの名前
  * @param {[string]} permissions 権限の設定
- * @returns 
+ * @returns {void}
  */
 export function createRole(countryId, roleName, permissions = []) {
     const country = countryData[countryId];
@@ -306,6 +312,7 @@ export function createRole(countryId, roleName, permissions = []) {
 /**
  * 建国時に自動で初期のロールを設定
  * @param {string} countryId 
+ * @returns {void}
  */
 export function firstRoleSetUp(countryId) {
     createRole(countryId,`Staff`,[`admin`]);

@@ -25,6 +25,15 @@ const settings = [
     }
 ];
 
+const countryMenuButtons = [
+    {
+        display: `金と同期するスコア名`, 
+        nextExecute: `hasPermission()`,
+        icon: `apple`
+    },
+];
+
+
 /**
  * 国のメニューフォーム
  * @param {Player} player
@@ -74,7 +83,7 @@ export function modalFormGenerator(player,obj,permission = undefined) {
             player.sendMessage(`§cあなたにはその権限がありません`)
             return;
         }; 
-    }
+    };
     /**
      * @type {string|undefined}
      */
@@ -112,5 +121,31 @@ export function modalFormGenerator(player,obj,permission = undefined) {
             return;
         };
         world.setDynamicProperty(obj.id,`${rs.formValues[0]}`);
+    });
+};
+
+/**
+ * 
+ * @param {Player} player 
+ * @param {[{display: string,nextExecute: string,icon?: string}]} buttons 
+ * @param {undefined|string} [permission] 
+ * @param {string} [bodyText] 
+ */
+export function actionFormGenerator(player,buttons,permission = undefined,bodyText = "") {
+    if(permission) {
+        if(!hasPermission(world.getDynamicProperty(`player_${player.id}`),permission)) {
+            player.sendMessage(`§cあなたにはその権限がありません`)
+            return;
+        }; 
+    };
+    const form = new ActionFormData()
+    .title(obj.display)
+    .body(bodyText);
+    for(let i = 0;i < buttons.length;i++) {
+        form.button(buttons[i].display,buttons[i].icon);
+    };
+    form.show(player).then(rs => {
+        if(typeof rs.selection === "undefined") return;
+        eval(buttons[rs.selection].nextExecute);
     });
 };

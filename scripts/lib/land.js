@@ -131,7 +131,7 @@ export function MakeCountry(player, countryName) {
     */
     const status = playersData[playerId];
 
-    if (typeof status.country !== undefined) {
+    if (typeof status.country !== "undefined") {
         player.sendMessage(`§cあなたは既に国に所属しています`);
         return;
     };
