@@ -2,9 +2,12 @@ import { world } from "@minecraft/server";
 import { CheckPermission } from "./util";
 
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
-    const permission = `build`
+    const permission = `break`
     const { player } = ev;
-    ev.cancel = CheckPermission(player,permission);
+    const cannot = CheckPermission(player,permission);
+    ev.cancel = cannot;
+    player.sendMessage({translate: `cannot.permission.break`});
+    return;
 });
 
 world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
