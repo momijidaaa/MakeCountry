@@ -71,7 +71,7 @@ export function ConvertChunk(rawX, rawZ) {
  * @returns 
  */
 export function CheckPermission(player, permission) {
-    const permission = `build`
+    if(player.hasTag(`mc_admin`)) return false;
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
     if (!chunkData || !chunkData.countryId) return false;
     const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
@@ -80,6 +80,11 @@ export function CheckPermission(player, permission) {
     const allow = chunkData[`${permission}Allow`].includes(player.id);
     if (allow) return false;
     if (chunkData[`${permission}Restriction`] && !allow) {
+        if (countryData.id === playerData.country) {
+            for (const role of playerData.roles) {
+                if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) return false;
+            };
+        };    
         return true;
     };
     if (countryData.id === playerData.country) {
