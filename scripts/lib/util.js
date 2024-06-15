@@ -68,7 +68,7 @@ export function ConvertChunk(rawX, rawZ) {
  * 権限確認
  * @param {Player} player 
  * @param {string} permission 
- * @returns 
+ * @returns {boolean}
  */
 export function CheckPermission(player, permission) {
     if(player.hasTag(`adminmode`)) return false;
