@@ -199,6 +199,42 @@ export function DeleteRole(player, roleId, countryId, deleteCountry = false) {
     player.sendMessage({ translate: `complete.delete.role` })
 };
 
+/**完成
+ * 敵対国追加
+ * @param {string} mainCountryId 
+ * @param {string} countryId 
+ */
+export function AddHostility( mainCountryId, countryId ) {
+    const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
+    const CountryData = GetAndParsePropertyData(`country_${countryId}`);
+    try {
+        mainCountryData.hostility.push(countryId);
+        CountryData.hostility.push(mainCountryData);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**完成
+ * 同盟を解除
+ * @param {string} mainCountryId 
+ * @param {string} countryId 
+ */
+export function RemoveAlliance( mainCountryId, countryId ) {
+    const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
+    const CountryData = GetAndParsePropertyData(`country_${countryId}`);
+    try {
+        mainCountryData.alliance.splice(mainCountryData.alliance.indexOf(countryId), 1);
+        CountryData.alliance.splice(CountryData.alliance.indexOf(mainCountryId), 1);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
 /**
  * 国際組織を作る
  * @param {Player} owner 
