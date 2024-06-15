@@ -49,7 +49,7 @@ export async function getDynamicProperty(id) {
 
 /**
  * DyProp get all ID
- * @returns {Array} Array IDs data
+ * @returns {Array<string>} Array IDs data
  */
 export async function DynamicPropertyIds() {
     let ids = JSON.parse(JSON.stringify(world.getDynamicPropertyIds()));

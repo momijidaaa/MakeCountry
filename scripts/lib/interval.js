@@ -1,6 +1,9 @@
 import { system, world } from "@minecraft/server";
-import { GetAndParsePropertyData, GetPlayerChunkPropertyId } from "./util";
-import * as DyProp from "./DyProp"
+import { GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import * as DyProp from "./DyProp";
+import config from "../config";
+
+let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer*60}`
 
 system.runInterval(()=>{
     if(!world.getDynamicProperty(`start`)) return;
@@ -13,5 +16,30 @@ system.runInterval(()=>{
             p.onScreenDisplay.updateSubtitle(`${nowChunkData.subName ?? ``}`);
         };
         p.setDynamicProperty(`nowCountryId`,nowChunkData.id);
+    };
+},20);
+
+system.runInterval(()=>{
+    let taxTimer = Number(taxTimerString) - 1;
+    if(taxTimer === 0) {
+        world.sendMessage({translate: `tax.time`})
+        for(const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
+            const playerData = GetAndParsePropertyData(pId);
+            const countryData = GetAndParsePropertyData(playerData.country)
+            if(countryData.taxInstitutionIsPer) {
+                let taxValue = playerData.money * (countryData.taxPer / 100);
+                playerData.money -= taxValue;
+                countryData.money += taxValue;
+                StringifyAndSavePropertyData(pId,playerData);
+                StringifyAndSavePropertyData(`country_${countryData.id}`,countryData);
+                return;
+            } else {
+                playerData.money -= countryData.taxPer;
+                countryData.money += countryData.taxPer;
+                StringifyAndSavePropertyData(pId,playerData);
+                StringifyAndSavePropertyData(`country_${countryData.id}`,countryData);
+                return;
+            };
+        };
     };
 },20);

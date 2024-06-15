@@ -1,35 +1,7 @@
-/**
- * gridデータのフォーマット
- * {      countryId: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]} ,dimension: string}}
- * 
- * 国データのフォーマット
- * {
- *   [key: string]: {
- *     name: string, //国の名前
- *     power: number, //国力
- *     funds: number, //国の金データ
- *     lands: [string], //領土にしてるチャンクのデータ
- *     members: [string], //メンバーのデータ
- *     roles: [string], //ロールのデータ
- *     pacifism: [boolean], //平和主義
- *     enemy: [string], //敵対国
- *     ally: [string], //同盟国
- *     neutral: [string], //中立国
- *     warnow: [string] 戦争中の国
- *   }
- * }
- * 
- *  * プレイヤーデータ フォーマット
- * 
- * {
- *     [key: string]: { name: string, roles: [string], money: number, country: string|undefined }
- * } 
- */
-
 import { Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
-import config from "./../config";
+import config from "../config";
 
 /**
  * 国を作る
@@ -77,10 +49,14 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         adminRole: adminRole,
         peopleRole: peopleRole,
         roles: [ownerRole, adminRole, peopleRole],
-        resourcePoint: 0,
-        money: 0,
-        hideMoney: true,
+        resourcePoint: config.initialCountryResourcePoint,
+        money: config.initialCountryMoney,
+        taxPer: config.taxPer,
+        taxInstitutionIsPer: config.taxInstitutionIsPer,
+        hideMoney: config.hideCountryMoney,
         peace: peace,
+        //色
+        color: `e`,
         //同盟国
         alliance: [],
         //敵対国
@@ -183,7 +159,7 @@ export function CreateRole(name, permissions = [], iconTextureId = `stone`, colo
     const id = Number(roleIdString);
     const roleData = {
         name: name,
-        color: `§${color}`,
+        color: `§a${color}`,
         icon: `textures/blocks/${iconTextureId}`,
         id: id,
         members: [],
