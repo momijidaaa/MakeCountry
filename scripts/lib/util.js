@@ -73,16 +73,15 @@ export function ConvertChunk(rawX, rawZ) {
 export function CheckPermission(player, permission) {
     const permission = `build`
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
-    if (!chunkData) return false;
+    if (!chunkData || !chunkData.countryId) return false;
+    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    if(countryData.warNowCountries.includes(playerData.country)) return false;
     const allow = chunkData[`${permission}Allow`].includes(player.id);
     if (allow) return false;
     if (chunkData[`${permission}Restriction`] && !allow) {
         return true;
-       
     };
-    if (!chunkData || !chunkData.countryId) return false;
-    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
     if (countryData.id === playerData.country) {
         for (const role of playerData.roles) {
             if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
