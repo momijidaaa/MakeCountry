@@ -71,7 +71,7 @@ export function ConvertChunk(rawX, rawZ) {
  * @returns 
  */
 export function CheckPermission(player, permission) {
-    if(player.hasTag(`mc_admin`)) return false;
+    if(player.hasTag(`adminmode`)) return false;
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
     if (!chunkData || !chunkData.countryId) return false;
     const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
