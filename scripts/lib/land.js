@@ -59,9 +59,12 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
     };
     const idString = world.getDynamicProperty(`countryId`) ?? "1"
     const id = Number(idString);
-    const ownerRole = CreateRole(`Owner`, [`admin`]);
+    ownerData.country = id;
+    ownerData.money -= config.MakeCountryCost;
+    const ownerRole = CreateRole(`Owner`, [`owner`]);
     const adminRole = CreateRole(`Admin`, [`admin`]);
-    const peopleRole = CreateRole(`People`, [`place`, `break`, `use`]);
+    const peopleRole = CreateRole(`People`, [`place`, `break`, `blockUse`,`entityUse`,`noTarget`]);
+    ownerData.roles.push(ownerRole)
     const countryData = {
         name: name,
         id: id,
@@ -101,8 +104,9 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         //招待制
         invite: true,
     };
-    world.sendMessage({translate: `born.country`,with: [name]})
+    world.sendMessage({translate: `born.country`,with: [name]});
     StringifyAndSavePropertyData(`country_${id}`, countryData);
+    StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
     world.setDynamicProperty(`countryId`, `${id++}`);
 };
 
