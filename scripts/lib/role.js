@@ -16,19 +16,17 @@
  * 
  * 国データのフォーマット
  * {
- *   [key: string]: {
- *     name: string, //国の名前
- *     power: number, //国力
- *     funds: number, //国の金データ
- *     lands: [string], //領土にしてるチャンクのデータ
- *     members: [string], //メンバーのデータ
- *     roles: [string], //ロールのデータ
- *     pacifism: [boolean], //平和主義
- *     enemy: [string], //敵対国
- *     ally: [string], //同盟国
- *     neutral: [string], //中立国
- *     warnow: [string] 戦争中の国
- *   }
+ *   name: string, //国の名前
+ *   power: number, //国力
+ *   funds: number, //国の金データ
+ *   lands: [string], //領土にしてるチャンクのデータ
+ *   members: [string], //メンバーのデータ
+ *   roles: [string], //ロールのデータ
+ *   pacifism: [boolean], //平和主義
+ *   enemy: [string], //敵対国
+ *   ally: [string], //同盟国
+ *   neutral: [string], //中立国
+ *   warnow: [string] 戦争中の国
  * }
  * 
  * 権限一覧

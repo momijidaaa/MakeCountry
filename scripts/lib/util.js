@@ -20,7 +20,7 @@ export function GetChunkPropertyId(rawX, rawZ, dimension = `overworld`) {
  * @returns {string}
  */
 export function GetPlayerChunkPropertyId(player) {
-    let {x: rawX,z: rawZ} = player.location;
+    let { x: rawX, z: rawZ } = player.location;
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
     return `chunk_${x}_${z}_${player.dimension.id.replace(`minecraft:`, ``)}`;
@@ -33,7 +33,7 @@ export function GetPlayerChunkPropertyId(player) {
  */
 export function GetAndParsePropertyData(id) {
     let dataString = Dyprop.getDynamicProperty(id);
-    if(!dataString || typeof dataString !== "string") return undefined;
+    if (!dataString || typeof dataString !== "string") return undefined;
     try {
         return JSON.parse(dataString);
     } catch (error) {
@@ -49,7 +49,7 @@ export function GetAndParsePropertyData(id) {
  * @returns 
  */
 export function StringifyAndSavePropertyData(id, data) {
-    Dyprop.setDynamicProperty(id,JSON.stringify(data));
+    Dyprop.setDynamicProperty(id, JSON.stringify(data));
 };
 
 /**
@@ -61,5 +61,42 @@ export function StringifyAndSavePropertyData(id, data) {
 export function ConvertChunk(rawX, rawZ) {
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
-    return {x , z}
+    return { x, z }
+};
+
+/**
+ * 権限確認
+ * @param {Player} player 
+ * @param {string} permission 
+ * @returns 
+ */
+export function CheckPermission(player, permission) {
+    const permission = `build`
+    const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
+    if (!chunkData) return false;
+    const allow = chunkData[`${permission}Allow`].includes(player.id);
+    if (allow) return false;
+    if (chunkData[`${permission}Restriction`] && !allow) {
+        return true;
+       
+    };
+    if (!chunkData || !chunkData.countryId) return false;
+    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    if (countryData.id === playerData.country) {
+        for (const role of playerData.roles) {
+            if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
+        };
+        return true;
+    };
+    if (countryData.alliance.includes(playerData.country)) {
+        if (countryData.alliancePermission.includes(permission)) return false;
+        return true;
+    };
+    if (countryData.hostility.includes(playerData.country)) {
+        if (countryData.hostilityPermission.includes(permission)) return false;
+        return true;
+    };
+    if (countryData.neutralityPermission.includes(permission)) return false;
+    return true;
 };

@@ -1,6 +1,6 @@
 /**
  * gridデータのフォーマット
- * {  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]} ,dimension: string}}
+ * {      countryId: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]} ,dimension: string}}
  * 
  * 国データのフォーマット
  * {
@@ -26,134 +26,205 @@
  * } 
  */
 
-import { Dimension, Player, world } from "@minecraft/server";
+import { Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { firstRoleSetUp } from "./role";
-
-// 領土データを管理するやつ
-/**
- * @type {{  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,     permission: {[roleId: string]: [[permission: string]: string]} ,dimension: string}}}
- */
-let grid = DyProp.get(`grid`) ?? "{}";
-grid = JSON.parse(grid);
-
-//プレイヤーデータのインポート
-/**
- * @type {{ [key: string]: { name: string,  roles: [string], money: number, country: string|undefined }}}
- */
-let playersData = DyProp.get(`players`) ?? `{}`;
-playersData = JSON.parse(playersData);
-
-//国データを管理
-/**
- * @type {{[key: string]: {name: string, power: number,funds: number, lands: [string], members: [string], roles: [string] ,pacifism: [boolean], enemy: [string], ally: [string], neutral: [string], warnow: [string]}}}
- */
-let countries = DyProp.get(`countries`) ?? "{}";
-countries = JSON.parse(countries);
+import { GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import config from "./../config";
 
 /**
- * データ内のセルを取得する関数
- * @param {number} rawX マイクラのX座標
- * @param {number} rawZ マイクラのZ座標 
- * @param {Dimension} dimension ディメンション
- * @returns {undefined|{  [key: string]:    {      country: string,      owner: string|undefined,      price: number,      id: string,      permission: {[roleId: string]: [string]},dimension: string}}}
- */
-export function getChunkData(rawX, rawZ, dimension = `overworld`) {
-    const x = Math.floor(rawX / 16);
-    const z = Math.floor(rawZ / 16);
-    return grid[`${x}_${z}_${dimension.id.replace(`minecraft:`, ``)}`];
-}
-
-/**
- * マイクラの座標をチャンクのデータに変換
- * @param {number} rawX マイクラのX座標
- * @param {number} rawZ マイクラのZ座標
- * @param {Dimension} dimension ディメンション
- * @returns {string} それぞれの座標を16で割って四捨五入してディメンション入れたキーを返す
- */
-export function convertChunk(rawX, rawZ, dimension) {
-    const x = Math.floor(rawX / 16);
-    const z = Math.floor(rawZ / 16);
-    return `${x}_${z}_${dimension.id.replace(`minecraft:`, ``)}`;
-}
-
-// 国のデータを保存する配列
-// ユニークなIDを管理する変数
-let nextCountryId = DyProp.get(`nextCountryId`) ?? "1";
-
-/**
- * 国自体を作成
- * @param {string} name 国の名前
+ * 国を作る
  * @param {Player} owner 
- * @param {string} firstLand
- * @returns {void} 
+ * @param {string} name 
+ * @param {boolean} peace 
  */
-function addCountry(name, owner, firstLand) {
-    const defaultCountryMoneyString = world.getDynamicProperty(`defaultCountryMoney`) ?? `1000`;
-    const defaultCountryMoneyNumber = Number(defaultCountryMoneyString);
-    /**
-     * @type {string}
-     */
-    const playerId = owner.getDynamicProperty(`player_${owner.id}`);
-
-    countries[nextCountryId] = {
-        name: name, //国の名前
-        owner: playerId,
-        funds: defaultCountryMoneyNumber, //国の金データ
-        lands: [firstLand], //領土にしてるチャンクのデータ
-        members: [playerId], //メンバーのデータ
-        roles: [], //ロールのデータ
+export function MakeCountry(owner, name, peace = config.defaultPeace) {
+    const ownerData = GetAndParsePropertyData(`player_${owner.id}`);
+    if (ownerData.country) {
+        owner.sendMessage({ translate: `already.country.join` });
+        return;
     };
-    DyProp.set(`countries`,countries);
-    firstRoleSetUp(nextCountryId);
-    playersData[playerId].country = nextCountryId
-    DyProp.set(`players`,playersData);
-    nextCountryId = `${Number(nextCountryId) + 1}`;
-    DyProp.set(`nextCountryId`, `${Number(nextCountryId)}`);
+    const chunkId = GetPlayerChunkPropertyId(owner);
+    const chunkData = GetAndParsePropertyData(chunkId);
+    if (chunkData && chunkData.countryId) {
+        owner.sendMessage({ translate: `already.country.here` });
+        return;
+    };
+    if (chunkData && chunkData.noTerritory) {
+        owner.sendMessage({ translate: `this.chunk.cannot.territory` });
+        return;
+    };
+    if (ownerData.money < config.MakeCountryCost) {
+        owner.sendMessage({ translate: `not.enough.makecountry.money`, with: [`${config.MoneyName} ${config.MakeCountryCost - ownerData.money}`] });
+        return;
+    };
+    const idString = world.getDynamicProperty(`countryId`) ?? "1"
+    const id = Number(idString);
+    const ownerRole = CreateRole(`Owner`, [`admin`]);
+    const adminRole = CreateRole(`Admin`, [`admin`]);
+    const peopleRole = CreateRole(`People`, [`place`, `break`, `use`]);
+    const countryData = {
+        name: name,
+        id: id,
+        owner: owner.id,
+        members: [owner.id],
+        territories: [chunkId],
+        ownerRole: ownerRole,
+        adminRole: adminRole,
+        peopleRole: peopleRole,
+        roles: [ownerRole, adminRole, peopleRole],
+        resourcePoint: 0,
+        money: 0,
+        hideMoney: true,
+        peace: peace,
+        //同盟国
+        alliance: [],
+        //敵対国
+        hostility: [],
+        //中立国の権限
+        neutralityPermission: [`blockUse`,`entityUse`,`noTarget`],
+        //同盟国の権限
+        alliancePermission: [`blockUse`,`entityUse`,`noTarget`],
+        //敵対国の権限
+        hostilityPermission: [],
+        //加盟している国際組織
+        internationalOrganizations: [],
+        //戦争中
+        warNowCountries: [],
+        //受け取った戦線布告の国
+        declarationReceive: [],
+        //送った戦線布告
+        declarationSend: [],
+        //受け取った同盟申請
+        allianceRequestReceive: [],
+        //送った同盟申請
+        allianceRequestSend: [],
+        //招待制
+        invite: true,
+    };
+
+    StringifyAndSavePropertyData(`country_${id}`, countryData);
+    world.setDynamicProperty(`countryId`, `${id++}`);
+};
+
+
+export function DeleteCountry(countryId) {
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    const roles = countryData.roles;
+    const members = countryData.members;
+    const territories = countryData.territories;
+
+
+    const ownerData = GetAndParsePropertyData(`player_${owner.id}`);
+    const chunkId = GetPlayerChunkPropertyId(owner);
+    const chunkData = GetAndParsePropertyData(chunkId);
+    if (chunkData && chunkData.countryId) {
+        owner.sendMessage({ translate: `already.country.here` });
+    };
+    if (chunkData && chunkData.noTerritory) {
+        owner.sendMessage({ translate: `this.chunk.cannot.territory` });
+    };
+    const idString = world.getDynamicProperty(`countryId`) ?? "1"
+    const id = Number(idString);
+    const ownerRole = CreateRole(`Owner`, [`admin`]);
+    const adminRole = CreateRole(`Admin`, [`admin`]);
+    const peopleRole = CreateRole(`People`, [`place`, `break`, `use`]);
 };
 
 /**
- * 国を作る関数
- * @param {Player} player 
- * @param {string} countryName 
+ * 指定した国でロールを作成
+ * @param {string} countryId 
+ * @param {string} name 
+ * @param {Array<string>} permissions 
+ * @param {string} iconTextureId 
+ * @param {string} color 
  */
-export function MakeCountry(player, countryName) {
-    /**
-     * @type {string|undefined}
-     */
-    const playerId = player.getDynamicProperty(`player_${player.id}`)
-    if (!playerId) {
-        player.sendMessage(`§cプレイヤーデータが登録されていません`);
-        return;
-    };
-    /**
-    * @type {{"name": string,"money": number ,"country": undefined|string}}
-    */
-    const status = playersData[playerId];
-
-    if (typeof status.country !== "undefined") {
-        player.sendMessage(`§cあなたは既に国に所属しています`);
-        return;
-    };
-    const { x: lx, z: lz } = player.location
-    const chunkStatus = getChunkData(lx, lz, player.dimension);
-    if (chunkStatus) {
-        player.sendMessage(`§cこのチャンクには建国できません`);
-        return;
-    };
-    const needMoneyString = world.getDynamicProperty(`needMoneyForMakeCountry`) ?? `10000`;
-    const needMoneyNumber = Number(needMoneyString);
-    if (status.money < needMoneyNumber) {
-        player.sendMessage(`§c建国には${needMoneyNumber}${configs}必要です(${needMoneyNumber - status.money}${needMoneyNumber})`);
-        return
-    };
-    status.money -= needMoneyNumber;
-    playersData[playerId] = status;
-    DyProp.set(`players`,playersData);
-    addCountry(countryName,player,convertChunk(lx, lz, player.dimension));
+export function CreateRoleToCountry(countryId, name, permissions = [], iconTextureId = `stone`, color = `e`) {
+    const roleId = CreateRole(name, permissions, iconTextureId, color);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.roles.push(roleId);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    return roleId;
 };
 
-// 国を削除する関数
-function removeCountry(countryId) {
-    countries = countries.filter(country => country.id !== countryId);
-}
+/**
+ * 完了
+ * ロール作成
+ * @param {string} name 
+ * @param {Array<string>} permissions 
+ * @returns {string} RoleId
+ */
+export function CreateRole(name, permissions = [], iconTextureId = `stone`, color = `e`) {
+    const roleIdString = world.getDynamicProperty(`roleId`) ?? "1";
+    const id = Number(roleIdString);
+    const roleData = {
+        name: name,
+        color: `§${color}`,
+        icon: `textures/blocks/${iconTextureId}`,
+        id: id,
+        members: [],
+        permissions: permissions
+    };
+    StringifyAndSavePropertyData(`role_${id}`, roleData);
+    world.setDynamicProperty(`roleId`, `${id++}`);
+    return roleData.id;
+};
+
+/**
+ * 完了
+ * ロールを削除
+ * @param {Player} player 
+ * @param {number} roleId 
+ * @param {number} countryId 
+ * @param {boolean} deleteCountry 
+ * @returns 
+ */
+export function DeleteRole(player, roleId, countryId, deleteCountry = false) {
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    if (!deleteCountry) {
+        if (roleId == countryData.ownerRole || roleId == countryData.adminRole || roleId == countryData.peopleRole) {
+            player.sendMessage({ translate: `cannot.delete.role` });
+            return;
+        };
+    };
+    const roleData = GetAndParsePropertyData(`role_${roleId}`);
+    roleData.members.forEach(memberId => {
+        try {
+            const memberData = GetAndParsePropertyData(`player_${memberId}`);
+            memberData.roles.splice(memberData.roles.indexOf(roleId), 1);
+        } catch (error) {
+            console.warn(error);
+        };
+    });
+    DyProp.setDynamicProperty(`role_${roleId}`);
+    player.sendMessage({ translate: `complete.delete.role` })
+};
+
+/**
+ * 国際組織を作る
+ * @param {Player} owner 
+ * @param {string} ownerCountryId
+ * @param {string} name 
+ */
+export function MakeInternationalOrganization(owner, ownerCountryId, name) {
+    const ownerData = GetAndParsePropertyData(`country_${ownerCountryId}`);
+    if (ownerData.money < config.MakeInternationalOrganizationCost) {
+        owner.sendMessage({ translate: `not.enough.country.money`, with: [`${config.MoneyName}${config.MakeInternationalOrganizationCost - ownerData.money}`] });
+        return;
+    };
+    const idString = world.getDynamicProperty(`InternationalOrganizationId`) ?? "1"
+    const id = Number(idString);
+
+    const OrganizationData = {
+        name: name,
+        ownerCountryId: ownerCountryId,
+        resourcePoint: 0,
+        id: id,
+        money: 0,
+        //加盟国
+        signatory: [ ownerCountryId ]
+    };
+
+    StringifyAndSavePropertyData(`InternationalOrganization_${id}`, OrganizationData);
+    world.setDynamicProperty(`InternationalOrganizationId`, `${id++}`);
+    return OrganizationData.id;
+};

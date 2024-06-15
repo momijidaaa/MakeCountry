@@ -7,7 +7,11 @@ system.runInterval(()=>{
     for(const p of world.getPlayers()) {
         let playerLastInCountryIdString = p.getDynamicProperty(`nowCountryId`) ?? "0";
         const playerLastInCountryId = Number(playerLastInCountryIdString);
-        const nowChunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(p)) ?? {"id": 0,"name": "wilderness.name"};
-        DyProp.setDynamicProperty(`nowCountryId`,nowChunkData.id);
+        const nowChunkData = GetAndParsePropertyData(`country_${GetAndParsePropertyData(GetPlayerChunkPropertyId(p))?.countryId}`) ?? {"id": 0,"name": "wilderness.name"};
+        if(nowChunkData.id !== playerLastInCountryId) {
+            p.onScreenDisplay.setTitle({translate: nowChunkData.name});
+            p.onScreenDisplay.updateSubtitle(`${nowChunkData.subName ?? ``}`);
+        };
+        p.setDynamicProperty(`nowCountryId`,nowChunkData.id);
     };
-});
+},20);
