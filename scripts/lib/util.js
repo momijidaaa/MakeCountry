@@ -74,12 +74,14 @@ export function ConvertChunk(rawX, rawZ) {
 export function CheckPermission(player, permission) {
     if(player.hasTag(`adminmode`)) return false;
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
-    if (!chunkData || (!chunkData.countryId && !chunkData.special)) return false;
-    if(chunkData.special && !config.specialLimitPermissions.includes(permission)) return true;
+    if(!chunkData && config.wildernessAllowPermissions.includes(permission)) return false;
+    if(!chunkData && !config.wildernessAllowPermissions.includes(permission)) return true;
+    const allow = chunkData[`${permission}Allow`].includes(player.id);
+    if (!chunkData.countryId && !chunkData.special && !chunkData.owner && !config.wildernessAllowPermissions.includes(permission)) return true;
+    if(chunkData.special && !config.specialAllowPermissions.includes(permission)) return true;
     const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     if(countryData.warNowCountries.includes(playerData.country)) return false;
-    const allow = chunkData[`${permission}Allow`].includes(player.id);
     if (allow) return false;
     if (chunkData[`${permission}Restriction`] && !allow) {
         if (countryData.id === playerData.country) {
