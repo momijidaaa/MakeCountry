@@ -115,7 +115,7 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
 export function calculationCountryPower(countryId) {
     const countryData = GetAndParsePropertyData(countryId);
     let countryPower = 0;
-    countryPower = countryData.money + countryData.members.length * 20 + countryData.territories.length * 10 + countryData.resourcePoint + countryData.alliance.length * 5 - countryData.hostility.length * 5
+    countryPower = countryData.money + countryData.members.length * 20 + countryData.territories.length * 10 + countryData.resourcePoint + countryData.alliance.length * 5 - countryData.hostility.length * 15
 };
 
 /**
