@@ -101,7 +101,7 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         //招待制
         invite: true,
     };
-
+    world.sendMessage({translate: `born.country`,with: [name]})
     StringifyAndSavePropertyData(`country_${id}`, countryData);
     world.setDynamicProperty(`countryId`, `${id++}`);
 };
@@ -110,9 +110,19 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
 export function DeleteCountry(countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     const roles = countryData.roles;
-    const members = countryData.members;
+    GetAndParsePropertyData(`player_${countryData.owner}`).money += countryData.money;
+    countryData.members.forEach(m => {
+        const playerData = GetAndParsePropertyData(`player_${m}`);
+        playerData.roles = [];
+        playerData.country = undefined;
+    });
     const territories = countryData.territories;
-
+    countryData.alliance.forEach(a => {
+        RemoveAlliance(countryId,a);
+    });
+    countryData.hostility.forEach(h => {
+        RemoveHostility(countryId,h);
+    });
 
     const ownerData = GetAndParsePropertyData(`player_${owner.id}`);
     const chunkId = GetPlayerChunkPropertyId(owner);
