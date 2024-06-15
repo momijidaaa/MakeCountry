@@ -168,7 +168,7 @@ class ChatHandler {
         const check = CheckPermission(this.sender, `setHome`);
         if (check) {
             if (chunkData.special) {
-                this.sender.sendMessage(`§c特別区域にHomeを設定することはできません`);
+                this.sender.sendMessage({translate: `command.sethome.error.special`, with: { translate: `special.name` }});
                 return;
             };
             this.sender.sendMessage({ translate: `command.sethome.error.thischunk` });
