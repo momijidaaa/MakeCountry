@@ -6,7 +6,7 @@ const startId = "DyProp_"
  * @param {String} id DyProp ID
  * @param {String|undefined} value DyProp string data
  */
-export async function setDynamicProperty(id, value) {
+export async function setDynamicProperty(id, value = undefined) {
     world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_`)).forEach(a => world.setDynamicProperty(a));
     if(!value) return;
     let i = 0;

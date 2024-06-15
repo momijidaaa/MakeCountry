@@ -233,7 +233,7 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
-        DyProp
+        DyProp.setDynamicProperty(GetPlayerChunkPropertyId(this.sender))
         this.sender.sendMessage({translate: `command.resetchunk.result`,with: {translate: `wilderness.name`}});
         
     };
