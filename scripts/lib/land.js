@@ -69,6 +69,7 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         name: name,
         id: id,
         owner: owner.id,
+        //通貨のID(0が共通通貨)
         currencyUnitId: 0,
         members: [owner.id],
         territories: [chunkId],
