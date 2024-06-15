@@ -7,4 +7,9 @@ export default {
     MakeInternationalOrganizationCost: 100000,
     //共通通貨の単位
     MoneyName: `￥`,
+    //初期の国庫の金
+    initialCountryMoney: 0,
+    //初期のリソースポイント
+    initialCountryResourcePoint: 0,
+
 };
