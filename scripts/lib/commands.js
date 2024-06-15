@@ -1,6 +1,6 @@
 import { Player, world } from "@minecraft/server";
 import config from "../config";
-import { CheckPermission, GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 
 class ChatHandler {
     constructor(event) {
@@ -185,8 +185,9 @@ class ChatHandler {
             this.sender.sendMessage(`§cHomeがセットされていません\n§b${config.prefix}sethome §cを使ってHomeを設定できます`);
             return;
         }
-        const [x, y, z] = homePoint.split(" ").map(Number);
-        const chunk = convertChunk(x, z);
+        let [x, y, z, dimension] = homePoint.split(" ",4);
+        [x, y, z] = [x, y, z].map(Number);
+        const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x,z,dimension));
         const score = getScore(chunk, "mc_chunk");
 
         if (score !== getScore(this.sender, "mc_pcountries") && getScore(this.sender, "mc_pcountries") > 0) {
@@ -194,7 +195,7 @@ class ChatHandler {
         } else if (score === -1) {
             this.sender.sendMessage(`§c特別区域にHomeをセットしてしまっているようです`);
         } else {
-            this.sender.teleport({ x, y, z }, { dimension: world.getDimension("overworld") });
+            this.sender.teleport({ x, y, z }, { dimension: world.getDimension(dimension.replace(`minecraft:`,``)) });
         }
     }
 

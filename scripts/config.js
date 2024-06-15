@@ -23,4 +23,6 @@ export default {
     taxPer: 10,
     //建国時に国庫を非公開にするか
     hideCountryMoney: true,
+    //特別区域で許可する権限
+    specialLimitPermissions: [`entityUse`,`blockUse`],
 };
