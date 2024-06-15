@@ -75,7 +75,7 @@ export function CheckPermission(player, permission) {
     if(player.hasTag(`adminmode`)) return false;
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
     if (!chunkData || (!chunkData.countryId && !chunkData.special)) return false;
-    if(chunkData.special && config.specialLimitPermissions.includes(permission)) return true;
+    if(chunkData.special && !config.specialLimitPermissions.includes(permission)) return true;
     const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     if(countryData.warNowCountries.includes(playerData.country)) return false;
