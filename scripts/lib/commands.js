@@ -1,6 +1,8 @@
 import { Player, world } from "@minecraft/server";
 import config from "../config";
-import { CheckPermission, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import * as DyProp from "./DyProp";
+import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import { GenerateChunkData } from "./land";
 
 class ChatHandler {
     constructor(event) {
@@ -155,11 +157,18 @@ class ChatHandler {
         const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
         if (!chunkData || (!chunkData.special && !chunkData.countryId)) {
             this.sender.sendMessage({ translate: `command.checkchunk.result.wilderness`, with: { translate: `wilderness.name` } });
+            return;
         } else if (chunkData.special) {
             this.sender.sendMessage({ translate: `command.checkchunk.result.special`, with: { translate: `special.name` } });
+            return;
         } else {
+            if (chunkData.owner) {
+                this.sender.sendMessage({ translate: `command.checkchunk.result.ownerland`, with: `${chunkCountryData.owner}` });
+                return;
+            };
             const chunkCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`)
             this.sender.sendMessage({ translate: `command.checkchunk.result.territory`, with: `${chunkCountryData.name}` });
+            return;
         };
     };
 
@@ -168,70 +177,73 @@ class ChatHandler {
         const check = CheckPermission(this.sender, `setHome`);
         if (check) {
             if (chunkData.special) {
-                this.sender.sendMessage({translate: `command.sethome.error.special`, with: { translate: `special.name` }});
+                this.sender.sendMessage({ translate: `command.sethome.error.special`, with: { translate: `special.name` } });
                 return;
             };
             this.sender.sendMessage({ translate: `command.sethome.error.thischunk` });
             return;
         };
         this.sender.sendMessage({ translate: `command.sethome.result`, with: [`${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)}(${this.sender.dimension.id})`, config.prefix] });
-        this.sender.setDynamicProperty("homePoint", `${Math.floor(this.sender.location.x)}_${Math.floor(this.sender.location.y)}_${Math.floor(this.sender.location.z)}_${this.sender.dimension.id}`);
+        this.sender.setDynamicProperty("homePoint", `${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)} ${this.sender.dimension.id}`);
         return;
     };
 
     teleportHome() {
         const homePoint = this.sender.getDynamicProperty("homePoint");
         if (!homePoint) {
-            this.sender.sendMessage(`§cHomeがセットされていません\n§b${config.prefix}sethome §cを使ってHomeを設定できます`);
+            this.sender.sendMessage({ translate: `command.error.nosethome` });
             return;
-        }
-        let [x, y, z, dimension] = homePoint.split(" ",4);
+        };
+        let [x, y, z, dimension] = homePoint.split(" ");
         [x, y, z] = [x, y, z].map(Number);
-        const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x,z,dimension));
-        const score = getScore(chunk, "mc_chunk");
-
-        if (score !== getScore(this.sender, "mc_pcountries") && getScore(this.sender, "mc_pcountries") > 0) {
-            this.sender.sendMessage(`§c他国の領土にHomeをセットしてしまっているようです`);
-        } else if (score === -1) {
-            this.sender.sendMessage(`§c特別区域にHomeをセットしてしまっているようです`);
-        } else {
-            this.sender.teleport({ x, y, z }, { dimension: world.getDimension(dimension.replace(`minecraft:`,``)) });
-        }
-    }
+        const check = CheckPermissionFromLocation(this.sender, x, z, dimension, `setHome`);
+        if (check) {
+            this.sender.sendMessage({ translate: `command.home.error.thischunk` });
+            return;
+        };
+        this.sender.teleport({ x, y, z }, { dimension: world.getDimension(dimension.replace(`minecraft:`, ``)) });
+        return;
+    };
 
     checkHome() {
         const homePoint = this.sender.getDynamicProperty("homePoint");
         if (!homePoint) {
-            this.sender.sendMessage(`§cHomeがセットされていません\n§b${config.prefix}sethome §cを使ってHomeを設定できます`);
+            this.sender.sendMessage({ translate: `command.error.nosethome` });
         } else {
-            this.sender.sendMessage(`§a現在のHomeは(${homePoint})にセットされてます`);
-        }
-    }
+            let [x, y, z, dimension] = homePoint.split(" ");
+            const homePointString = `${x},${y},${z}(${dimension.replace(`minecraft:`, ``)})`
+            this.sender.sendMessage({ translate: `command.checkhome.result`, with: [homePointString] });
+        };
+    };
 
     setAdminChunk() {
         if (!this.sender.hasTag("mc_admin")) {
-            this.sender.sendMessage(`§c権限がありません`);
+            this.sender.sendMessage({ translate: `command.permission.error` });
             return;
-        }
-        this.sender.sendMessage(`§aこのチャンクを特別区域にしました`);
-        setScore(convertChunk(this.sender.location.x, this.sender.location.z), "mc_chunk", -1);
-    }
+        };
+        const { x, z } = this.sender.location;
+        this.sender.sendMessage({translate: `command.setadminchunk.result`,with: {translate: `special.name`}});
+        const chunk = GenerateChunkData(x,z,this.sender.dimension.id,undefined,undefined,10000,true);
+        StringifyAndSavePropertyData(chunk.id,chunk);
+        return;
+    };
 
     resetChunk() {
         if (!this.sender.hasTag("mc_admin")) {
-            this.sender.sendMessage(`§c権限がありません`);
+            this.sender.sendMessage({ translate: `command.permission.error` });
             return;
-        }
-        this.sender.sendMessage(`§aこのチャンクを荒野にしました`);
-        setScore(convertChunk(this.sender.location.x, this.sender.location.z), "mc_chunk", 0);
-    }
+        };
+        DyProp
+        this.sender.sendMessage({translate: `command.resetchunk.result`,with: {translate: `wilderness.name`}});
+        
+    };
 
     buyChunk() {
         const money = getScore(this.sender, "mc_money");
         if (money < config.chunkPrice) {
             this.sender.sendMessage(`§c土地を買うための所持金が不足しています\n§c土地価格: ${config.chunkPrice}円`);
             return;
-        }
+        };
 
         const chunk = convertChunk(this.sender.location.x, this.sender.location.z);
         const score = getScore(chunk, "mc_chunk");
@@ -246,8 +258,8 @@ class ChatHandler {
             this.sender.sendMessage(`§cこのチャンクはすでにあなたの国のものです`);
         } else {
             this.sender.sendMessage(`§cこのチャンクは他の国がすでに所有しています`);
-        }
-    }
+        };
+    };
 
     sellChunk() {
         const chunk = convertChunk(this.sender.location.x, this.sender.location.z);
@@ -261,8 +273,8 @@ class ChatHandler {
             this.sender.sendMessage(`§c特別区域を売ることはできません`);
         } else {
             this.sender.sendMessage(`§cこのチャンクはあなたの国のものではありません`);
-        }
-    }
+        };
+    };
 
     sendHelp() {
         const helpMessage = [
@@ -287,31 +299,31 @@ class ChatHandler {
         ];
 
         this.sender.sendMessage(helpMessage.join("\n"));
-    }
+    };
 
     surrender() {
         // 国を解散するロジック
-    }
+    };
 
     makeCountry() {
         // 新しい国を作成するロジック
-    }
+    };
 
     settingCountry() {
         // 国の設定を変更するロジック
-    }
+    };
 
     leaveCountry() {
         // 国から離脱するロジック
-    }
+    };
 
     deposit(args) {
         // 国の金庫にお金を預けるロジック
-    }
+    };
 
     alliance(args) {
         // 他国と同盟を結ぶロジック
-    }
+    };
 }
 
 world.beforeEvents.chatSend.subscribe(event => {

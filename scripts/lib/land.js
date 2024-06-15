@@ -1,6 +1,6 @@
 import { Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import { GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
 
 /**
@@ -35,7 +35,7 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
     ownerData.money -= config.MakeCountryCost;
     const ownerRole = CreateRole(`Owner`, [`owner`]);
     const adminRole = CreateRole(`Admin`, [`admin`]);
-    const peopleRole = CreateRole(`People`, [`place`, `break`, `blockUse`,`entityUse`,`noTarget`]);
+    const peopleRole = CreateRole(`People`, [`place`, `break`, `blockUse`, `entityUse`, `noTarget`]);
     ownerData.roles.push(ownerRole)
     const countryData = {
         name: name,
@@ -62,9 +62,9 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         //敵対国
         hostility: [],
         //中立国の権限
-        neutralityPermission: [`blockUse`,`entityUse`,`noTarget`],
+        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`],
         //同盟国の権限
-        alliancePermission: [`blockUse`,`entityUse`,`noTarget`],
+        alliancePermission: [`blockUse`, `entityUse`, `noTarget`],
         //敵対国の権限
         hostilityPermission: [],
         //加盟している国際組織
@@ -82,20 +82,51 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         //招待制
         invite: true,
     };
-    world.sendMessage({translate: `born.country`,with: [name]});
+    world.sendMessage({ translate: `born.country`, with: [name] });
     StringifyAndSavePropertyData(`country_${id}`, countryData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
     world.setDynamicProperty(`countryId`, `${id++}`);
 };
 
-/**
+export function GenerateChunkData(x, z, dimensionId,ownerId = undefined, countryId = undefined, price = config.defaultChunkPrice, special = false) {
+    const chunkData = {
+        x: x,
+        z: z,
+        id: GetChunkPropertyId(x,z,dimensionId),
+        owner: ownerId,
+        countryId: countryId,
+        special: special,
+        price: price,
+        adminRestriction: false,
+        adminAllow: [],
+        placeRestriction: false,
+        placeAllow: [],
+        breakRestriction: false,
+        breakAllow: [],
+        blockUseRestriction: false,
+        blockUseAllow: [],
+        entityUseRestriction: false,
+        entityUseAllow: [],
+        setHomeRestriction: false,
+        setHomeAllow: [],
+        noTargetRestriction: false,
+        noTargetAllow: [],
+        editStructureRestriction: false,
+        editStructureAllow: [],
+    };
+    return chunkData;
+};
+
+/**完成
  * 国力の計算
  * @param {string} countryId 
+ * @returns {number}
  */
 export function calculationCountryPower(countryId) {
     const countryData = GetAndParsePropertyData(countryId);
     let countryPower = 0;
-    countryPower = countryData.money + countryData.members.length * 20 + countryData.territories.length * 10 + countryData.resourcePoint + countryData.alliance.length * 5 - countryData.hostility.length * 15
+    countryPower = countryData.money + countryData.members.length * 20 + countryData.territories.length * 10 + countryData.resourcePoint + countryData.alliance.length * 5 - countryData.hostility.length * 15;
+    return countryPower;
 };
 
 /**
@@ -115,20 +146,20 @@ export function DeleteCountry(countryId) {
     countryData.territories.forEach(t => {
         const chunkData = GetAndParsePropertyData(t);
         chunkData.countryId = undefined;
-        StringifyAndSavePropertyData(t,chunkData);
+        StringifyAndSavePropertyData(t, chunkData);
     });
     countryData.alliance.forEach(a => {
-        RemoveAlliance(countryId,a);
+        RemoveAlliance(countryId, a);
     });
     countryData.hostility.forEach(h => {
-        RemoveHostility(countryId,h);
+        RemoveHostility(countryId, h);
     });
     countryData.roles.forEach(r => {
         DyProp.setDynamicProperty(`role_${r}`);
     });
     //ここら辺に国際組織から抜ける処理を追加しておく
     DyProp.setDynamicProperty(`country_${countryId}`);
-    world.sendMessage({translate: `deleted.country`,with: [`${countryData.name}`]});
+    world.sendMessage({ translate: `deleted.country`, with: [`${countryData.name}`] });
 };
 
 /**
@@ -205,14 +236,14 @@ export function DeleteRole(player, roleId, countryId, deleteCountry = false) {
  * @param {string} mainCountryId 
  * @param {string} countryId 
  */
-export function AddHostility( mainCountryId, countryId ) {
+export function AddHostility(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
         mainCountryData.hostility.push(countryId);
         CountryData.hostility.push(mainCountryId);
-        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
-        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
         console.warn(error);
     };
@@ -223,14 +254,14 @@ export function AddHostility( mainCountryId, countryId ) {
  * @param {string} mainCountryId 
  * @param {string} countryId 
  */
-export function RemoveHostility( mainCountryId, countryId ) {
+export function RemoveHostility(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
         mainCountryData.hostility.splice(mainCountryData.hostility.indexOf(countryId), 1);
         CountryData.hostility.splice(CountryData.hostility.indexOf(mainCountryId), 1);
-        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
-        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
         console.warn(error);
     };
@@ -241,14 +272,14 @@ export function RemoveHostility( mainCountryId, countryId ) {
  * @param {string} mainCountryId 
  * @param {string} countryId 
  */
-export function AddHostility( mainCountryId, countryId ) {
+export function AddHostility(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
         mainCountryData.alliance.push(countryId);
         CountryData.alliance.push(mainCountryId);
-        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
-        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
         console.warn(error);
     };
@@ -259,14 +290,14 @@ export function AddHostility( mainCountryId, countryId ) {
  * @param {string} mainCountryId 
  * @param {string} countryId 
  */
-export function RemoveAlliance( mainCountryId, countryId ) {
+export function RemoveAlliance(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
         mainCountryData.alliance.splice(mainCountryData.alliance.indexOf(countryId), 1);
         CountryData.alliance.splice(CountryData.alliance.indexOf(mainCountryId), 1);
-        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
-        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
         console.warn(error);
     };
@@ -294,7 +325,7 @@ export function MakeInternationalOrganization(owner, ownerCountryId, name) {
         id: id,
         money: 0,
         //加盟国
-        signatory: [ ownerCountryId ]
+        signatory: [ownerCountryId]
     };
 
     StringifyAndSavePropertyData(`InternationalOrganization_${id}`, OrganizationData);

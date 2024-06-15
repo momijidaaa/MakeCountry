@@ -6,13 +6,13 @@ import config from "../config";
  * 指定した座標、ディメンションのチャンクのダイプロのプロパティを取得
  * @param {number} rawX マイクラのX座標
  * @param {number} rawZ マイクラのZ座標 
- * @param {Dimension} dimension ディメンション
+ * @param {string} dimension ディメンションID
  * @returns {string}
  */
 export function GetChunkPropertyId(rawX, rawZ, dimension = `overworld`) {
     const x = Math.floor(rawX / 16);
     const z = Math.floor(rawZ / 16);
-    return `chunk_${x}_${z}_${dimension.id.replace(`minecraft:`, ``)}`;
+    return `chunk_${x}_${z}_${dimension.replace(`minecraft:`, ``)}`;
 };
 
 /**
@@ -74,6 +74,55 @@ export function ConvertChunk(rawX, rawZ) {
 export function CheckPermission(player, permission) {
     if (player.hasTag(`adminmode`)) return false;
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
+    if (!chunkData) {
+        if (config.wildernessAllowPermissions.includes(permission)) {
+            return false;
+        } else {
+            return true;
+        };
+    };
+    const allow = chunkData[`${permission}Allow`].includes(player.id);
+    if (!chunkData.countryId && !chunkData.special && !chunkData.owner && !config.wildernessAllowPermissions.includes(permission)) return true;
+    if (chunkData.special && !config.specialAllowPermissions.includes(permission)) return true;
+    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    if (countryData.warNowCountries.includes(playerData.country)) return false;
+    if (allow) return false;
+    if (chunkData[`${permission}Restriction`] && !allow) {
+        if (countryData.id === playerData.country) {
+            for (const role of playerData.roles) {
+                if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) return false;
+            };
+        };
+        return true;
+    };
+    if (countryData.id === playerData.country) {
+        for (const role of playerData.roles) {
+            if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
+        };
+        return true;
+    };
+    if (countryData.alliance.includes(playerData.country)) {
+        if (countryData.alliancePermission.includes(permission)) return false;
+        return true;
+    };
+    if (countryData.hostility.includes(playerData.country)) {
+        if (countryData.hostilityPermission.includes(permission)) return false;
+        return true;
+    };
+    if (countryData.neutralityPermission.includes(permission)) return false;
+    return true;
+};
+
+/**
+ * 権限確認
+ * @param {Player} player 
+ * @param {string} permission 
+ * @returns {boolean}
+ */
+export function CheckPermissionFromLocation(player, x, z, dimension, permission) {
+    if (player.hasTag(`adminmode`)) return false;
+    const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x, z, dimension));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
             return false;
