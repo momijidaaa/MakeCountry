@@ -110,7 +110,10 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
     world.setDynamicProperty(`countryId`, `${id++}`);
 };
 
-
+/**
+ * 国を削除
+ * @param {string} countryId 
+ */
 export function DeleteCountry(countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     const roles = countryData.roles;
@@ -135,6 +138,7 @@ export function DeleteCountry(countryId) {
     countryData.roles.forEach(r => {
         DyProp.setDynamicProperty(`role_${r}`);
     });
+    //ここら辺に国際組織から抜ける処理を追加しておく
     DyProp.setDynamicProperty(`country_${countryId}`);
     world.sendMessage({translate: `deleted.country`,with: [`${countryData.name}`]});
 };
