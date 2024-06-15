@@ -114,34 +114,29 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
 export function DeleteCountry(countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     const roles = countryData.roles;
-    GetAndParsePropertyData(`player_${countryData.owner}`).money += countryData.money;
+    const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
+    ownerData.money = ownerData.money + countryData.money + countryData.resourcePoint;
     countryData.members.forEach(m => {
         const playerData = GetAndParsePropertyData(`player_${m}`);
         playerData.roles = [];
         playerData.country = undefined;
     });
-    const territories = countryData.territories;
+    countryData.territories.forEach(t => {
+        const chunkData = GetAndParsePropertyData(t);
+        chunkData.countryId = undefined;
+        StringifyAndSavePropertyData(t,chunkData);
+    });
     countryData.alliance.forEach(a => {
         RemoveAlliance(countryId,a);
     });
     countryData.hostility.forEach(h => {
         RemoveHostility(countryId,h);
     });
-
-    const ownerData = GetAndParsePropertyData(`player_${owner.id}`);
-    const chunkId = GetPlayerChunkPropertyId(owner);
-    const chunkData = GetAndParsePropertyData(chunkId);
-    if (chunkData && chunkData.countryId) {
-        owner.sendMessage({ translate: `already.country.here` });
-    };
-    if (chunkData && chunkData.noTerritory) {
-        owner.sendMessage({ translate: `this.chunk.cannot.territory` });
-    };
-    const idString = world.getDynamicProperty(`countryId`) ?? "1"
-    const id = Number(idString);
-    const ownerRole = CreateRole(`Owner`, [`admin`]);
-    const adminRole = CreateRole(`Admin`, [`admin`]);
-    const peopleRole = CreateRole(`People`, [`place`, `break`, `use`]);
+    countryData.roles.forEach(r => {
+        DyProp.setDynamicProperty(`role_${r}`);
+    });
+    DyProp.setDynamicProperty(`country_${countryId}`);
+    world.sendMessage({translate: `deleted.country`,with: [`${countryData.name}`]});
 };
 
 /**
