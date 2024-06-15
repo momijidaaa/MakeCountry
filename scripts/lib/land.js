@@ -112,6 +112,10 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
     world.setDynamicProperty(`countryId`, `${id++}`);
 };
 
+/**
+ * 国力の計算
+ * @param {string} countryId 
+ */
 export function calculationCountryPower(countryId) {
     const countryData = GetAndParsePropertyData(countryId);
     let countryPower = 0;
