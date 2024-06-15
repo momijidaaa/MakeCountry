@@ -233,15 +233,17 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
-        DyProp.setDynamicProperty(GetPlayerChunkPropertyId(this.sender))
+        DyProp.setDynamicProperty(GetPlayerChunkPropertyId(this.sender));
         this.sender.sendMessage({translate: `command.resetchunk.result`,with: {translate: `wilderness.name`}});
         
     };
 
     buyChunk() {
-        const money = getScore(this.sender, "mc_money");
-        if (money < config.chunkPrice) {
-            this.sender.sendMessage(`§c土地を買うための所持金が不足しています\n§c土地価格: ${config.chunkPrice}円`);
+        const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
+        let chunkPrice = config.defaultChunkPrice;
+        if(chunkData && chunkData.price) chunkPrice = chunkData.price;
+        if (this.playerData.money < chunkPrice) {
+            this.sender.sendMessage({translate: `command.buychunk.error.not.enough.money`,with: [`${config.MoneyName} ${chunkPrice}`]});
             return;
         };
 

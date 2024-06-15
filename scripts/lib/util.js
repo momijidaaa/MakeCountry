@@ -130,8 +130,13 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
             return true;
         };
     };
+    if(chunkData.owner) {
+        if(chunkData.owner === player.id) return false;
+        const restrictionPermissions = [`makeCountry`,`buyChunk`,`sellChunk`];
+        if(restrictionPermissions.includes(permission)) return true;
+    };
     const allow = chunkData[`${permission}Allow`].includes(player.id);
-    if (!chunkData.countryId && !chunkData.special && !chunkData.owner && !config.wildernessAllowPermissions.includes(permission)) return true;
+    if (!chunkData.countryId && !chunkData.special && chunkData.owner && chunkData[`${permission}Restriction`] && !config.wildernessAllowPermissions.includes(permission)) return true;
     if (chunkData.special && !config.specialAllowPermissions.includes(permission)) return true;
     const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
