@@ -6,12 +6,12 @@ const startId = "DyProp_"
  * @param {String} id DyProp ID
  * @param {String|undefined} value DyProp string data
  */
-export async function set(id, value) {
+export async function setDynamicProperty(id, value) {
     world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_`)).forEach(a => world.setDynamicProperty(a));
     if(!value) return;
     let i = 0;
     while (true) {
-        const ObjectId = `${startId}${id}_${i}`;
+        const ObjectId = `${startId}${id}_dy${i}`;
         const Object = !world.getDynamicProperty(ObjectId) ? [] : JSON.parse(world.getDynamicProperty(ObjectId));
 
         Object.push(value);
@@ -30,11 +30,11 @@ export async function set(id, value) {
  * @param {String} id Dyprop ID
  * @returns {string|undefined} String or Undefined
  */
-export async function get(id) {
+export async function getDynamicProperty(id) {
     let array = [];
     let i = 0;
     while (true) {
-        const ObjectId = `${startId}${id}_${i}`;
+        const ObjectId = `${startId}${id}_dy${i}`;
 
         if (world.getDynamicProperty(ObjectId) === undefined) break;
 
@@ -51,16 +51,16 @@ export async function get(id) {
  * DyProp get all ID
  * @returns {Array} Array IDs data
  */
-export async function getIds() {
+export async function DynamicPropertyIds() {
     let ids = JSON.parse(JSON.stringify(world.getDynamicPropertyIds()));
     let array = [];
     let i = 0;
 
-    test: while (true) {
+    while (true) {
         if (ids.length === 0) break;
         for (const id of ids) {
-            if (id.startsWith(startId) && id.endsWith(`_${i}`)) {
-                const item = id.replace(startId, "").replace(`_${i}`);
+            if (id.startsWith(startId) && id.endsWith(`_dy${i}`)) {
+                const item = id.replace(startId, "").replace(`_dy${i}`);
                 if (!array.includes(item)) {
                     array.push(item);
                     ids.splice(ids.indexOf(id), 1);

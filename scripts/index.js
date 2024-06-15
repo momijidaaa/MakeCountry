@@ -1,10 +1,10 @@
+/*
 import { world } from "@minecraft/server";
 import * as DyProp from "./lib/DyProp";
 
 import "./lib/land";
 import "./lib/role";
 
-//プレイヤーが来た時
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { initialSpawn, player } = ev;
     if (initialSpawn) {
@@ -12,6 +12,8 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
             /**
              * @type {{ [key: string]: { name: string, roles: [string], money: number, country: string|undefined }}}
              */
+            
+            /*
             let playersData = "";
 
             let nextPlayerNum = DyProp.get(`nextPlayerNum`);
@@ -39,3 +41,4 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
         };
     };
 });
+*/
