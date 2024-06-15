@@ -209,7 +209,43 @@ export function AddHostility( mainCountryId, countryId ) {
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
         mainCountryData.hostility.push(countryId);
-        CountryData.hostility.push(mainCountryData);
+        CountryData.hostility.push(mainCountryId);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**完成
+ * 敵対を解除
+ * @param {string} mainCountryId 
+ * @param {string} countryId 
+ */
+export function RemoveHostility( mainCountryId, countryId ) {
+    const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
+    const CountryData = GetAndParsePropertyData(`country_${countryId}`);
+    try {
+        mainCountryData.hostility.splice(mainCountryData.hostility.indexOf(countryId), 1);
+        CountryData.hostility.splice(CountryData.hostility.indexOf(mainCountryId), 1);
+        StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
+        StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**完成
+ * 同盟追加
+ * @param {string} mainCountryId 
+ * @param {string} countryId 
+ */
+export function AddHostility( mainCountryId, countryId ) {
+    const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
+    const CountryData = GetAndParsePropertyData(`country_${countryId}`);
+    try {
+        mainCountryData.alliance.push(countryId);
+        CountryData.alliance.push(mainCountryId);
         StringifyAndSavePropertyData(`country_${mainCountryId}`,mainCountryData);
         StringifyAndSavePropertyData(`country_${countryId}`,CountryData);
     } catch (error) {
