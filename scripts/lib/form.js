@@ -11,14 +11,14 @@ import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } 
  */
 export function joinTypeSelectForm(player) {
     const form = new ActionFormData();
-    form.title({translate: `form.invite.title`});
-    form.button({translate: `form.invite.check.invite`});
-    form.button({translate: `form.invite.list.allowjoin`});
+    form.title({ translate: `form.invite.title` });
+    form.button({ translate: `form.invite.check.invite` });
+    form.button({ translate: `form.invite.list.allowjoin` });
     form.show(player).then(rs => {
-        if(rs.canceled) {
+        if (rs.canceled) {
             return;
         };
-        switch(rs.selection) {
+        switch (rs.selection) {
             case 0: {
                 //招待を確認
                 break;
@@ -28,6 +28,33 @@ export function joinTypeSelectForm(player) {
                 break;
             };
         };
+    });
+};
+
+export function allowJoinCountriesList(player) {
+    const countriesData = [];
+    for (const id of DyProp.DynamicPropertyIds(`country_`)) {
+        const d = GetAndParsePropertyData(id);
+        if (!d.invite) countriesData.push(d);
+    };
+    const form = new ActionFormData();
+    if (countriesData.length === 0) {
+        form.body({ translate: `no.allowjoin.country` })
+        form.button({ translate: `mc.button.back` });
+    };
+    countriesData.forEach(countryData => {
+        form.button(`${countryData.name}\nID: ${countryData.id}`);
+    });
+    form.show(player).then(rs => {
+        if(rs.canceled) {
+            joinTypeSelectForm(player);
+            return;
+        };
+        if(countriesData.length === 0) {
+            joinTypeSelectForm(player);
+            return;
+        };
+        joinCheckForm(player,countriesData[rs.selection]);
     });
 };
 
@@ -144,7 +171,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
             switch (rs.selection) {
                 case 0: {
                     if (HasPermission(player, `editCountryName`)) {
-                        editCountryNameForm(player,countryData);
+                        editCountryNameForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
                     };
@@ -152,7 +179,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                 };
                 case 1: {
                     if (HasPermission(player, `editCountryLore`)) {
-                        editCountryLoreForm(player,countryData);
+                        editCountryLoreForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
                     };
@@ -179,7 +206,7 @@ export function editCountryNameForm(player, countryData) {
         if (value === ``) value === `Country`;
         const beforeName = countryData.name;
         countryData.name = value;
-        player.sendMessage({rawtext: [{text: `§a[MakeCountry]§r\n`},{translate: `changed.countryname`},{text: `\n§r${beforeName} ->§r ${value}`}]});
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.countryname` }, { text: `\n§r${beforeName} ->§r ${value}` }] });
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         settingCountryInfoForm(player, countryData);
         return;
@@ -199,7 +226,7 @@ export function editCountryLoreForm(player, countryData) {
         let value = rs.formValues[0];
         const beforeLore = countryData.lore;
         countryData.lore = value;
-        player.sendMessage({rawtext: [{text: `§a[MakeCountry]§r\n`},{translate: `changed.countrylore`},{text: `\n§r${beforeLore} ->§r ${value}`}]});
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.countrylore` }, { text: `\n§r${beforeLore} ->§r ${value}` }] });
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         settingCountryInfoForm(player, countryData);
         return;
