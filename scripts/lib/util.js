@@ -122,6 +122,8 @@ export function CheckPermission(player, permission) {
  */
 export function CheckPermissionFromLocation(player, x, z, dimension, permission) {
     if (player.hasTag(`adminmode`)) return false;
+    const restrictionPermissions = [`makeCountry`,`buyChunk`,`sellChunk`];
+    const selfCountryRestrictionPermissions = [`makeCountry`,`buyChunk`];
     const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x, z, dimension));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
@@ -132,7 +134,6 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
     };
     if(chunkData.owner) {
         if(chunkData.owner === player.id) return false;
-        const restrictionPermissions = [`makeCountry`,`buyChunk`,`sellChunk`];
         if(restrictionPermissions.includes(permission)) return true;
     };
     const allow = chunkData[`${permission}Allow`].includes(player.id);
@@ -151,6 +152,7 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
         return true;
     };
     if (countryData.id === playerData.country) {
+        if(selfCountryRestrictionPermissions.includes(permission)) return true;
         for (const role of playerData.roles) {
             if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
         };

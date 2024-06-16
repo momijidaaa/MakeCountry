@@ -28,6 +28,6 @@ export default {
     //特別区域で許可する権限
     specialAllowPermissions: [`entityUse`, `blockUse`],
     //荒野で許可する権限
-    wildernessAllowPermissions: [`entityUse`, `blockUse`],
+    wildernessAllowPermissions: [`entityUse`, `blockUse`,`makeCountry`,`buyChunk`],
 
 };
