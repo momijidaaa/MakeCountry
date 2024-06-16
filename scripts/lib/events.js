@@ -47,7 +47,12 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player , initialSpawn } = ev;
     if(initialSpawn) {
         const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
-        if(dataCheck) return;
+        if(dataCheck) {
+            const playerData = JSON.parse(dataCheck);
+            playerData.name = player.name;
+            StringifyAndSavePropertyData(`player_${player.id}`,playerData);
+            return;
+        };
         const newPlayerData = {
             name: player.name,
             id: player.id,
