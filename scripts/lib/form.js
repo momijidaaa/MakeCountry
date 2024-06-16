@@ -146,13 +146,33 @@ export function countryList(player) {
  */
 export function showCountryInfo(player,countryData) {
     try {
-        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const membersId = countryData.members.filter(m => m !== ownerData.id);
+        let membersName = [];
+        membersId.forEach(member => {
+            const memberData = GetAndParsePropertyData(`player_${member}`);
+            membersName.push(memberData.name);
+        });
+        let money = `show.private`;
+        let resourcePoint = `show.private`;
+        if(!countryData.hideMoney) {
+            money = countryData.money;
+            resourcePoint = countryData.resourcePoint;
+        };
         const showBody = [
             {translate: `form.showcountry.option.name`,with: [countryData.name]},
             {translate: `form.showcountry.option.lore`,with: [countryData.lore]},
             {translate: `form.showcountry.option.id`,with: [countryData.id]},
             {translate: `form.showcountry.option.owner`,with: [ownerData.name]},
-        ]
+            {translate: `form.showcountry.option.memberscount`,with: [`${membersName.length}`]},
+            {translate: `form.showcountry.option.members`,with: [membersName.join(` , `)]},
+            {translate: `form.showcountry.option.territories`,with: [`${countryData.territories.length}`]},
+            {translate: `form.showcountry.option.money`,with: [`${config.MoneyName} ${countryData.money}`]},
+            {translate: `form.showcountry.option.resourcepoint`,with: [`${countryData.resourcePoint}`]},
+            {translate: `form.showcountry.option.peace`,with: [`${countryData.peace}`]},
+            {translate: `form.showcountry.option.taxper`,with: [`${countryData.taxPer}`]},
+            {translate: `form.showcountry.option.taxinstitutionisper`,with: [`${countryData.taxInstitutionIsPer}`]},
+        ];
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body({rawtext: []})
