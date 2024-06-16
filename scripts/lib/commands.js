@@ -325,26 +325,26 @@ class ChatHandler {
         /** 
          * @type {import("@minecraft/server").RawMessage}
          */
-        const helpMessage = [{ text: `§a--------------------------\n`, translate: `command.help.money` },
-            { translate: `command.help.money` },
-            { translate: `command.help.setup` },
-            { translate: `command.help.msend` },
-            { translate: `command.help.checkchunk` },
-            { translate: `command.help.sethome` },
-            { translate: `command.help.home` },
-            { translate: `command.help.checkhome` },
-            { translate: `command.help.adminchunk` },
-            { translate: `command.help.resetchunk`, with: { rawtext: [{ translate: `special.name` }] } },
-            { translate: `command.help.buychunk` },
-            { translate: `command.help.sellchunk` },
-            { translate: `command.help.makecountry` },
-            { translate: `command.help.settingcountry` },
-            { translate: `command.help.leavecountry` },
-            { translate: `command.help.kill` },
-            { translate: `command.help.countrylist` },
-            { translate: `command.help.joincountry` },
-            { translate: `command.help.chome` },
-            { text: `§a--------------------------` }]
+        const helpMessage = [{text: `§a------------------------------------\n`},{ translate: `command.help.money` },{text: `\n`},
+            { translate: `command.help.money` },{text: `\n`},
+            { translate: `command.help.setup` },{text: `\n`},
+            { translate: `command.help.msend` },{text: `\n`},
+            { translate: `command.help.checkchunk` },{text: `\n`},
+            { translate: `command.help.sethome` },{text: `\n`},
+            { translate: `command.help.home` },{text: `\n`},
+            { translate: `command.help.checkhome` },{text: `\n`},
+            { translate: `command.help.adminchunk` },{text: `\n`},
+            { translate: `command.help.resetchunk`, with: { rawtext: [{ translate: `special.name` }] } },{text: `\n`},
+            { translate: `command.help.buychunk` },{text: `\n`},
+            { translate: `command.help.sellchunk` },{text: `\n`},
+            { translate: `command.help.makecountry` },{text: `\n`},
+            { translate: `command.help.settingcountry` },{text: `\n`},
+            { translate: `command.help.leavecountry` },{text: `\n`},
+            { translate: `command.help.kill` },{text: `\n`},
+            { translate: `command.help.countrylist` },{text: `\n`},
+            { translate: `command.help.joincountry` },{text: `\n`},
+            { translate: `command.help.chome` },{text: `\n`},
+            { text: `§a------------------------------------` }]
         this.sender.sendMessage({
             rawtext: helpMessage
         });
