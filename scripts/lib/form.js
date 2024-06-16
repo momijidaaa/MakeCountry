@@ -27,9 +27,11 @@ export function playerMainMenu(player) {
         switch (rs.selection) {
             case 0: {
                 showProfileForm(player);
+                break;
             };
             case 1: {
                 joinTypeSelectForm(player);
+                break;
             };
         };
     });
@@ -70,7 +72,7 @@ export function joinTypeSelectForm(player) {
     form.button({ translate: `form.invite.list.allowjoin` });
     form.show(player).then(rs => {
         if (rs.canceled) {
-            
+            playerMainMenu(player);
             return;
         };
         switch (rs.selection) {
@@ -265,17 +267,17 @@ export function joinCheckFromListForm(player, countryData) {
  * @param {Player} player 
  */
 export function countryInvitesList(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    let playerData = GetAndParsePropertyData(`player_${player.id}`);
     const countriesData = [];
-    for (const id of playerData.invite) {
+    for (const id of playerData?.invite) {
         const d = GetAndParsePropertyData(`country_${id}`);
         if (!d) {
-            playerData.invite.splice(playerData.invite.indexOf(id), 1);
+            playerData?.invite.splice(playerData.invite.indexOf(id), 1);
             continue;
         };
         countriesData.push(d);
     };
-    StringifyAndSavePropertyData(`player_${playerData.id}`,playerData);
+    StringifyAndSavePropertyData(`player_${player.id}`,playerData);
     const form = new ActionFormData();
     if (countriesData.length === 0) {
         form.body({ translate: `no.invite.country` });
@@ -304,7 +306,7 @@ export function countryInvitesList(player) {
  */
 export function allowJoinCountriesList(player) {
     const countriesData = [];
-    for (const id of DyProp.DynamicPropertyIds(`country_`)) {
+    for (const id of DyProp.DynamicPropertyIds().filter(b => b.startsWith(`country_`))) {
         const d = GetAndParsePropertyData(id);
         if (!d.invite) countriesData.push(d);
     };
