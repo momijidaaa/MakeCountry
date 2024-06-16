@@ -180,7 +180,7 @@ class ChatHandler {
         const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
         const check = CheckPermission(this.sender, `setHome`);
         if (check) {
-            if (chunkData.special) {
+            if (chunkData?.special) {
                 this.sender.sendMessage({ translate: `command.sethome.error.special`, with: { rawtext: [{ translate: `special.name` }] } });
                 return;
             };
