@@ -30,6 +30,8 @@ system.runInterval(() => {
         world.sendMessage({ translate: `tax.time` });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
             const playerData = GetAndParsePropertyData(pId);
+            playerData.days += 1;
+            StringifyAndSavePropertyData(pId, playerData);
             if (!playerData.country) continue;
             const countryData = GetAndParsePropertyData(playerData.country)
             if (countryData.taxInstitutionIsPer) {

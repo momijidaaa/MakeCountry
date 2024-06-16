@@ -47,7 +47,8 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
             country: undefined,
             money: config.initialMoney,
             roles: [],
-            chunks: []
+            chunks: [],
+            days: 0
         };
         StringifyAndSavePropertyData(`player_${player.id}`,newPlayerData);
     };
