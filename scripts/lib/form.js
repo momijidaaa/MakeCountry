@@ -295,7 +295,7 @@ export function settingCountryRoleForm(player) {
     try {
         const form = new ActionFormData();
         form.title({ translate: `form.setting.button.role` });
-        const playerData = GetAndParsePropertyData(player)
+        const playerData = GetAndParsePropertyData(`player_${player.id}`)
         const roleIds = GetAndParsePropertyData(`country_${playerData.country}`).roles;
         let roles = [];
         roleIds.forEach(id => {

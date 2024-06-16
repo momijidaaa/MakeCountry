@@ -196,20 +196,25 @@ export function CreateRoleToCountry(countryId, name, permissions = [], iconTextu
  * @param {Array<string>} permissions 
  * @returns {string} RoleId
  */
-export function CreateRole(name, permissions = [], iconTextureId = `stone`, color = `e`) {
+export function CreateRole(roleDatas = [{name: ``, permissions: [], iconTextureId: `stone`, color: `e`}]) {
     const roleIdString = world.getDynamicProperty(`roleId`) ?? "1";
     let id = Number(roleIdString);
-    const roleData = {
-        name: name,
-        color: `§a${color}`,
-        icon: `textures/blocks/${iconTextureId}`,
-        id: id,
-        members: [],
-        permissions: permissions
-    };
-    StringifyAndSavePropertyData(`role_${id}`, roleData);
+    let returns = [];
+    roleDatas.forEach(role => {
+        const roleData = {
+            name: role.name,
+            color: `§a${role.color}`,
+            icon: `textures/blocks/${role.iconTextureId}`,
+            id: role.id,
+            members: [],
+            permissions: role.permissions
+        };
+        StringifyAndSavePropertyData(`role_${id}`, roleData);
+        returns.push(roleData.id);
+        id++
+    });
     world.setDynamicProperty(`roleId`, `${id++}`);
-    return roleData.id;
+    return returns;
 };
 
 /**
