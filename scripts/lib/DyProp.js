@@ -39,7 +39,7 @@ export function getDynamicProperty(id) {
         i++;
     };
     if (array.length === 0) return undefined
-    return array;
+    return array.join(``);
 };
 
 /**
