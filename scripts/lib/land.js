@@ -91,6 +91,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         //招待制
         invite: invite,
     };
+    ownerData.roles.push(ownerRole)
     world.sendMessage({ translate: `born.country`, with: [name] });
     StringifyAndSavePropertyData(`country_${id}`, countryData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
