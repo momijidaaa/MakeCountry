@@ -365,8 +365,30 @@ export function playerCountryJoin(player, countryId) {
         countryData.members.push(playerData.id);
         playerData.roles.push(countryData.peopleRole);
         playerData.country = countryId;
-        StringifyAndSavePropertyData(`player_${playerData.id}`,playerData);
-        StringifyAndSavePropertyData(`country_${countryId}`,countryData);
+        StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
+        StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `joined.country` }] });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
+ * 国から抜けさせる
+ * @param {Player} player 
+ * @param {Number} countryId 
+ */
+export function playerCountryLeave(player) {
+    try {
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        countryId = playerData.country;
+        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
+        playerData.roles = [];
+        playerData.country = undefined;
+        StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
+        StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `left.country` }] });
     } catch (error) {
         console.warn(error);
     };
