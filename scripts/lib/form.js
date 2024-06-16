@@ -111,12 +111,21 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         form.title({ translate: `form.setting.info.title` });
         form.body({ rawtext: showBody });
         form.button({ translate: `form.setting.info.button.name` });
+        form.button({ translate: `form.setting.info.button.lore` });
 
         form.show(player).then(rs => {
             if (rs.canceled) return;
             switch (rs.selection) {
                 case 0: {
                     if (HasPermission(player, `editCountryName`)) {
+                        editCountryNameForm();
+                    } else {
+                        player.sendMessage({ translate: `no.permission` });
+                    };
+                    break;
+                };
+                case 1: {
+                    if (HasPermission(player, `editCountryLore`)) {
                         editCountryNameForm();
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -151,7 +160,7 @@ export function editCountryNameForm(player, countryData) {
     });
 };
 
-export function editCountryNameForm(player, countryData) {
+export function editCountryLoreForm(player, countryData) {
     const form = new ModalFormData();
     form.title({ translate: `form.editcountrylore.title` });
     form.textField({ translate: `form.editcountrylore.label` }, { translate: `form.editcountrylore.input` }, countryData.lore);
