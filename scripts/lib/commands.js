@@ -3,7 +3,7 @@ import config from "../config";
 import * as DyProp from "./DyProp";
 import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData } from "./land";
-import { MakeCountryForm } from "./form";
+import { MakeCountryForm, countryList, settingCountry } from "./form";
 
 class ChatHandler {
     constructor(event) {
@@ -94,7 +94,7 @@ class ChatHandler {
                     this.kill();
                     break;
                 case `${this.prefix}countrylist`:
-                    this.countryList();
+                    this.CountryList();
                     break;
                 case `${this.prefix}chome`:
                     this.chome();
@@ -360,6 +360,12 @@ class ChatHandler {
     };
 
     settingCountry() {
+        if (!this.playerData.country) {
+            this.sender.sendMessage({ translate: `command.settingcountry.error.nobelong.country` });
+            return;
+        };
+        settingCountry(this.sender);
+        return;
     };
 
     leaveCountry() {
@@ -368,7 +374,9 @@ class ChatHandler {
         this.sender.runCommand(`kill @s`);
         return;
     };
-    countryList() {
+    CountryList() {
+        countryList(this.sender)
+        return;
     };
 
     joinCountry() {
