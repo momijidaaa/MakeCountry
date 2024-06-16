@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { CheckPermission } from "./util";
+import { CheckPermission, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
 
@@ -49,5 +49,6 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
             roles: [],
             chunks: []
         };
+        StringifyAndSavePropertyData(`player_${player.id}`,newPlayerData);
     };
 });
