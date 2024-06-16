@@ -356,12 +356,12 @@ export function RoleNameChange(player, roleData) {
         form.submitButton({ translate: `mc.button.change` });
         form.show(player).then(rs => {
             if (rs.canceled) {
-                selectRoleEditType(player, roleData.id);
+                selectRoleEditType(player, roleData);
                 return;
             };
             roleData.name = rs.formValues[0] ?? `None`;
             StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
-            selectRoleEditType(player, roleData.id);
+            selectRoleEditType(player, roleData);
             return;
         });
     };
