@@ -1,6 +1,8 @@
 export default {
     //コマンドのプレフィックス
     prefix: `?`,
+    //プレイヤーの初期の所持金
+    initialMoney: 1000,
     //チャットの際にプレイヤー名の左に所属国を表示するか
     showCountryChatLeftName: true,
     //デフォルトで平和主義にするか

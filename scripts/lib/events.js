@@ -1,5 +1,7 @@
 import { world } from "@minecraft/server";
 import { CheckPermission } from "./util";
+import * as DyProp from "./DyProp";
+import config from "../config";
 
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const permission = `break`
@@ -32,4 +34,20 @@ world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
     ev.cancel = CheckPermission(player,permission);
     player.sendMessage({translate: `cannot.permission.${permission}`});
     return;
+});
+
+world.afterEvents.playerSpawn.subscribe((ev) => {
+    const { player , initialSpawn } = ev;
+    if(initialSpawn) {
+        const dataCheck = DyProp.getDynamicProperty(`player_${id}`);
+        if(dataCheck) return;
+        const newPlayerData = {
+            name: player.name,
+            id: player.id,
+            country: undefined,
+            money: config.initialMoney,
+            roles: [],
+            chunks: []
+        };
+    };
 });
