@@ -179,7 +179,7 @@ export function countryDeleteCheckForm(player) {
                 };
                 case 1: {
                     player.sendMessage({ translate: `form.dismantle.complete` })
-                    DeleteCountry(playerData.id);
+                    DeleteCountry(playerData.country);
                     break;
                 };
             };
