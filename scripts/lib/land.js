@@ -34,14 +34,14 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     };
     const idString = world.getDynamicProperty(`countryId`) ?? "1"
     let id = Number(idString);
-    if (!chunkData) chunkData = GenerateChunkData(x,z,dimensionId,undefined,id,undefined,false);
+    if (!chunkData) chunkData = GenerateChunkData(x, z, dimensionId, undefined, id, undefined, false);
     chunkData.countryId = id;
     ownerData.country = id;
     ownerData.money -= config.MakeCountryCost;
-    const [ownerRole, adminRole, peopleRole ]= CreateRole([
-        {name: `Owner`, permissions: [`owner`],iconTextureId: `gold_block`,color: `e`},
-        {name: `Admin`, permissions: [`admin`],iconTextureId: `iron_block`,color: `f`},
-        {name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`],iconTextureId: `stone`,color: `a`}
+    const [ownerRole, adminRole, peopleRole] = CreateRole([
+        { name: `Owner`, permissions: [`owner`], iconTextureId: `gold_block`, color: `e` },
+        { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
+        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`], iconTextureId: `stone`, color: `a` }
     ]);
     ownerData.roles.push(ownerRole)
     const countryData = {
@@ -92,7 +92,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         invite: invite,
     };
     ownerData.roles.push(ownerRole)
-    world.sendMessage({ translate: `born.country`, with: [name] });
+    world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `born.country`, with: [name] }] });
     StringifyAndSavePropertyData(`country_${id}`, countryData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
     StringifyAndSavePropertyData(chunkData.id, chunkData);
@@ -155,7 +155,7 @@ export function DeleteCountry(countryId) {
         const playerData = GetAndParsePropertyData(`player_${m}`);
         playerData.roles = [];
         playerData.country = undefined;
-        StringifyAndSavePropertyData(`player_${m}`,playerData);
+        StringifyAndSavePropertyData(`player_${m}`, playerData);
     });
     countryData.territories.forEach(t => {
         const chunkData = GetAndParsePropertyData(t);
@@ -173,7 +173,7 @@ export function DeleteCountry(countryId) {
     });
     //ここら辺に国際組織から抜ける処理を追加しておく
     DyProp.setDynamicProperty(`country_${countryId}`);
-    world.sendMessage({ translate: `deleted.country`, with: [`${countryData.name}`] });
+    world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `deleted.country`, with: [`${countryData.name}`] }] });
 };
 
 /**
@@ -199,7 +199,7 @@ export function CreateRoleToCountry(countryId, name, permissions = [], iconTextu
  * @param {Array<string>} permissions 
  * @returns {string} RoleId
  */
-export function CreateRole(roleDatas = [{name: ``, permissions: [], iconTextureId: `stone`, color: `e`}]) {
+export function CreateRole(roleDatas = [{ name: ``, permissions: [], iconTextureId: `stone`, color: `e` }]) {
     const roleIdString = world.getDynamicProperty(`roleId`) ?? "1";
     let id = Number(roleIdString);
     let returns = [];

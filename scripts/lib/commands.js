@@ -116,7 +116,7 @@ class ChatHandler {
                 this.sender.sendMessage({ translate: `command.permission.error` });
                 return;
             }
-            this.sender.sendMessage({ translate: `system.setup.complete` });
+            this.sender.sendMessage({rawtext: [{text: `§a[MakeCountry]\n`},{ translate: `system.setup.complete` }]});
             this.sender.addTag("mc_admin");
             world.setDynamicProperty(`start`, `true`)
             return;
@@ -187,7 +187,7 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.sethome.error.thischunk` });
             return;
         };
-        this.sender.sendMessage({ translate: `command.sethome.result`, with: [`${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)}(${this.sender.dimension.id.replace(`minecraft:`,``)})`, config.prefix] });
+        this.sender.sendMessage({ translate: `command.sethome.result`, with: [`${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)}(${this.sender.dimension.id.replace(`minecraft:`, ``)})`, config.prefix] });
         this.sender.setDynamicProperty("homePoint", `${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)} ${this.sender.dimension.id}`);
         return;
     };

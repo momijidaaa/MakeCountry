@@ -27,7 +27,7 @@ system.runInterval(() => {
 system.runInterval(() => {
     let taxTimer = Number(taxTimerString) - 1;
     if (taxTimer === 0) {
-        world.sendMessage({ translate: `tax.time` });
+        world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
             const playerData = GetAndParsePropertyData(pId);
             playerData.days += 1;
