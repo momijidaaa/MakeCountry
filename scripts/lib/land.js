@@ -277,7 +277,7 @@ export function RemoveHostility(mainCountryId, countryId) {
  * @param {string} mainCountryId 
  * @param {string} countryId 
  */
-export function AddHostility(mainCountryId, countryId) {
+export function AddAlliance(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
