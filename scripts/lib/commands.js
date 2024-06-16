@@ -381,6 +381,7 @@ class ChatHandler {
         const countryData = GetAndParsePropertyData(`country_${this.playerData?.country}`);
         if (this.playerData.id === countryData.owner) {
             this.sender.sendMessage({ translate: `command.leavecountry.error.your.owner` })
+            return;
         };
         playerCountryLeave(this.sender);
         return;
@@ -392,9 +393,6 @@ class ChatHandler {
     CountryList() {
         countryList(this.sender);
         return;
-    };
-
-    joinCountry() {
     };
 
     chome() {

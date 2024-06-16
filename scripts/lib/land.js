@@ -381,7 +381,7 @@ export function playerCountryJoin(player, countryId) {
 export function playerCountryLeave(player) {
     try {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
-        countryId = playerData.country;
+        const countryId = playerData.country;
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
         playerData.roles = [];
