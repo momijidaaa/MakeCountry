@@ -39,9 +39,9 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     ownerData.country = id;
     ownerData.money -= config.MakeCountryCost;
     const [ownerRole, adminRole, peopleRole ]= CreateRole([
-        {name: `Owner`, permissions: [`owner`],iconTextureId: `golden_block`,color: `e`},
+        {name: `Owner`, permissions: [`owner`],iconTextureId: `gold_block`,color: `e`},
         {name: `Admin`, permissions: [`admin`],iconTextureId: `iron_block`,color: `f`},
-        {name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`],iconTextureId: `glass`,color: `a`}
+        {name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`],iconTextureId: `stone`,color: `a`}
     ]);
     ownerData.roles.push(ownerRole)
     const countryData = {
@@ -207,7 +207,7 @@ export function CreateRole(roleDatas = [{name: ``, permissions: [], iconTextureI
             name: role.name,
             color: `§a${role.color}`,
             icon: `textures/blocks/${role.iconTextureId}`,
-            id: role.id,
+            id: id,
             members: [],
             permissions: role.permissions
         };

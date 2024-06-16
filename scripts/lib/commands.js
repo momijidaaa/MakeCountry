@@ -101,7 +101,7 @@ class ChatHandler {
                     this.chome();
                     break;
                 default:
-                    this.sender.sendMessage({ translate: `command.unknown.error`, with: command });
+                    this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
             }
         });
     };
@@ -125,7 +125,7 @@ class ChatHandler {
 
     sendMoney(args) {
         if (args.length < 2 || isNaN(args[0]) || !args[1]) {
-            this.sender.sendMessage({ translate: `command.sendmoney.error.name`, with: config.prefix });
+            this.sender.sendMessage({ translate: `command.sendmoney.error.name`, with: [config.prefix] });
             return;
         }
 
@@ -141,11 +141,11 @@ class ChatHandler {
             return;
         };
         if (amount < 1) {
-            this.sender.sendMessage({ translate: `command.error.canuse.number.more`, with: `1` });
+            this.sender.sendMessage({ translate: `command.error.canuse.number.more`, with: [`1`] });
             return;
         };
         if (this.playerData.money < amount) {
-            this.sender.sendMessage({ translate: `command.error.trysend.moremoney.youhave`, with: `${this.playerData.money}` });
+            this.sender.sendMessage({ translate: `command.error.trysend.moremoney.youhave`, with: [`${this.playerData.money}`] });
             return;
         };
         const targetData = GetAndParsePropertyData(`player_${targetPlayer.id}`);
@@ -163,15 +163,15 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.checkchunk.result.wilderness`, with: { rawtext: [{ translate: `wilderness.name` }] } });
             return;
         } else if (chunkData.special) {
-            this.sender.sendMessage({ translate: `command.checkchunk.result.special`, with: { translate: `special.name` } });
+            this.sender.sendMessage({ translate: `command.checkchunk.result.special`, with: { rawtext: [{ translate: `special.name` }] } });
             return;
         } else {
             if (chunkData.owner) {
-                this.sender.sendMessage({ translate: `command.checkchunk.result.ownerland`, with: `${chunkCountryData.owner}` });
+                this.sender.sendMessage({ translate: `command.checkchunk.result.ownerland`, with: [`${chunkCountryData.owner}`] });
                 return;
             };
             const chunkCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`)
-            this.sender.sendMessage({ translate: `command.checkchunk.result.territory`, with: `${chunkCountryData.name}` });
+            this.sender.sendMessage({ translate: `command.checkchunk.result.territory`, with: [`${chunkCountryData.name}`] });
             return;
         };
     };
@@ -181,7 +181,7 @@ class ChatHandler {
         const check = CheckPermission(this.sender, `setHome`);
         if (check) {
             if (chunkData.special) {
-                this.sender.sendMessage({ translate: `command.sethome.error.special`, with: { translate: `special.name` } });
+                this.sender.sendMessage({ translate: `command.sethome.error.special`, with: { rawtext: [{ translate: `special.name` }] } });
                 return;
             };
             this.sender.sendMessage({ translate: `command.sethome.error.thischunk` });
@@ -226,7 +226,7 @@ class ChatHandler {
             return;
         };
         const { x, z } = this.sender.location;
-        this.sender.sendMessage({ translate: `command.setadminchunk.result`, with: { translate: `special.name` } });
+        this.sender.sendMessage({ translate: `command.setadminchunk.result`, with: { rawtext: [{ translate: `special.name` }] } });
         const chunk = GenerateChunkData(x, z, this.sender.dimension.id, undefined, undefined, 10000, true);
         StringifyAndSavePropertyData(chunk.id, chunk);
         return;
@@ -238,7 +238,7 @@ class ChatHandler {
             return;
         };
         DyProp.setDynamicProperty(GetPlayerChunkPropertyId(this.sender));
-        this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { translate: `wilderness.name` } });
+        this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { rawtext: [{ translate: `wilderness.name` }] } });
 
     };
 
@@ -253,11 +253,11 @@ class ChatHandler {
         const cannotBuy = CheckPermission(this.sender, `buyChunk`);
         if (cannotBuy) {
             if (!chunkData) {
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.wilderness`, with: { translate: `wilderness.name` } });
+                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.wilderness`, with: { rawtext: [{ translate: `wilderness.name` }] } });
                 return;
             };
             if (chunkData.special) {
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.special`, with: { translate: `special.name` } });
+                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.special`, with: { rawtext: [{ translate: `special.name` }] } });
                 return;
             };
             if (chunkData.owner) {
@@ -270,7 +270,7 @@ class ChatHandler {
                     this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
                     return;
                 };
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { translate: `${chunkData.countryId}` } });
+                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
                 return;
             };
             this.sender.sendMessage({ translate: `command.permission.error` });

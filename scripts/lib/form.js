@@ -336,6 +336,7 @@ export function RoleIconChange(player, roleData) {
             roleData.icon = rs.formValues[0];
             if (rs.formValues[0] === ``) roleData.icon = undefined;
             StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
+            selectRoleEditType(player, roleData.id);
             return;
         });
     };
@@ -360,6 +361,7 @@ export function RoleNameChange(player, roleData) {
             };
             roleData.name = rs.formValues[0] ?? `None`;
             StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
+            selectRoleEditType(player, roleData.id);
             return;
         });
     };
@@ -382,7 +384,10 @@ export function selectRoleEditType(player, roleData) {
         form.button({ translate: `form.role.edit.select.button.permission` });
         form.button({ translate: `form.role.edit.select.button.delete` });
         form.show(player).then(rs => {
-            if (rs.canceled) return;
+            if (rs.canceled) {
+                settingCountryRoleForm(player);
+                return;
+            };
             switch (rs.selection) {
                 case 0: {
                     //名前の変更
