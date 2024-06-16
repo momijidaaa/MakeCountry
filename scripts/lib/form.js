@@ -119,7 +119,7 @@ export function settingCountryInfoForm(player) {
                     if(HasPermission(player,`editCountryName`)) {
                         editCountryNameForm();
                     } else {
-                        player.sendMessage({translate: `no.permission`})
+                        player.sendMessage({translate: `no.permission`});
                     };
                     break;
                 };
@@ -131,7 +131,9 @@ export function settingCountryInfoForm(player) {
 };
 
 export function editCountryNameForm(player,countryData) {
-    const form
+    const form = new ModalFormData();
+    form.title({translate: `form.editcountryname.title`});
+    form.textField({translate: `form.editcountryname.label`},{translate: `form.editcountryname.input`},countryData.name);
 };
 
 const rolePermissions = [
