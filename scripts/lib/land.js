@@ -352,3 +352,22 @@ export function MakeInternationalOrganization(owner, ownerCountryId, name) {
     world.setDynamicProperty(`InternationalOrganizationId`, `${id++}`);
     return OrganizationData.id;
 };
+
+/**
+ * 国に参加させる
+ * @param {Player} player 
+ * @param {Number} countryId 
+ */
+export function playerCountryJoin(player, countryId) {
+    try {
+        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        countryData.members.push(playerData.id);
+        playerData.roles.push(countryData.peopleRole);
+        playerData.country = countryId;
+        StringifyAndSavePropertyData(`player_${playerData.id}`,playerData);
+        StringifyAndSavePropertyData(`country_${countryId}`,countryData);
+    } catch (error) {
+        console.warn(error);
+    };
+};

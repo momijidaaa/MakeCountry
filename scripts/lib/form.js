@@ -31,6 +31,91 @@ export function joinTypeSelectForm(player) {
     });
 };
 
+/**
+ * 
+ * @param {Player} player 
+ * @param {any} countryData 
+ */
+export function joinCheckForm(player,countryData) {
+    try {
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const membersId = countryData.members.filter(m => m !== ownerData.id);
+        let membersName = [];
+        membersId.forEach(member => {
+            const memberData = GetAndParsePropertyData(`player_${member}`);
+            membersName.push(memberData.name);
+        });
+        let money = `show.private`;
+        let resourcePoint = `show.private`;
+        if (!countryData.hideMoney) {
+            money = `${countryData.money}`;
+            resourcePoint = `${countryData.resourcePoint}`;
+        };
+        const allianceIds = countryData.alliance;
+        let allianceCountryName = [];
+        allianceIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(id);
+            allianceCountryName.push(subCountryData.name);
+        });
+        const hostilityIds = countryData.alliance;
+        let hostilityCountryName = [];
+        hostilityIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(id);
+            hostilityCountryName.push(subCountryData.name);
+        });
+        const warNowIds = countryData.hostility;
+        let warNowCountryName = [];
+        warNowIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(id);
+            warNowCountryName.push(subCountryData.name);
+        });
+        const showBody =
+        {
+            rawtext: [
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${money}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: [`${resourcePoint}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+            ]
+        };
+        const form = new ActionFormData();
+        form.title(countryData.name);
+        form.body(showBody);
+        form.button({ translate: `mc.button.join` });
+        form.button({ translate: `mc.button.back` });
+        form.show(player).then(rs => {
+            if(rs.canceled) {
+                allowJoinCountriesList(player);
+                return;
+            };
+            switch(rs.selection) {
+                case 0: {
+                    
+                    return;
+                };
+            };
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
+ * 
+ * @param {Player} player 
+ */
 export function allowJoinCountriesList(player) {
     const countriesData = [];
     for (const id of DyProp.DynamicPropertyIds(`country_`)) {
@@ -55,6 +140,7 @@ export function allowJoinCountriesList(player) {
             return;
         };
         joinCheckForm(player,countriesData[rs.selection]);
+        return;
     });
 };
 
