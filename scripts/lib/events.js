@@ -40,6 +40,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player , initialSpawn } = ev;
     if(initialSpawn) {
         const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
+        world.sendMessage(`${typeof dataCheck}`);
         if(dataCheck) return;
         const newPlayerData = {
             name: player.name,

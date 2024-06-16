@@ -7,21 +7,16 @@ const startId = "DyProp_"
  * @param {String|undefined} value DyProp string data
  */
 export async function setDynamicProperty(id, value = undefined) {
-    world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_`)).forEach(a => world.setDynamicProperty(a));
-    if(!value) return;
-    let i = 0;
-    while (true) {
+    world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_dy`)).forEach(a => world.setDynamicProperty(a));
+    if (!value) return;
+    const chunkSize = 20000
+    if (typeof value !== 'string') {
+        console.warn("Input must be a string");
+        return;
+    };
+    for (let i = 0; i < value.length; i += chunkSize) {
         const ObjectId = `${startId}${id}_dy${i}`;
-        const Object = !world.getDynamicProperty(ObjectId) ? [] : JSON.parse(world.getDynamicProperty(ObjectId));
-
-        Object.push(value);
-        try {
-            world.setDynamicProperty(ObjectId, JSON.stringify(Object));
-            break;
-        } catch {
-            i++;
-            continue;
-        };
+        world.setDynamicProperty(ObjectId,value.substring(i, i + chunkSize));
     };
 };
 
@@ -44,7 +39,7 @@ export async function getDynamicProperty(id) {
         i++;
     };
     if (array.length === 0) return undefined
-    return array.join(``);
+    return array;
 };
 
 /**
