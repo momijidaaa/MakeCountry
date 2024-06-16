@@ -71,6 +71,11 @@ const rolePermissions = [
     `neutralityPermission`
 ];
 
+/**
+ * 完成
+ * ロールの一覧表示
+ * @param {Player} player 
+ */
 export function settingCountryRoleForm(player) {
     try {
         const form = new ActionFormData();
