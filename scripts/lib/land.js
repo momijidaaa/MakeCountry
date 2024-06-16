@@ -149,13 +149,13 @@ export function calculationCountryPower(countryId) {
  */
 export function DeleteCountry(countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
-    const roles = countryData.roles;
     const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
     ownerData.money = ownerData.money + countryData.money + countryData.resourcePoint;
     countryData.members.forEach(m => {
         const playerData = GetAndParsePropertyData(`player_${m}`);
         playerData.roles = [];
         playerData.country = undefined;
+        StringifyAndSavePropertyData(`player_${m}`,playerData);
     });
     countryData.territories.forEach(t => {
         const chunkData = GetAndParsePropertyData(t);
