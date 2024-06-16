@@ -29,5 +29,10 @@ export default {
     specialAllowPermissions: [`entityUse`, `blockUse`],
     //荒野で許可する権限
     wildernessAllowPermissions: [`entityUse`, `blockUse`,`makeCountry`,`buyChunk`],
-
+    //平和主義国の維持費(1チャンク)
+    MaintenanceFeePacifistCountries: 500,
+    //非平和主義国の維持費(1チャンク)
+    MaintenanceFeeNonPeacefulCountries: 50,
+    //建国後何回分の徴税をなしにするか
+    NonMaintenanceCostAccrualPeriod: 3
 };

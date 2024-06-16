@@ -7,9 +7,10 @@ import config from "../config";
  * 国を作る
  * @param {Player} owner 
  * @param {string} name 
+ * @param {boolean} invite 
  * @param {boolean} peace 
  */
-export function MakeCountry(owner, name, peace = config.defaultPeace) {
+export function MakeCountry(owner, name = `country`, invite = true,peace = config.defaultPeace) {
     const ownerData = GetAndParsePropertyData(`player_${owner.id}`);
     if (ownerData.country) {
         owner.sendMessage({ translate: `already.country.join` });
@@ -43,6 +44,7 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         owner: owner.id,
         //通貨のID(0が共通通貨)
         currencyUnitId: 0,
+        NonMaintenanceCostAccrualPeriod: config.NonMaintenanceCostAccrualPeriod,
         members: [owner.id],
         territories: [chunkId],
         ownerRole: ownerRole,
@@ -80,7 +82,7 @@ export function MakeCountry(owner, name, peace = config.defaultPeace) {
         //送った同盟申請
         allianceRequestSend: [],
         //招待制
-        invite: true,
+        invite: invite,
     };
     world.sendMessage({ translate: `born.country`, with: [name] });
     StringifyAndSavePropertyData(`country_${id}`, countryData);
@@ -93,6 +95,8 @@ export function GenerateChunkData(x, z, dimensionId,ownerId = undefined, country
         x: x,
         z: z,
         id: GetChunkPropertyId(x,z,dimensionId),
+        spawn: undefined,
+        publicSpawn: false,
         owner: ownerId,
         countryId: countryId,
         special: special,

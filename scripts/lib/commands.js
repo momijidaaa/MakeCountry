@@ -3,6 +3,7 @@ import config from "../config";
 import * as DyProp from "./DyProp";
 import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData } from "./land";
+import { MakeCountryForm } from "./form";
 
 class ChatHandler {
     constructor(event) {
@@ -94,6 +95,9 @@ class ChatHandler {
                     break;
                 case `${this.prefix}countrylist`:
                     this.countryList();
+                    break;
+                case `${this.prefix}chome`:
+                    this.chome();
                     break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: command });
@@ -340,21 +344,25 @@ class ChatHandler {
             { translate: `command.help.kill` },
             { translate: `command.help.countrylist` },
             { translate: `command.help.joincountry` },
+            { translate: `command.help.chome` },
             { text: `§a--------------------------` },
         ];
         this.sender.sendMessage(helpMessage);
     };
 
     makeCountry() {
-        // 新しい国を作成するロジック
+        if (this.playerData.country) {
+            this.sender.sendMessage({ translate: `command.makecountry.error.belong.country` });
+            return;
+        };
+        MakeCountryForm(this.sender);
+        return;
     };
 
     settingCountry() {
-        // 国の設定を変更するロジック
     };
 
     leaveCountry() {
-        // 国から離脱するロジック
     };
     kill() {
         this.sender.runCommand(`kill @s`);
@@ -364,6 +372,20 @@ class ChatHandler {
     };
 
     joinCountry() {
+    };
+
+    chome() {
+        if (!this.playerData.country) {
+            this.sender.sendMessage({ translate: `command.chome.error.notjoin.country` });
+            return;
+        };
+        const countryData = GetAndParsePropertyData(`country_${this.playerData.country}`)
+        if (!countryData.spawn) {
+            return;
+        };
+        this.sender.teleport(countryData.spawn.location,{dimension: world.getDimension(countryData.spawn.dimension)});
+        this.sender.sendMessage({translate: `command.chome.result`})
+        return;
     };
 };
 

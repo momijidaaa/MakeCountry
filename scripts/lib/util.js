@@ -169,3 +169,17 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
     if (countryData.neutralityPermission.includes(permission)) return false;
     return true;
 };
+
+/**
+ * 権限があるか確認
+ * @param {Player} player 
+ * @param {string} permission 
+ * @returns {boolean}
+ */
+export function HasPermission(player,permission) {
+    if (player.hasTag(`adminmode`)) return true;
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    for (const role of playerData.roles) {
+        if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission) ) return true;
+    };
+};
