@@ -82,22 +82,23 @@ export function CheckPermission(player, permission) {
             return true;
         };
     };
+    if(!chunkData?.countryId && !chunkData.owner && !chunkData?.special) return false;
     const allow = chunkData[`${permission}Allow`].includes(player.id);
-    if (!chunkData.countryId && !chunkData.special && !chunkData.owner && !config.wildernessAllowPermissions.includes(permission)) return true;
-    if (chunkData.special && !config.specialAllowPermissions.includes(permission)) return true;
     const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    if (countryData.warNowCountries.includes(playerData.country)) return false;
+    if (!chunkData.countryId && !chunkData.special && !chunkData.owner && !config.wildernessAllowPermissions.includes(permission)) return true;
+    if (countryData?.warNowCountries.includes(playerData.country)) return false;
     if (allow) return false;
     if (chunkData[`${permission}Restriction`] && !allow) {
-        if (countryData.id === playerData.country) {
+        if (countryData?.id === playerData.country) {
             for (const role of playerData.roles) {
                 if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) return false;
             };
         };
         return true;
     };
-    if (countryData.id === playerData.country) {
+    if (chunkData.special && !config.specialAllowPermissions.includes(permission)) return true;
+    if (countryData?.id === playerData.country) {
         for (const role of playerData.roles) {
             if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
         };
