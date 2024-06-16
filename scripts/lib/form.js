@@ -140,6 +140,28 @@ export function countryList(player) {
 };
 
 /**
+ * 国の情報を表示
+ * @param {Player} player 
+ * @param {any} countryData 
+ */
+export function showCountryInfo(player,countryData) {
+    try {
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
+        const showBody = [
+            {translate: `form.showcountry.option.name`,with: [countryData.name]},
+            {translate: `form.showcountry.option.lore`,with: [countryData.lore]},
+            {translate: `form.showcountry.option.id`,with: [countryData.id]},
+            {translate: `form.showcountry.option.name`,with: [countryData.name]},
+        ]
+        const form = new ActionFormData();
+        form.title(countryData.name);
+        form.body({rawtext: []})
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
  * 完成
  * ロールの一覧表示
  * @param {Player} player 

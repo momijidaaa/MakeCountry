@@ -42,6 +42,7 @@ export function MakeCountry(owner, name = `country`, invite = true,peace = confi
         name: name,
         id: id,
         owner: owner.id,
+        lore: ``,
         //通貨のID(0が共通通貨)
         currencyUnitId: 0,
         NonMaintenanceCostAccrualPeriod: config.NonMaintenanceCostAccrualPeriod,
