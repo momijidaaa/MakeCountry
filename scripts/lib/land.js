@@ -38,9 +38,11 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     chunkData.countryId = id;
     ownerData.country = id;
     ownerData.money -= config.MakeCountryCost;
-    const ownerRole = CreateRole(`Owner`, [`owner`]);
-    const adminRole = CreateRole(`Admin`, [`admin`]);
-    const peopleRole = CreateRole(`People`, [`place`, `break`, `blockUse`, `entityUse`, `noTarget`]);
+    const [ownerRole, adminRole, peopleRole ]= CreateRole([
+        {name: `Owner`, permissions: [`owner`],icon: `golden_block`,color: `e`},
+        {name: `Admin`, permissions: [`admin`],icon: `iron_block`,color: `f`},
+        {name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`],icon: `glass`,color: `a`}
+    ]);
     ownerData.roles.push(ownerRole)
     const countryData = {
         name: name,
