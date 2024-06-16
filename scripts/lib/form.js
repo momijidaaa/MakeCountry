@@ -151,7 +151,7 @@ export function showCountryInfo(player,countryData) {
             {translate: `form.showcountry.option.name`,with: [countryData.name]},
             {translate: `form.showcountry.option.lore`,with: [countryData.lore]},
             {translate: `form.showcountry.option.id`,with: [countryData.id]},
-            {translate: `form.showcountry.option.name`,with: [countryData.name]},
+            {translate: `form.showcountry.option.owner`,with: [ownerData.name]},
         ]
         const form = new ActionFormData();
         form.title(countryData.name);
