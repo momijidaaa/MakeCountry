@@ -38,24 +38,81 @@ export function settingCountry(player) {
 
 /**
  * 
- * 国の情報表示
+ * 自国の情報表示
  * @param {Player} player 
  */
 export function settingCountryInfoForm(player) {
-    const form = new ActionFormData();
-    form.title({ translate: `form.setting.info.title` });
-    form.body({ translate: `form.setting.info.body` });
-    form.button({ translate: `form.setting.info.button.name` });
-
-    form.show(player).then(rs => {
-        if (rs.canceled) return;
-        switch (rs.selection) {
-            case 0: {
-                HasPermission()
-                break;
-            };
+    try {
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const membersId = countryData.members.filter(m => m !== ownerData.id);
+        let membersName = [];
+        membersId.forEach(member => {
+            const memberData = GetAndParsePropertyData(`player_${member}`);
+            membersName.push(memberData.name);
+        });
+        let money = `show.private`;
+        let resourcePoint = `show.private`;
+        if (!countryData.hideMoney) {
+            money = countryData.money;
+            resourcePoint = countryData.resourcePoint;
         };
-    });
+        const allianceIds = countryData.alliance;
+        let allianceCountryName = [];
+        allianceIds.forEach(id => {
+            const countryData = GetAndParsePropertyData(id);
+            allianceCountryName.push(countryData.name);
+        });
+        const hostilityIds = countryData.alliance;
+        let hostilityCountryName = [];
+        hostilityIds.forEach(id => {
+            const countryData = GetAndParsePropertyData(id);
+            hostilityCountryName.push(countryData.name);
+        });
+        const warNowIds = countryData.hostility;
+        let warNowCountryName = [];
+        warNowIds.forEach(id => {
+            const countryData = GetAndParsePropertyData(id);
+            warNowCountryName.push(countryData.name);
+        });
+
+        const showBody = [
+            { translate: `form.showcountry.option.name`, with: [countryData.name] },
+            { translate: `form.showcountry.option.lore`, with: [countryData.lore] },
+            { translate: `form.showcountry.option.id`, with: [countryData.id] },
+            { translate: `form.showcountry.option.owner`, with: [ownerData.name] },
+            { translate: `form.showcountry.option.memberscount`, with: [`${membersName.length}`] },
+            { translate: `form.showcountry.option.members`, with: [membersName.join(`§r , `)] },
+            { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] },
+            { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${countryData.money}`] },
+            { translate: `form.showcountry.option.resourcepoint`, with: [`${countryData.resourcePoint}`] },
+            { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] },
+            { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] },
+            { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] },
+            { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] },
+            { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] },
+            { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] },
+            { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] },
+        ];
+
+        const form = new ActionFormData();
+        form.title({ translate: `form.setting.info.title` });
+        form.body({rawtext: showBody});
+        form.button({ translate: `form.setting.info.button.name` });
+
+        form.show(player).then(rs => {
+            if (rs.canceled) return;
+            switch (rs.selection) {
+                case 0: {
+                    HasPermission()
+                    break;
+                };
+            };
+        });
+    } catch (error) {
+        console.warn(error);
+    };
 };
 
 const rolePermissions = [
