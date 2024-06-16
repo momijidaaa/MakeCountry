@@ -140,6 +140,7 @@ export function selectRoleEditType(player, roleData) {
             switch (rs.selection) {
                 case 0: {
                     //名前の変更
+                    RoleNameChange(player,roleData);
                     break;
                 };
                 case 1: {
