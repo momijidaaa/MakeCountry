@@ -51,8 +51,8 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         lore: ``,
         //通貨のID(0が共通通貨)
         currencyUnitId: 0,
-        NonMaintenanceCostAccrualPeriod: config.NonMaintenanceCostAccrualPeriod,
         members: [owner.id],
+        peaceChangeCooltime: 0,
         territories: [chunkId],
         ownerRole: ownerRole,
         adminRole: adminRole,

@@ -516,12 +516,15 @@ export function editCountryPeaceForm(player, countryData) {
             settingCountryInfoForm(player, countryData);
             return;
         };
+        if (0 < countryData.peaceChangeCooltime) {
+            player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `peace.cooltime` },{text: ` (${countryData.peaceChangeCooltime})`}] });
+        };
         const beforeValue = countryData.peace;
         let value = rs.formValues[0];
         countryData.peace = value;
+        countryData.peaceChangeCooltime = config.peaceChangeCooltime;
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.peace` }, { text: `\n§r${beforeValue} ->§r ${value}` }] });
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
-        settingCountryInfoForm(player, countryData);
         return;
     });
 };
@@ -541,7 +544,6 @@ export function editCountryInviteForm(player, countryData) {
         countryData.invite = value;
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.invite` }, { text: `\n§r${beforeValue} ->§r ${value}` }] });
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
-        settingCountryInfoForm(player, countryData);
         return;
     });
 };

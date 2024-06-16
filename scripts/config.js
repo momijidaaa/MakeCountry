@@ -3,6 +3,8 @@ export default {
     prefix: `?`,
     //プレイヤーの初期の所持金
     initialMoney: 1000,
+    //平和主義切り替えのクールタイム(徴税タイミングごとに-1)
+    peaceChangeCooltime: 3,
     //チャットの際にプレイヤー名の左に所属国を表示するか
     showCountryChatLeftName: true,
     //デフォルトで平和主義にするか
@@ -30,7 +32,7 @@ export default {
     //特別区域で許可する権限
     specialAllowPermissions: [`entityUse`, `blockUse`],
     //荒野で許可する権限
-    wildernessAllowPermissions: [`entityUse`, `blockUse`,`makeCountry`,`buyChunk`,`place`,`break`,`setHome`],
+    wildernessAllowPermissions: [`entityUse`, `blockUse`, `makeCountry`, `buyChunk`, `place`, `break`, `setHome`],
     //平和主義国の維持費(1チャンク)
     MaintenanceFeePacifistCountries: 500,
     //非平和主義国の維持費(1チャンク)

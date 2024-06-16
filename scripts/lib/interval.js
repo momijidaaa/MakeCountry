@@ -51,10 +51,12 @@ system.runInterval(() => {
         };
         for (const cId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`))) {
             const countryData = GetAndParsePropertyData(cId);
+            if (0 < countryData.peaceChangeCooltime) {
+                countryData.peaceChangeCooltime -= 1;
+            };
             countryData.days += 1;
             StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
-            if (0 < countryData.NonMaintenanceCostAccrualPeriod) {
-                countryData.NonMaintenanceCostAccrualPeriod -= 1;
+            if (countryData.days < config.NonMaintenanceCostAccrualPeriod) {
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
                 continue;
             };
