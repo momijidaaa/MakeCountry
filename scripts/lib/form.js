@@ -49,11 +49,12 @@ export function showProfileForm(player) {
         {translate: `msg.havemoney`},{text: `${playerData?.money} §r\n`},
         {translate: `msg.days`},{text: `${playerData?.days} §r\n`},
         {translate: `msg.country`},{text: `${playerData?.country ?? `None`} §r\n`},
-        {translate: `msg.invite`},{text: `${playerData?.invite ?? `None`} §r\n`},
+        {translate: `msg.invite`},{text: `${playerData?.invite.length ?? `None`} §r\n`},
         {translate: `msg.havechunks`},{text: `${playerData?.chunks.length} §r`}
     ];
     const form = new ActionFormData();
     form.title({translate: `form.profile.title`});
+    form.body({rawtext: showProfile})
     form.button({translate: `mc.button.back`});
     form.show(player).then(rs =>{
         playerMainMenu(player);
