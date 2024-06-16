@@ -5,10 +5,30 @@ import config from "../config";
 import { DeleteCountry, DeleteRole, MakeCountry } from "./land";
 import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
+/**
+ * 国に参加するときの形式選択
+ * @param {Player} player 
+ */
 export function joinTypeSelectForm(player) {
     const form = new ActionFormData();
+    form.title({translate: `form.invite.title`});
     form.button({translate: `form.invite.check.invite`});
     form.button({translate: `form.invite.list.allowjoin`});
+    form.show(player).then(rs => {
+        if(rs.canceled) {
+            return;
+        };
+        switch(rs.selection) {
+            case 0: {
+                //招待を確認
+                break;
+            };
+            case 1: {
+                //入れる国のリスト
+                break;
+            };
+        };
+    });
 };
 
 /**
