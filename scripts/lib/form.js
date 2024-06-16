@@ -85,22 +85,22 @@ export function countryDeleteCheckForm(player) {
     try {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const form = new ActionFormData();
-        form.title({translate: `form.dismantle.check`});
-        form.body({translate: `form.dismantle.body`});
-        form.button({translate: `mc.button.back`});
-        form.button({translate: `mc.button.dismantle`});
+        form.title({ translate: `form.dismantle.check` });
+        form.body({ translate: `form.dismantle.body` });
+        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.dismantle` });
         form.show(player).then(rs => {
-            if(rs.canceled) {
+            if (rs.canceled) {
                 settingCountry(player);
                 return;
             };
-            switch(rs.selection) {
+            switch (rs.selection) {
                 case 0: {
                     settingCountry(player);
                     break;
                 };
                 case 1: {
-                    player.sendMessage({translate: `form.dismantle.complete`})
+                    player.sendMessage({ translate: `form.dismantle.complete` })
                     DeleteCountry(playerData.id);
                     break;
                 };
@@ -119,7 +119,7 @@ export function countryDeleteCheckForm(player) {
 export function countryList(player) {
     try {
         const form = new ActionFormData();
-        form.title({translate: `form.countrylist.title`});
+        form.title({ translate: `form.countrylist.title` });
         const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
         let countries = [];
         countryIds.forEach(id => {
@@ -129,10 +129,10 @@ export function countryList(player) {
             form.button(`${country.name} \n§rID: ${country.id}`);
         });
         form.show(player).then(rs => {
-            if(rs.canceled) {
+            if (rs.canceled) {
                 return;
             };
-            showCountryInfo(player,countries[rs.selection]);
+            showCountryInfo(player, countries[rs.selection]);
         });
     } catch (error) {
         console.warn(error);
@@ -144,7 +144,7 @@ export function countryList(player) {
  * @param {Player} player 
  * @param {any} countryData 
  */
-export function showCountryInfo(player,countryData) {
+export function showCountryInfo(player, countryData) {
     try {
         const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
         const membersId = countryData.members.filter(m => m !== ownerData.id);
@@ -155,27 +155,56 @@ export function showCountryInfo(player,countryData) {
         });
         let money = `show.private`;
         let resourcePoint = `show.private`;
-        if(!countryData.hideMoney) {
+        if (!countryData.hideMoney) {
             money = countryData.money;
             resourcePoint = countryData.resourcePoint;
         };
+        const allianceIds = countryData.alliance;
+        let allianceCountryName = [];
+        allianceIds.forEach(id => {
+            const countryData = GetAndParsePropertyData(id);
+            allianceCountryName.push(countryData.name);
+        });
+        const hostilityIds = countryData.alliance;
+        let hostilityCountryName = [];
+        hostilityIds.forEach(id => {
+            const countryData = GetAndParsePropertyData(id);
+            hostilityCountryName.push(countryData.name);
+        });
+        const warNowIds = countryData.hostility;
+        let warNowCountryName = [];
+        warNowIds.forEach(id => {
+            const countryData = GetAndParsePropertyData(id);
+            warNowCountryName.push(countryData.name);
+        });
+
+
         const showBody = [
-            {translate: `form.showcountry.option.name`,with: [countryData.name]},
-            {translate: `form.showcountry.option.lore`,with: [countryData.lore]},
-            {translate: `form.showcountry.option.id`,with: [countryData.id]},
-            {translate: `form.showcountry.option.owner`,with: [ownerData.name]},
-            {translate: `form.showcountry.option.memberscount`,with: [`${membersName.length}`]},
-            {translate: `form.showcountry.option.members`,with: [membersName.join(` , `)]},
-            {translate: `form.showcountry.option.territories`,with: [`${countryData.territories.length}`]},
-            {translate: `form.showcountry.option.money`,with: [`${config.MoneyName} ${countryData.money}`]},
-            {translate: `form.showcountry.option.resourcepoint`,with: [`${countryData.resourcePoint}`]},
-            {translate: `form.showcountry.option.peace`,with: [`${countryData.peace}`]},
-            {translate: `form.showcountry.option.taxper`,with: [`${countryData.taxPer}`]},
-            {translate: `form.showcountry.option.taxinstitutionisper`,with: [`${countryData.taxInstitutionIsPer}`]},
+            { translate: `form.showcountry.option.name`, with: [countryData.name] },
+            { translate: `form.showcountry.option.lore`, with: [countryData.lore] },
+            { translate: `form.showcountry.option.id`, with: [countryData.id] },
+            { translate: `form.showcountry.option.owner`, with: [ownerData.name] },
+            { translate: `form.showcountry.option.memberscount`, with: [`${membersName.length}`] },
+            { translate: `form.showcountry.option.members`, with: [membersName.join(`§r , `)] },
+            { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] },
+            { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${countryData.money}`] },
+            { translate: `form.showcountry.option.resourcepoint`, with: [`${countryData.resourcePoint}`] },
+            { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] },
+            { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] },
+            { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] },
+            { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] },
+            { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] },
+            { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] },
+            { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] },
         ];
         const form = new ActionFormData();
         form.title(countryData.name);
-        form.body({rawtext: []})
+        form.body({ rawtext: showBody });
+        form.button({ translate: `mc.button.back` });
+        form.show(player).then(rs => {
+            countryList(player);
+            return;
+        });
     } catch (error) {
         console.warn(error);
     };
@@ -189,7 +218,7 @@ export function showCountryInfo(player,countryData) {
 export function settingCountryRoleForm(player) {
     try {
         const form = new ActionFormData();
-        form.title({translate: `form.setting.button.role`});
+        form.title({ translate: `form.setting.button.role` });
         const playerData = GetAndParsePropertyData(player)
         const roleIds = GetAndParsePropertyData(`country_${playerData.country}`).roles;
         let roles = [];
@@ -197,14 +226,14 @@ export function settingCountryRoleForm(player) {
             roles.push(GetAndParsePropertyData(`role_${id}`));
         });
         roles.forEach(role => {
-            form.button(role.name,role.icon);
+            form.button(role.name, role.icon);
         });
         form.show(player).then(rs => {
-            if(rs.canceled) {
+            if (rs.canceled) {
                 settingCountry(player);
                 return;
             };
-            selectRoleEditType(player,roles[rs.selection]);
+            selectRoleEditType(player, roles[rs.selection]);
         });
     } catch (error) {
         console.warn(error);
@@ -221,16 +250,16 @@ export function RoleIconChange(player, roleData) {
     if (HasPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.iconchange.title`, with: [roleData.name] });
-        form.textField({translate: `form.role.iconchange.label`},{translate: `form.role.iconchange.input`},roleData.icon);
-        form.submitButton({translate: `mc.button.change`});
+        form.textField({ translate: `form.role.iconchange.label` }, { translate: `form.role.iconchange.input` }, roleData.icon);
+        form.submitButton({ translate: `mc.button.change` });
         form.show(player).then(rs => {
-            if(rs.canceled) {
-                selectRoleEditType(player,roleData.id);
+            if (rs.canceled) {
+                selectRoleEditType(player, roleData.id);
                 return;
             };
             roleData.icon = rs.formValues[0];
-            if(rs.formValues[0] === ``) roleData.icon = undefined;
-            StringifyAndSavePropertyData(`role_${roleData.id}`,roleData);
+            if (rs.formValues[0] === ``) roleData.icon = undefined;
+            StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
             return;
         });
     };
@@ -246,15 +275,15 @@ export function RoleNameChange(player, roleData) {
     if (HasPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.namechange.title`, with: [roleData.name] });
-        form.textField({translate: `form.role.namechange.label`},{translate: `form.role.namechange.input`},roleData.name);
-        form.submitButton({translate: `mc.button.change`});
+        form.textField({ translate: `form.role.namechange.label` }, { translate: `form.role.namechange.input` }, roleData.name);
+        form.submitButton({ translate: `mc.button.change` });
         form.show(player).then(rs => {
-            if(rs.canceled) {
-                selectRoleEditType(player,roleData.id);
+            if (rs.canceled) {
+                selectRoleEditType(player, roleData.id);
                 return;
             };
             roleData.name = rs.formValues[0] ?? `None`;
-            StringifyAndSavePropertyData(`role_${roleData.id}`,roleData);
+            StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
             return;
         });
     };
@@ -281,12 +310,12 @@ export function selectRoleEditType(player, roleData) {
             switch (rs.selection) {
                 case 0: {
                     //名前の変更
-                    RoleNameChange(player,roleData);
+                    RoleNameChange(player, roleData);
                     break;
                 };
                 case 1: {
                     //アイコンの変更
-                    RoleIconChange(player,roleData);
+                    RoleIconChange(player, roleData);
                     break;
                 };
                 case 2: {
@@ -320,7 +349,7 @@ export function setRolePermissionForm(player, roleData) {
         form.submitButton({ translate: `mc.button.save` });
         form.show(player).then(rs => {
             if (rs.canceled) {
-                selectRoleEditType(player,roleData.id)
+                selectRoleEditType(player, roleData.id)
                 return;
             };
             const values = rs.formValues;
