@@ -329,7 +329,7 @@ class ChatHandler {
         /** 
          * @type {import("@minecraft/server").RawMessage}
          */
-        const helpMessage = [{ text: `§a------------------------------------\n` }, { translate: `command.help.money` }, { text: `\n` },
+        const helpMessage = [{ text: `§a------------------------------------\n` },
         { translate: `command.help.money` }, { text: `\n` },
         { translate: `command.help.setup` }, { text: `\n` },
         { translate: `command.help.msend` }, { text: `\n` },
