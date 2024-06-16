@@ -7,7 +7,10 @@ const startId = "DyProp_"
  * @param {String|undefined} value
  */
 export function setDynamicProperty(id, value = undefined) {
-    world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_dy`)).forEach(a => world.setDynamicProperty(a));
+    world.getDynamicPropertyIds().filter(b => b.startsWith(`${startId}${id}_dy`)).forEach(a => {
+        world.setDynamicProperty(a)
+        world.sendMessage(`${a}`)
+    });
     if (!value) return;
     const chunkSize = 20000
     if (typeof value !== 'string') {

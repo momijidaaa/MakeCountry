@@ -57,6 +57,8 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         ownerRole: ownerRole,
         adminRole: adminRole,
         peopleRole: peopleRole,
+        spawn: undefined,
+        publicSpawn: false,
         roles: [ownerRole, adminRole, peopleRole],
         resourcePoint: config.initialCountryResourcePoint,
         money: config.initialCountryMoney,
@@ -104,8 +106,6 @@ export function GenerateChunkData(x, z, dimensionId, ownerId = undefined, countr
         x: x,
         z: z,
         id: GetChunkPropertyId(x, z, dimensionId),
-        spawn: undefined,
-        publicSpawn: false,
         owner: ownerId,
         countryId: countryId,
         special: special,
@@ -148,8 +148,10 @@ export function calculationCountryPower(countryId) {
  * @param {string} countryId 
  */
 export function DeleteCountry(countryId) {
+    world.sendMessage(`${countryId}`)
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
-    const ownerData = GetAndParsePropertyData(`player_${countryData?.owner}`)
+    const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
+    world.sendMessage(`${JSON.stringify(countryData)}`)
     ownerData.money = ownerData.money + countryData.money + countryData.resourcePoint;
     StringifyAndSavePropertyData(`player_${ownerData.id}`, ownerData);
     countryData.members.forEach(m => {
