@@ -376,7 +376,7 @@ class ChatHandler {
         return;
     };
     CountryList() {
-        countryList(this.sender)
+        countryList(this.sender);
         return;
     };
 

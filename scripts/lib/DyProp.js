@@ -2,9 +2,9 @@ import { world } from "@minecraft/server";
 const startId = "DyProp_"
 
 /**
- * DyProp save string data to ID
- * @param {String} id DyProp ID
- * @param {String|undefined} value DyProp string data
+ * 
+ * @param {String} id
+ * @param {String|undefined} value
  */
 export function setDynamicProperty(id, value = undefined) {
     world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_dy`)).forEach(a => world.setDynamicProperty(a));
@@ -16,14 +16,14 @@ export function setDynamicProperty(id, value = undefined) {
     };
     for (let i = 0; i < value.length; i += chunkSize) {
         const ObjectId = `${startId}${id}_dy${i}`;
-        world.setDynamicProperty(ObjectId,value.substring(i, i + chunkSize));
+        world.setDynamicProperty(ObjectId, value.substring(i, i + chunkSize));
     };
 };
 
 /**
- * DyProp get string data for ID
- * @param {String} id Dyprop ID
- * @returns {string|undefined} String or Undefined
+ *
+ * @param {String} id
+ * @returns {string|undefined}
  */
 export function getDynamicProperty(id) {
     let array = [];
@@ -43,28 +43,23 @@ export function getDynamicProperty(id) {
 };
 
 /**
- * DyProp get all ID
- * @returns {Array<string>} Array IDs data
+ * 
+ * @returns {Array<string>}
  */
 export function DynamicPropertyIds() {
-    let ids = JSON.parse(JSON.stringify(world.getDynamicPropertyIds()));
-    let array = [];
-    let i = 0;
+    const inputArray = world.getDynamicPropertyIds;
+    //正規表現パターンを作成
+    const pattern = /^DyProp_(.+)_dy\d+$/;
+    const result = new Set();
 
-    while (true) {
-        if (ids.length === 0) break;
-        for (const id of ids) {
-            if (id.startsWith(startId) && id.endsWith(`_dy${i}`)) {
-                const item = id.replace(startId, "").replace(`_dy${i}`);
-                if (!array.includes(item)) {
-                    array.push(item);
-                    ids.splice(ids.indexOf(id), 1);
-                };
-            }
-        };
+    //フィルタリング＆抽出
+    inputArray.forEach(item => {
+        const match = item.match(pattern);
+        if (match) {
+            result.add(match[1]);
+        }
+    });
 
-        i++;
-    };
-
-    return array;
+    //配列変換
+    return Array.from(result);
 };
