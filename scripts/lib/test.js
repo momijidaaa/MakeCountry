@@ -27,7 +27,11 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             break;
         };
         case `karo:list`: {
-            world.sendMessage(`${world.getDynamicPropertyIds().join(`\n`)}`);
+            const dyp = []
+            world.getDynamicPropertyIds().forEach(id => {
+                `§6${id}§r\n${world.getDynamicProperty(id)}\n`
+            })
+            world.sendMessage(`${dyp.join(`\n`)}`);
             break;
         };
     };

@@ -118,7 +118,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
             switch (rs.selection) {
                 case 0: {
                     if (HasPermission(player, `editCountryName`)) {
-                        editCountryNameForm();
+                        editCountryNameForm(player,countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
                     };
@@ -126,7 +126,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                 };
                 case 1: {
                     if (HasPermission(player, `editCountryLore`)) {
-                        editCountryNameForm();
+                        editCountryLoreForm(player,countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
                     };
@@ -153,7 +153,7 @@ export function editCountryNameForm(player, countryData) {
         if (value === ``) value === `Country`;
         const beforeName = countryData.name;
         countryData.name = value;
-        world.sendMessage({rawtext: [{text: `§a[MakeCountry]§r\n`},{translate: `changed.countryname`},{text: `\n§r${beforeName} →§r ${value}`}]});
+        player.sendMessage({rawtext: [{text: `§a[MakeCountry]§r\n`},{translate: `changed.countryname`},{text: `\n§r${beforeName} ->§r ${value}`}]});
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         settingCountryInfoForm(player, countryData);
         return;
@@ -173,7 +173,7 @@ export function editCountryLoreForm(player, countryData) {
         let value = rs.formValues[0];
         const beforeLore = countryData.lore;
         countryData.lore = value;
-        player.sendMessage({rawtext: [{text: `§a[MakeCountry]§r\n`},{translate: `changed.countrylore`},{text: `\n§r${beforeLore} →§r ${value}`}]});
+        player.sendMessage({rawtext: [{text: `§a[MakeCountry]§r\n`},{translate: `changed.countrylore`},{text: `\n§r${beforeLore} ->§r ${value}`}]});
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         settingCountryInfoForm(player, countryData);
         return;

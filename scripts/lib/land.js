@@ -172,7 +172,7 @@ export function DeleteCountry(countryId) {
         DyProp.setDynamicProperty(`role_${r}`);
     });
     //ここら辺に国際組織から抜ける処理を追加しておく
-    DyProp.setDynamicProperty(`country_${countryId}`);
+    DyProp.setDynamicProperty(`country_${countryData.id}`);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `deleted.country`, with: [`${countryData.name}`] }] });
 };
 
