@@ -116,7 +116,11 @@ export function settingCountryInfoForm(player) {
             if (rs.canceled) return;
             switch (rs.selection) {
                 case 0: {
-                    HasPermission()
+                    if(HasPermission(player,`editCountryName`)) {
+                        editCountryNameForm();
+                    } else {
+                        player.sendMessage({translate: `no.permission`})
+                    };
                     break;
                 };
             };
@@ -124,6 +128,10 @@ export function settingCountryInfoForm(player) {
     } catch (error) {
         console.warn(error);
     };
+};
+
+export function editCountryNameForm(player,countryData) {
+    const form
 };
 
 const rolePermissions = [
