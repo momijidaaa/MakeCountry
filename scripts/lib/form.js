@@ -18,7 +18,17 @@ export function settingCountry(player) {
     form.button({ translate: `form.setting.button.role` });
 
     form.show(player).then(rs => {
-        if (rs.canceled) return;
+        if (rs.canceled) {
+            if (rs.cancelationReason === FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
+                    settingCountry(player);
+                    return;
+                }, 10);
+                return;
+            };
+            player.sendMessage({ translate: `form.cancel.message` });
+            return;
+        };
         switch (rs.selection) {
             case 0: {
                 settingCountryInfoForm(player)
@@ -98,7 +108,7 @@ export function settingCountryInfoForm(player) {
 
         const form = new ActionFormData();
         form.title({ translate: `form.setting.info.title` });
-        form.body({rawtext: showBody});
+        form.body({ rawtext: showBody });
         form.button({ translate: `form.setting.info.button.name` });
 
         form.show(player).then(rs => {
@@ -187,6 +197,14 @@ export function countryList(player) {
         });
         form.show(player).then(rs => {
             if (rs.canceled) {
+                if (rs.cancelationReason === FormCancelationReason.UserBusy) {
+                    system.runTimeout(() => {
+                        countryList(player);
+                        return;
+                    }, 10);
+                    return;
+                };
+                player.sendMessage({ translate: `form.cancel.message` });
                 return;
             };
             showCountryInfo(player, countries[rs.selection]);
@@ -442,6 +460,7 @@ export function MakeCountryForm(player) {
                     MakeCountryForm(player);
                     return;
                 }, 10);
+                return;
             };
             player.sendMessage({ translate: `form.cancel.message` });
             return;

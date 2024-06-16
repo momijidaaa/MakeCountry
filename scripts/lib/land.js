@@ -31,7 +31,7 @@ export function MakeCountry(owner, name = `country`, invite = true,peace = confi
         return;
     };
     const idString = world.getDynamicProperty(`countryId`) ?? "1"
-    const id = Number(idString);
+    let id = Number(idString);
     ownerData.country = id;
     ownerData.money -= config.MakeCountryCost;
     const ownerRole = CreateRole(`Owner`, [`owner`]);
@@ -192,7 +192,7 @@ export function CreateRoleToCountry(countryId, name, permissions = [], iconTextu
  */
 export function CreateRole(name, permissions = [], iconTextureId = `stone`, color = `e`) {
     const roleIdString = world.getDynamicProperty(`roleId`) ?? "1";
-    const id = Number(roleIdString);
+    let id = Number(roleIdString);
     const roleData = {
         name: name,
         color: `§a${color}`,
@@ -321,7 +321,7 @@ export function MakeInternationalOrganization(owner, ownerCountryId, name) {
         return;
     };
     const idString = world.getDynamicProperty(`InternationalOrganizationId`) ?? "1"
-    const id = Number(idString);
+    let id = Number(idString);
 
     const OrganizationData = {
         name: name,

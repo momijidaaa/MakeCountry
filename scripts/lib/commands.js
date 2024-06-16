@@ -41,6 +41,7 @@ class ChatHandler {
     };
 
     handleCommand() {
+        this.event.cancel = true;
         const command = this.message.split(" ")[0];
         const args = this.message.split(" ").slice(1);
         system.run(() => {
@@ -106,7 +107,7 @@ class ChatHandler {
     };
 
     Money() {
-        this.sender.sendMessage({ translate: `command.money.result.message`, with: `${config.MoneyName} ${this.playerData.money}` });
+        this.sender.sendMessage({ translate: `command.money.result.message`, with: [`${config.MoneyName} ${this.playerData.money}`] });
     };
 
     setup() {
