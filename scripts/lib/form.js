@@ -11,15 +11,15 @@ import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } 
  */
 export function playerMainMenu(player) {
     const form = new ActionFormData();
-    form.title({translate: `form.mainmenu.title`});
-    form.button({translate: `form.mainmenu.button.profile`});
-    form.button({translate: `form.mainmenu.button.join`});
-    form.show(player).then(rs =>{
-        if(rs.canceled) {
-            if(rs.cancelationReason === FormCancelationReason.UserBusy) {
-                system.runTimeout(()=>{
+    form.title({ translate: `form.mainmenu.title` });
+    form.button({ translate: `form.mainmenu.button.profile` });
+    form.button({ translate: `form.mainmenu.button.join` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            if (rs.cancelationReason === FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
                     playerMainMenu(player);
-                },10);
+                }, 10);
                 return;
             };
             return;
@@ -44,19 +44,19 @@ export function playerMainMenu(player) {
 export function showProfileForm(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const showProfile = [
-        {translate: `msg.name`},{text: `${playerData?.name} §r\n`},
-        {translate: `msg.lv`},{text: `${player.level} §r\n`},
-        {translate: `msg.havemoney`},{text: `${playerData?.money} §r\n`},
-        {translate: `msg.days`},{text: `${playerData?.days} §r\n`},
-        {translate: `msg.country`},{text: `${playerData?.country ?? `None`} §r\n`},
-        {translate: `msg.invite`},{text: `${playerData?.invite.length ?? `None`} §r\n`},
-        {translate: `msg.havechunks`},{text: `${playerData?.chunks.length} §r`}
+        { translate: `msg.name` }, { text: `${playerData?.name} §r\n` },
+        { translate: `msg.lv` }, { text: `${player.level} §r\n` },
+        { translate: `msg.havemoney` }, { text: `${playerData?.money} §r\n` },
+        { translate: `msg.days` }, { text: `${playerData?.days} §r\n` },
+        { translate: `msg.country` }, { text: `${playerData?.country ?? `None`} §r\n` },
+        { translate: `msg.invite` }, { text: `${playerData?.invite.length ?? `None`} §r\n` },
+        { translate: `msg.havechunks` }, { text: `${playerData?.chunks.length} §r` }
     ];
     const form = new ActionFormData();
-    form.title({translate: `form.profile.title`});
-    form.body({rawtext: showProfile})
-    form.button({translate: `mc.button.back`});
-    form.show(player).then(rs =>{
+    form.title({ translate: `form.profile.title` });
+    form.body({ rawtext: showProfile })
+    form.button({ translate: `mc.button.back` });
+    form.show(player).then(rs => {
         playerMainMenu(player);
         return;
     });
@@ -163,7 +163,7 @@ export function joinCheckFromInviteForm(player, countryData) {
             switch (rs.selection) {
                 case 0: {
                     playerData.invite.splice(playerData.invite.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`player_${playerData.id}`,playerData);
+                    StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
                     playerCountryJoin(player, countryData.id);
                     return;
                 };
@@ -278,7 +278,7 @@ export function countryInvitesList(player) {
         };
         countriesData.push(d);
     };
-    StringifyAndSavePropertyData(`player_${player.id}`,playerData);
+    StringifyAndSavePropertyData(`player_${player.id}`, playerData);
     const form = new ActionFormData();
     if (countriesData.length === 0) {
         form.body({ translate: `no.invite.country` });
@@ -440,6 +440,8 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         form.body({ rawtext: showBody });
         form.button({ translate: `form.setting.info.button.name` });
         form.button({ translate: `form.setting.info.button.lore` });
+        form.button({ translate: `form.setting.info.button.peace` });
+        form.button({ translate: `form.setting.info.button.invite` });
 
         form.show(player).then(rs => {
             if (rs.canceled) return;
@@ -455,6 +457,22 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                 case 1: {
                     if (HasPermission(player, `editCountryLore`)) {
                         editCountryLoreForm(player, countryData);
+                    } else {
+                        player.sendMessage({ translate: `no.permission` });
+                    };
+                    break;
+                };
+                case 2: {
+                    if (HasPermission(player, `peaceChange`)) {
+                        editCountryPeaceForm(player, countryData);
+                    } else {
+                        player.sendMessage({ translate: `no.permission` });
+                    };
+                    break;
+                };
+                case 3: {
+                    if (HasPermission(player, `inviteChange`)) {
+                        editCountryInviteForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
                     };
@@ -488,6 +506,46 @@ export function editCountryNameForm(player, countryData) {
     });
 };
 
+export function editCountryPeaceForm(player, countryData) {
+    const form = new ModalFormData();
+    form.title({ translate: `form.editcountrypeace.title` });
+    form.toggle({ translate: `form.editcountrypeace.label` }, countryData.peace);
+    form.submitButton({ translate: `mc.button.change` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            settingCountryInfoForm(player, countryData);
+            return;
+        };
+        const beforeValue = countryData.peace;
+        let value = rs.formValues[0];
+        countryData.peace = value;
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.peace` }, { text: `\n§r${beforeValue} ->§r ${value}` }] });
+        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        settingCountryInfoForm(player, countryData);
+        return;
+    });
+};
+
+export function editCountryInviteForm(player, countryData) {
+    const form = new ModalFormData();
+    form.title({ translate: `form.editcountryinvite.title` });
+    form.toggle({ translate: `form.editcountryinvite.label` }, countryData.invite);
+    form.submitButton({ translate: `mc.button.change` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            settingCountryInfoForm(player, countryData);
+            return;
+        };
+        const beforeValue = countryData.invite;
+        let value = rs.formValues[0];
+        countryData.invite = value;
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.invite` }, { text: `\n§r${beforeValue} ->§r ${value}` }] });
+        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        settingCountryInfoForm(player, countryData);
+        return;
+    });
+};
+
 export function editCountryLoreForm(player, countryData) {
     const form = new ModalFormData();
     form.title({ translate: `form.editcountrylore.title` });
@@ -511,6 +569,8 @@ export function editCountryLoreForm(player, countryData) {
 const rolePermissions = [
     `editCountryName`,
     `editCountryLore`,
+    `peaceChange`,
+    `inviteChange`,
     `invite`,
     `place`,
     `break`,
