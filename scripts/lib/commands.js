@@ -339,6 +339,7 @@ class ChatHandler {
             { translate: `command.help.leavecountry` },
             { translate: `command.help.kill` },
             { translate: `command.help.countrylist` },
+            { translate: `command.help.joincountry` },
             { text: `§a--------------------------` },
         ];
         this.sender.sendMessage(helpMessage);
@@ -360,6 +361,9 @@ class ChatHandler {
         return;
     };
     countryList() {
+    };
+
+    joinCountry() {
     };
 };
 
