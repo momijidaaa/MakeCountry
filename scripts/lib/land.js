@@ -151,6 +151,7 @@ export function DeleteCountry(countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     const ownerData = GetAndParsePropertyData(`player_${countryData?.owner}`)
     ownerData.money = ownerData.money + countryData.money + countryData.resourcePoint;
+    StringifyAndSavePropertyData(`player_${ownerData.id}`, ownerData);
     countryData.members.forEach(m => {
         const playerData = GetAndParsePropertyData(`player_${m}`);
         playerData.roles = [];

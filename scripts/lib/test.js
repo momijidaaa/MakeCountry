@@ -29,7 +29,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         case `karo:list`: {
             const dyp = []
             world.getDynamicPropertyIds().forEach(id => {
-                `§6${id}§r\n${world.getDynamicProperty(id)}\n`
+                dyp.push(`§6${id}§r\n${world.getDynamicProperty(id)}\n`)
             })
             world.sendMessage(`${dyp.join(`\n`)}`);
             break;
