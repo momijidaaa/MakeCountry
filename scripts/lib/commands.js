@@ -20,8 +20,8 @@ class ChatHandler {
          * @type {string}
          */
         this.prefix = config.prefix;
-        this.playerData = GetAndParsePropertyData(`player_${sender.id}`);
-        this.playerCountryData = GetAndParsePropertyData(`country_${sender.country}`);
+        this.playerData = GetAndParsePropertyData(`player_${this.sender.id}`);
+        this.playerCountryData = GetAndParsePropertyData(`country_${this.sender?.country}`);
     }
 
     isCommand() {
@@ -33,11 +33,11 @@ class ChatHandler {
             world.sendMessage(`<${this.sender.name}> ${this.message}`);
             return;
         };
-        let landId = this.playerData.country;
+        let landId = this.playerData?.country;
         let land = `chat.player.no.join.any.country`;
-        if (landId) land = this.playerCountryData.id;
-        world.sendMessage([{ text: `<§${this.playerCountryData.color}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
-        this.event.targets = [];
+        if (landId) land = this.playerCountryData.name;
+        world.sendMessage([{ text: `<§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
+        this.event.cancel = true;
     };
 
     handleCommand() {
@@ -323,10 +323,9 @@ class ChatHandler {
 
     sendHelp() {
         /** 
-         * @type {Array{}}
+         * @type {import("@minecraft/server").RawMessage}
          */
-        const helpMessage = [
-            { text: `§a--------------------------\n` },
+        const helpMessage = [{ text: `§a--------------------------\n`, translate: `command.help.money` },
             { translate: `command.help.money` },
             { translate: `command.help.setup` },
             { translate: `command.help.msend` },
@@ -335,7 +334,7 @@ class ChatHandler {
             { translate: `command.help.home` },
             { translate: `command.help.checkhome` },
             { translate: `command.help.adminchunk` },
-            { translate: `command.help.resetchunk`, with: { translate: `special.name` } },
+            { translate: `command.help.resetchunk`, with: { rawtext: [{ translate: `special.name` }] } },
             { translate: `command.help.buychunk` },
             { translate: `command.help.sellchunk` },
             { translate: `command.help.makecountry` },
@@ -345,9 +344,10 @@ class ChatHandler {
             { translate: `command.help.countrylist` },
             { translate: `command.help.joincountry` },
             { translate: `command.help.chome` },
-            { text: `§a--------------------------` },
-        ];
-        this.sender.sendMessage(helpMessage);
+            { text: `§a--------------------------` }]
+        this.sender.sendMessage({
+            rawtext: helpMessage
+        });
     };
 
     makeCountry() {
@@ -391,8 +391,8 @@ class ChatHandler {
         if (!countryData.spawn) {
             return;
         };
-        this.sender.teleport(countryData.spawn.location,{dimension: world.getDimension(countryData.spawn.dimension)});
-        this.sender.sendMessage({translate: `command.chome.result`})
+        this.sender.teleport(countryData.spawn.location, { dimension: world.getDimension(countryData.spawn.dimension) });
+        this.sender.sendMessage({ translate: `command.chome.result` })
         return;
     };
 };

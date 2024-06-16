@@ -39,7 +39,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player , initialSpawn } = ev;
     if(initialSpawn) {
-        const dataCheck = DyProp.getDynamicProperty(`player_${id}`);
+        const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
         if(dataCheck) return;
         const newPlayerData = {
             name: player.name,
