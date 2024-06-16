@@ -511,6 +511,7 @@ export function editCountryLoreForm(player, countryData) {
 const rolePermissions = [
     `editCountryName`,
     `editCountryLore`,
+    `invite`,
     `place`,
     `break`,
     `setHome`,

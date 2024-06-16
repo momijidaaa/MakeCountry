@@ -41,7 +41,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     const [ownerRole, adminRole, peopleRole] = CreateRole([
         { name: `Owner`, permissions: [`owner`], iconTextureId: `gold_block`, color: `e` },
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
-        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`], iconTextureId: `stone`, color: `a` }
+        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`,`invite`], iconTextureId: `stone`, color: `a` }
     ]);
     ownerData.roles.push(ownerRole)
     const countryData = {
@@ -73,9 +73,9 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         //敵対国
         hostility: [],
         //中立国の権限
-        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`],
+        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`,`setHome`],
         //同盟国の権限
-        alliancePermission: [`blockUse`, `entityUse`, `noTarget`],
+        alliancePermission: [`blockUse`, `entityUse`, `noTarget`,`setHome`],
         //敵対国の権限
         hostilityPermission: [],
         //加盟している国際組織
