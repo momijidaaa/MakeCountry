@@ -430,7 +430,7 @@ export function setRolePermissionForm(player, roleData) {
         form.submitButton({ translate: `mc.button.save` });
         form.show(player).then(rs => {
             if (rs.canceled) {
-                selectRoleEditType(player, roleData.id)
+                selectRoleEditType(player, roleData);
                 return;
             };
             const values = rs.formValues;
@@ -442,6 +442,8 @@ export function setRolePermissionForm(player, roleData) {
             };
             roleData.permissions = newRolePermissions;
             StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
+            selectRoleEditType(player, roleData);
+            return;
         });
     };
 };
