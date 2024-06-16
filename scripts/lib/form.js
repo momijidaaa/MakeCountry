@@ -5,6 +5,12 @@ import config from "../config";
 import { DeleteCountry, DeleteRole, MakeCountry } from "./land";
 import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
+export function joinTypeSelectForm(player) {
+    const form = new ActionFormData();
+    form.button({translate: `form.invite.check.invite`});
+    form.button({translate: `form.invite.list.allowjoin`});
+};
+
 /**
  * 
  * 国の設定
