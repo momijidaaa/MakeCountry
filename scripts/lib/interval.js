@@ -4,7 +4,7 @@ import * as DyProp from "./DyProp";
 import config from "../config";
 import { DeleteCountry } from "./land";
 
-let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer * 60}`;
+let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
 
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
@@ -70,4 +70,4 @@ system.runInterval(() => {
             StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         };
     };
-}, 20);
+}, 20*60);
