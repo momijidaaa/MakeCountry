@@ -502,7 +502,6 @@ export function setRolePermissionForm(player, roleData) {
     };
 };
 
-
 /**
  * 完成
  * 国を作るフォームを表示
