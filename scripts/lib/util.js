@@ -1,4 +1,4 @@
-import { Player } from "@minecraft/server";
+import { Player, world } from "@minecraft/server";
 import * as Dyprop from "./DyProp";
 import config from "../config";
 
@@ -36,7 +36,8 @@ export function GetAndParsePropertyData(id) {
     let dataString = Dyprop.getDynamicProperty(id);
     if (!dataString || typeof dataString !== "string") return undefined;
     try {
-        return JSON.parse(dataString);
+        const parseData = JSON.parse(dataString);
+        return parseData;
     } catch (error) {
         console.warn(error);
         return undefined;

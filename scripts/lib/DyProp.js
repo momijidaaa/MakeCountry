@@ -39,6 +39,7 @@ export function getDynamicProperty(id) {
     matches.map(item => item.original).forEach(id => {
         longString = longString + world.getDynamicProperty(id);
     });
+    return longString;
 };
 
 /**

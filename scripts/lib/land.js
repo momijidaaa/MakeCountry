@@ -10,14 +10,16 @@ import config from "../config";
  * @param {boolean} invite 
  * @param {boolean} peace 
  */
-export function MakeCountry(owner, name = `country`, invite = true,peace = config.defaultPeace) {
+export function MakeCountry(owner, name = `country`, invite = true, peace = config.defaultPeace) {
+    const { x, z } = owner.location;
+    const dimensionId = owner.dimension.id;
     const ownerData = GetAndParsePropertyData(`player_${owner.id}`);
     if (ownerData.country) {
         owner.sendMessage({ translate: `already.country.join` });
         return;
     };
     const chunkId = GetPlayerChunkPropertyId(owner);
-    const chunkData = GetAndParsePropertyData(chunkId);
+    let chunkData = GetAndParsePropertyData(chunkId);
     if (chunkData && chunkData.countryId) {
         owner.sendMessage({ translate: `already.country.here` });
         return;
@@ -32,6 +34,8 @@ export function MakeCountry(owner, name = `country`, invite = true,peace = confi
     };
     const idString = world.getDynamicProperty(`countryId`) ?? "1"
     let id = Number(idString);
+    if (!chunkData) chunkData = GenerateChunkData(x,z,dimensionId,undefined,id,undefined,false);
+    chunkData.countryId = id;
     ownerData.country = id;
     ownerData.money -= config.MakeCountryCost;
     const ownerRole = CreateRole(`Owner`, [`owner`]);
@@ -88,19 +92,21 @@ export function MakeCountry(owner, name = `country`, invite = true,peace = confi
     world.sendMessage({ translate: `born.country`, with: [name] });
     StringifyAndSavePropertyData(`country_${id}`, countryData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
+    StringifyAndSavePropertyData(chunkData.id, chunkData);
     world.setDynamicProperty(`countryId`, `${id++}`);
 };
 
-export function GenerateChunkData(x, z, dimensionId,ownerId = undefined, countryId = undefined, price = config.defaultChunkPrice, special = false) {
+export function GenerateChunkData(x, z, dimensionId, ownerId = undefined, countryId = undefined, price = config.defaultChunkPrice, special = false) {
     const chunkData = {
         x: x,
         z: z,
-        id: GetChunkPropertyId(x,z,dimensionId),
+        id: GetChunkPropertyId(x, z, dimensionId),
         spawn: undefined,
         publicSpawn: false,
         owner: ownerId,
         countryId: countryId,
         special: special,
+        noTerritory: false,
         price: price,
         adminRestriction: false,
         adminAllow: [],

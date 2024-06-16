@@ -8,6 +8,7 @@ world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const { player } = ev;
     const cannot = CheckPermission(player,permission);
     ev.cancel = cannot;
+    if(!cannot) return;
     player.sendMessage({translate: `cannot.permission.${permission}`});
     return;
 });
@@ -15,7 +16,9 @@ world.beforeEvents.playerBreakBlock.subscribe((ev) => {
 world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     const permission = `place`
     const { player } = ev;
-    ev.cancel = CheckPermission(player,permission);
+    const cannot = CheckPermission(player,permission);
+    ev.cancel = cannot;
+    if(!cannot) return;
     player.sendMessage({translate: `cannot.permission.${permission}`});
     return;
 });
@@ -23,7 +26,9 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission = `blockUse`
     const { player } = ev;
-    ev.cancel = CheckPermission(player,permission);
+    const cannot = CheckPermission(player,permission);
+    ev.cancel = cannot;
+    if(!cannot) return;
     player.sendMessage({translate: `cannot.permission.${permission}`});
     return;
 });
@@ -31,7 +36,9 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
 world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
     const permission = `entityUse`
     const { player } = ev;
-    ev.cancel = CheckPermission(player,permission);
+    const cannot = CheckPermission(player,permission);
+    ev.cancel = cannot;
+    if(!cannot) return;
     player.sendMessage({translate: `cannot.permission.${permission}`});
     return;
 });
@@ -40,7 +47,6 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player , initialSpawn } = ev;
     if(initialSpawn) {
         const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
-        world.sendMessage(`${typeof dataCheck}`);
         if(dataCheck) return;
         const newPlayerData = {
             name: player.name,

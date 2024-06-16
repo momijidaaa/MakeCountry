@@ -16,6 +16,7 @@ export function settingCountry(player) {
     form.body({ translate: `form.setting.body` });
     form.button({ translate: `form.setting.button.info` });
     form.button({ translate: `form.setting.button.role` });
+    form.button({ translate: `form.setting.button.delete` });
 
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -88,22 +89,22 @@ export function settingCountryInfoForm(player) {
         });
 
         const showBody = [
-            { translate: `form.showcountry.option.name`, with: [countryData.name] },
-            { translate: `form.showcountry.option.lore`, with: [countryData.lore] },
-            { translate: `form.showcountry.option.id`, with: [countryData.id] },
-            { translate: `form.showcountry.option.owner`, with: [ownerData.name] },
-            { translate: `form.showcountry.option.memberscount`, with: [`${membersName.length}`] },
-            { translate: `form.showcountry.option.members`, with: [membersName.join(`§r , `)] },
-            { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] },
-            { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${countryData.money}`] },
-            { translate: `form.showcountry.option.resourcepoint`, with: [`${countryData.resourcePoint}`] },
-            { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] },
-            { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] },
-            { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] },
-            { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] },
-            { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] },
-            { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] },
-            { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] },
+            { translate: `form.showcountry.option.name`, with: [countryData.name] },{ text: `\n`},
+            { translate: `form.showcountry.option.lore`, with: [countryData.lore] },{ text: `\n`},
+            { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.owner`, with: [ownerData.name] },{ text: `\n`},
+            { translate: `form.showcountry.option.memberscount`, with: [`${membersName.length}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${countryData.money}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.resourcepoint`, with: [`${countryData.resourcePoint}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] },{ text: `\n`},
+            { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
         ];
 
         const form = new ActionFormData();
@@ -190,7 +191,7 @@ export function countryList(player) {
         const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
         let countries = [];
         countryIds.forEach(id => {
-            countries[countries.length] = GetAndParsePropertyData(`country_${id}`);
+            countries[countries.length] = GetAndParsePropertyData(id);
         });
         countries.forEach(country => {
             form.button(`${country.name} \n§rID: ${country.id}`);
@@ -204,7 +205,6 @@ export function countryList(player) {
                     }, 10);
                     return;
                 };
-                player.sendMessage({ translate: `form.cancel.message` });
                 return;
             };
             showCountryInfo(player, countries[rs.selection]);
@@ -231,50 +231,51 @@ export function showCountryInfo(player, countryData) {
         let money = `show.private`;
         let resourcePoint = `show.private`;
         if (!countryData.hideMoney) {
-            money = countryData.money;
-            resourcePoint = countryData.resourcePoint;
+            money = `${countryData.money}`;
+            resourcePoint = `${countryData.resourcePoint}`;
         };
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const countryData = GetAndParsePropertyData(id);
-            allianceCountryName.push(countryData.name);
+            const subCountryData = GetAndParsePropertyData(id);
+            allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const countryData = GetAndParsePropertyData(id);
-            hostilityCountryName.push(countryData.name);
+            const subCountryData = GetAndParsePropertyData(id);
+            hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const countryData = GetAndParsePropertyData(id);
-            warNowCountryName.push(countryData.name);
+            const subCountryData = GetAndParsePropertyData(id);
+            warNowCountryName.push(subCountryData.name);
         });
-
-
-        const showBody = [
-            { translate: `form.showcountry.option.name`, with: [countryData.name] },
-            { translate: `form.showcountry.option.lore`, with: [countryData.lore] },
-            { translate: `form.showcountry.option.id`, with: [countryData.id] },
-            { translate: `form.showcountry.option.owner`, with: [ownerData.name] },
-            { translate: `form.showcountry.option.memberscount`, with: [`${membersName.length}`] },
-            { translate: `form.showcountry.option.members`, with: [membersName.join(`§r , `)] },
-            { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] },
-            { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${countryData.money}`] },
-            { translate: `form.showcountry.option.resourcepoint`, with: [`${countryData.resourcePoint}`] },
-            { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] },
-            { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] },
-            { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] },
-            { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] },
-            { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] },
-            { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] },
-            { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] },
-        ];
+        const showBody =
+        {
+            rawtext: [
+                { translate: `form.showcountry.option.name`, with: [countryData.name] },{ text: `\n`},
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] },{ text: `\n`},
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] },{ text: `\n`},
+                { translate: `form.showcountry.option.memberscount`, with: [`${membersName.length}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${money}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.resourcepoint`, with: [`${resourcePoint}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] },{ text: `\n`},
+                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+            ]
+        };
         const form = new ActionFormData();
         form.title(countryData.name);
-        form.body({ rawtext: showBody });
+        form.body(showBody);
         form.button({ translate: `mc.button.back` });
         form.show(player).then(rs => {
             countryList(player);

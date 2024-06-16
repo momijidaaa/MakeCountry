@@ -22,9 +22,18 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             StringifyAndSavePropertyData(`player_${sourceEntity.id}`, playerData);
             break;
         };
+        case `karo:reset`: {
+            world.clearDynamicProperties();
+            break;
+        };
+        case `karo:list`: {
+            world.sendMessage(`${world.getDynamicPropertyIds().join(`\n`)}`);
+            break;
+        };
     };
 });
 
+/*
 world.afterEvents.worldInitialize.subscribe(() => {
     const dyp = world.getDynamicPropertyIds()
     world.sendMessage(`${dyp}`)
@@ -33,3 +42,4 @@ world.afterEvents.worldInitialize.subscribe(() => {
     })
     world.sendMessage(`${DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`))}`)
 })
+*/
