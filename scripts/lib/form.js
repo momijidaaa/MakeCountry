@@ -1,4 +1,4 @@
-import { Player, system } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
@@ -190,7 +190,7 @@ export function countryList(player) {
         const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
         let countries = [];
         countryIds.forEach(id => {
-            countries.push(GetAndParsePropertyData(`role_${id}`));
+            countries[countries.length] = GetAndParsePropertyData(`country_${id}`);
         });
         countries.forEach(country => {
             form.button(`${country.name} \n§rID: ${country.id}`);

@@ -1,5 +1,6 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import * as DyProp from "./DyProp";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -23,3 +24,12 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         };
     };
 });
+
+world.afterEvents.worldInitialize.subscribe(() => {
+    const dyp = world.getDynamicPropertyIds()
+    world.sendMessage(`${dyp}`)
+    dyp.forEach(d => {
+        world.sendMessage(`${d}\n${world.getDynamicProperty(d)}`)
+    })
+    world.sendMessage(`${DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`))}`)
+})

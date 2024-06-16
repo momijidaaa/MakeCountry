@@ -26,20 +26,19 @@ export function setDynamicProperty(id, value = undefined) {
  * @returns {string|undefined}
  */
 export function getDynamicProperty(id) {
-    let array = [];
-    let i = 0;
-    while (true) {
-        const ObjectId = `${startId}${id}_dy${i}`;
-
-        if (world.getDynamicProperty(ObjectId) === undefined) break;
-
-        const Object = world.getDynamicProperty(ObjectId);
-
-        array.push(Object);
-        i++;
-    };
-    if (array.length === 0) return undefined
-    return array.join(``);
+    let inputArray = world.getDynamicPropertyIds();
+    const pattern = new RegExp(`^DyProp_${id}_dy(\\d+)$`);
+    const matches = inputArray
+        .map(item => {
+            const match = item.match(pattern);
+            return match ? { original: item, index: parseInt(match[1], 10) } : null;
+        })
+        .filter(item => item !== null)
+        .sort((a, b) => a.index - b.index);
+    let longString = ``;
+    matches.map(item => item.original).forEach(id => {
+        longString = longString + world.getDynamicProperty(id);
+    });
 };
 
 /**
