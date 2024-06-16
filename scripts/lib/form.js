@@ -113,6 +113,34 @@ export function countryDeleteCheckForm(player) {
 
 /**
  * 完成
+ * 国の一覧表示
+ * @param {Player} player 
+ */
+export function countryList(player) {
+    try {
+        const form = new ActionFormData();
+        form.title({translate: `form.countrylist.title`});
+        const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
+        let countries = [];
+        countryIds.forEach(id => {
+            countries.push(GetAndParsePropertyData(`role_${id}`));
+        });
+        countries.forEach(country => {
+            form.button(`${country.name} \n§rID: ${country.id}`);
+        });
+        form.show(player).then(rs => {
+            if(rs.canceled) {
+                return;
+            };
+            showCountryInfo(player,countries[rs.selection]);
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
+ * 完成
  * ロールの一覧表示
  * @param {Player} player 
  */
