@@ -15,11 +15,15 @@ export function settingCountry(player) {
     form.title({ translate: `form.setting.title` });
     form.body({ translate: `form.setting.body` });
     form.button({ translate: `form.setting.button.info` });
+    form.button({ translate: `form.setting.button.role` });
 
     form.show(player).then(rs => {
         if (rs.canceled) return;
         switch (rs.selection) {
             case 0: {
+                break;
+            };
+            case 1: {
                 break;
             };
         };
@@ -67,6 +71,31 @@ const rolePermissions = [
     `neutralityPermission`
 ];
 
+export function settingCountryRoleForm(player) {
+    try {
+        const form = new ActionFormData();
+        form.title({translate: `form.setting.button.role`});
+        const playerData = GetAndParsePropertyData(player)
+        const roleIds = GetAndParsePropertyData(`country_${playerData.country}`).roles;
+        let roles = [];
+        roleIds.forEach(id => {
+            roles.push(GetAndParsePropertyData(`role_${id}`));
+        });
+        roles.forEach(role => {
+            form.button(role.name,role.icon);
+        });
+        form.show(player).then(rs => {
+            if(rs.canceled) {
+                settingCountry(player);
+                return;
+            };
+            selectRoleEditType(player,roles[rs.selection]);
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
 /**
  * 完成
  * ロールの名前を変更
@@ -86,6 +115,7 @@ export function RoleNameChange(player, roleData) {
             };
             roleData.name = rs.formValues[0] ?? `None`;
             StringifyAndSavePropertyData(`role_${roleData.id}`,roleData);
+            return;
         });
     };
 };
@@ -94,11 +124,10 @@ export function RoleNameChange(player, roleData) {
  * 完成(?)
  * ロールの詳細
  * @param {Player} player 
- * @param {string} roleId 
+ * @param {any} roleData 
  */
-export function selectRoleEditType(player, roleId) {
+export function selectRoleEditType(player, roleData) {
     if (HasPermission(player, `admin`)) {
-        const roleData = GetAndParsePropertyData(`role_${roleId}`);
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const form = new ActionFormData();
         form.title({ translate: `form.role.edit.select.title`, with: [roleData.name] });
