@@ -148,10 +148,8 @@ export function calculationCountryPower(countryId) {
  * @param {string} countryId 
  */
 export function DeleteCountry(countryId) {
-    world.sendMessage(`${countryId}`)
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
-    world.sendMessage(`${JSON.stringify(countryData)}`)
     ownerData.money = ownerData.money + countryData.money + countryData.resourcePoint;
     StringifyAndSavePropertyData(`player_${ownerData.id}`, ownerData);
     countryData.members.forEach(m => {
