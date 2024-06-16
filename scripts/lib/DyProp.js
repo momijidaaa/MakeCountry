@@ -6,7 +6,7 @@ const startId = "DyProp_"
  * @param {String} id DyProp ID
  * @param {String|undefined} value DyProp string data
  */
-export async function setDynamicProperty(id, value = undefined) {
+export function setDynamicProperty(id, value = undefined) {
     world.getDynamicPropertyIds().filter(id => id.startsWith(`${startId}${id}_dy`)).forEach(a => world.setDynamicProperty(a));
     if (!value) return;
     const chunkSize = 20000
@@ -25,7 +25,7 @@ export async function setDynamicProperty(id, value = undefined) {
  * @param {String} id Dyprop ID
  * @returns {string|undefined} String or Undefined
  */
-export async function getDynamicProperty(id) {
+export function getDynamicProperty(id) {
     let array = [];
     let i = 0;
     while (true) {
@@ -46,7 +46,7 @@ export async function getDynamicProperty(id) {
  * DyProp get all ID
  * @returns {Array<string>} Array IDs data
  */
-export async function DynamicPropertyIds() {
+export function DynamicPropertyIds() {
     let ids = JSON.parse(JSON.stringify(world.getDynamicPropertyIds()));
     let array = [];
     let i = 0;
