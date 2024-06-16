@@ -2,8 +2,62 @@ import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { DeleteCountry, DeleteRole, MakeCountry } from "./land";
+import { DeleteCountry, DeleteRole, MakeCountry, playerCountryJoin } from "./land";
 import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
+
+/**
+ * 
+ * @param {Player} player 
+ */
+export function playerMainMenu(player) {
+    const form = new ActionFormData();
+    form.title({translate: `form.mainmenu.title`});
+    form.button({translate: `form.mainmenu.button.profile`});
+    form.button({translate: `form.mainmenu.button.join`});
+    form.show(player).then(rs =>{
+        if(rs.canceled) {
+            if(rs.cancelationReason === FormCancelationReason.UserBusy) {
+                system.runTimeout(()=>{
+                    playerMainMenu(player);
+                },10);
+                return;
+            };
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                showProfileForm(player);
+            };
+            case 1: {
+                joinTypeSelectForm(player);
+            };
+        };
+    });
+};
+
+/**
+ * プロフィールを表示
+ * @param {Player} player 
+ */
+export function showProfileForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const showProfile = [
+        {translate: `msg.name`},{text: `${playerData?.name} §r\n`},
+        {translate: `msg.lv`},{text: `${player.level} §r\n`},
+        {translate: `msg.havemoney`},{text: `${playerData?.money} §r\n`},
+        {translate: `msg.days`},{text: `${playerData?.days} §r\n`},
+        {translate: `msg.country`},{text: `${playerData?.country ?? `None`} §r\n`},
+        {translate: `msg.invite`},{text: `${playerData?.invite ?? `None`} §r\n`},
+        {translate: `msg.havechunks`},{text: `${playerData?.chunks.length} §r`}
+    ];
+    const form = new ActionFormData();
+    form.title({translate: `form.profile.title`});
+    form.button({translate: `mc.button.back`});
+    form.show(player).then(rs =>{
+        playerMainMenu(player);
+        return;
+    });
+};
 
 /**
  * 国に参加するときの形式選択
@@ -16,15 +70,18 @@ export function joinTypeSelectForm(player) {
     form.button({ translate: `form.invite.list.allowjoin` });
     form.show(player).then(rs => {
         if (rs.canceled) {
+            
             return;
         };
         switch (rs.selection) {
             case 0: {
                 //招待を確認
+                countryInvitesList(player);
                 break;
             };
             case 1: {
                 //入れる国のリスト
+                allowJoinCountriesList(player);
                 break;
             };
         };
@@ -36,7 +93,7 @@ export function joinTypeSelectForm(player) {
  * @param {Player} player 
  * @param {any} countryData 
  */
-export function joinCheckForm(player,countryData) {
+export function joinCheckFromInviteForm(player, countryData) {
     try {
         const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
         const membersId = countryData.members.filter(m => m !== ownerData.id);
@@ -69,8 +126,7 @@ export function joinCheckForm(player,countryData) {
             const subCountryData = GetAndParsePropertyData(id);
             warNowCountryName.push(subCountryData.name);
         });
-        const showBody =
-        {
+        const showBody = {
             rawtext: [
                 { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
                 { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
@@ -79,8 +135,95 @@ export function joinCheckForm(player,countryData) {
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${money}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: [`${resourcePoint}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${config.MoneyName} ${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+            ]
+        };
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const form = new ActionFormData();
+        form.title(countryData.name);
+        form.body(showBody);
+        form.button({ translate: `mc.button.join` });
+        form.button({ translate: `mc.button.back` });
+        form.show(player).then(rs => {
+            if (rs.canceled) {
+                countryInvitesList(player);
+                return;
+            };
+            switch (rs.selection) {
+                case 0: {
+                    playerData.invite.splice(playerData.invite.indexOf(countryData.id), 1);
+                    StringifyAndSavePropertyData(`player_${playerData.id}`,playerData);
+                    playerCountryJoin(player, countryData.id);
+                    return;
+                };
+                case 1: {
+                    countryInvitesList(player);
+                    return;
+                };
+            };
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
+ * 
+ * @param {Player} player 
+ * @param {any} countryData 
+ */
+export function joinCheckFromListForm(player, countryData) {
+    try {
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const membersId = countryData.members.filter(m => m !== ownerData.id);
+        let membersName = [];
+        membersId.forEach(member => {
+            const memberData = GetAndParsePropertyData(`player_${member}`);
+            membersName.push(memberData.name);
+        });
+        let money = `show.private`;
+        let resourcePoint = `show.private`;
+        if (!countryData.hideMoney) {
+            money = `${countryData.money}`;
+            resourcePoint = `${countryData.resourcePoint}`;
+        };
+        const allianceIds = countryData.alliance;
+        let allianceCountryName = [];
+        allianceIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(id);
+            allianceCountryName.push(subCountryData.name);
+        });
+        const hostilityIds = countryData.alliance;
+        let hostilityCountryName = [];
+        hostilityIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(id);
+            hostilityCountryName.push(subCountryData.name);
+        });
+        const warNowIds = countryData.hostility;
+        let warNowCountryName = [];
+        warNowIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(id);
+            warNowCountryName.push(subCountryData.name);
+        });
+        const showBody = {
+            rawtext: [
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${config.MoneyName} ${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
                 { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -96,13 +239,17 @@ export function joinCheckForm(player,countryData) {
         form.button({ translate: `mc.button.join` });
         form.button({ translate: `mc.button.back` });
         form.show(player).then(rs => {
-            if(rs.canceled) {
+            if (rs.canceled) {
                 allowJoinCountriesList(player);
                 return;
             };
-            switch(rs.selection) {
+            switch (rs.selection) {
                 case 0: {
-                    
+                    playerCountryJoin(player, countryData.id);
+                    return;
+                };
+                case 1: {
+                    allowJoinCountriesList(player);
                     return;
                 };
             };
@@ -110,6 +257,45 @@ export function joinCheckForm(player,countryData) {
     } catch (error) {
         console.warn(error);
     };
+};
+
+
+/**
+ * 
+ * @param {Player} player 
+ */
+export function countryInvitesList(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countriesData = [];
+    for (const id of playerData.invite) {
+        const d = GetAndParsePropertyData(`country_${id}`);
+        if (!d) {
+            playerData.invite.splice(playerData.invite.indexOf(id), 1);
+            continue;
+        };
+        countriesData.push(d);
+    };
+    StringifyAndSavePropertyData(`player_${playerData.id}`,playerData);
+    const form = new ActionFormData();
+    if (countriesData.length === 0) {
+        form.body({ translate: `no.invite.country` });
+        form.button({ translate: `mc.button.back` });
+    };
+    countriesData.forEach(countryData => {
+        form.button(`${countryData.name}\nID: ${countryData.id}`);
+    });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            joinTypeSelectForm(player);
+            return;
+        };
+        if (countriesData.length === 0) {
+            joinTypeSelectForm(player);
+            return;
+        };
+        joinCheckFromInviteForm(player, countriesData[rs.selection]);
+        return;
+    });
 };
 
 /**
@@ -131,15 +317,15 @@ export function allowJoinCountriesList(player) {
         form.button(`${countryData.name}\nID: ${countryData.id}`);
     });
     form.show(player).then(rs => {
-        if(rs.canceled) {
+        if (rs.canceled) {
             joinTypeSelectForm(player);
             return;
         };
-        if(countriesData.length === 0) {
+        if (countriesData.length === 0) {
             joinTypeSelectForm(player);
             return;
         };
-        joinCheckForm(player,countriesData[rs.selection]);
+        joinCheckFromListForm(player, countriesData[rs.selection]);
         return;
     });
 };
@@ -386,6 +572,10 @@ export function countryList(player) {
         countryIds.forEach(id => {
             countries[countries.length] = GetAndParsePropertyData(id);
         });
+        if (countries.length === 0) {
+            form.body({ translate: `no.countries.world` });
+            form.button({ translate: `mc.button.close` });
+        };
         countries.forEach(country => {
             form.button(`${country.name} \n§rID: ${country.id}`);
         });
@@ -398,6 +588,9 @@ export function countryList(player) {
                     }, 10);
                     return;
                 };
+                return;
+            };
+            if (countries.length === 0) {
                 return;
             };
             showCountryInfo(player, countries[rs.selection]);

@@ -2,8 +2,8 @@ import { Player, system, world } from "@minecraft/server";
 import config from "../config";
 import * as DyProp from "./DyProp";
 import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
-import { GenerateChunkData } from "./land";
-import { MakeCountryForm, countryList, settingCountry } from "./form";
+import { GenerateChunkData, playerCountryLeave } from "./land";
+import { MakeCountryForm, countryList, playerMainMenu, settingCountry } from "./form";
 
 class ChatHandler {
     constructor(event) {
@@ -100,6 +100,9 @@ class ChatHandler {
                 case `${this.prefix}chome`:
                     this.chome();
                     break;
+                case `${this.prefix}menu`:
+                    this.mainMenu();
+                    break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
             }
@@ -116,7 +119,7 @@ class ChatHandler {
                 this.sender.sendMessage({ translate: `command.permission.error` });
                 return;
             }
-            this.sender.sendMessage({rawtext: [{text: `§a[MakeCountry]\n`},{ translate: `system.setup.complete` }]});
+            this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `system.setup.complete` }] });
             this.sender.addTag("mc_admin");
             world.setDynamicProperty(`start`, `true`)
             return;
@@ -345,6 +348,7 @@ class ChatHandler {
         { translate: `command.help.countrylist` }, { text: `\n` },
         { translate: `command.help.joincountry` }, { text: `\n` },
         { translate: `command.help.chome` }, { text: `\n` },
+        { translate: `command.help.menu` }, { text: `\n` },
         { text: `§a------------------------------------` }]
         this.sender.sendMessage({
             rawtext: helpMessage
@@ -370,6 +374,16 @@ class ChatHandler {
     };
 
     leaveCountry() {
+        if (!this.playerData?.country) {
+            this.sender.sendMessage({ translate: `command.leavecountry.error.no.belong.country` })
+            return;
+        };
+        const countryData = GetAndParsePropertyData(`country_${this.playerData?.country}`);
+        if (this.playerData.id === countryData.owner) {
+            this.sender.sendMessage({ translate: `command.leavecountry.error.your.owner` })
+        };
+        playerCountryLeave(this.sender);
+        return;
     };
     kill() {
         this.sender.runCommand(`kill @s`);
@@ -394,6 +408,10 @@ class ChatHandler {
         };
         this.sender.teleport(countryData.spawn.location, { dimension: world.getDimension(countryData.spawn.dimension) });
         this.sender.sendMessage({ translate: `command.chome.result` })
+        return;
+    };
+    mainMenu() {
+        playerMainMenu(this.sender);
         return;
     };
 };
