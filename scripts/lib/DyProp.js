@@ -47,7 +47,7 @@ export function getDynamicProperty(id) {
  * @returns {Array<string>}
  */
 export function DynamicPropertyIds() {
-    const inputArray = world.getDynamicPropertyIds;
+    const inputArray = world.getDynamicPropertyIds();
     //正規表現パターンを作成
     const pattern = /^DyProp_(.+)_dy\d+$/;
     const result = new Set();
