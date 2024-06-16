@@ -2,7 +2,7 @@ import { Player, system } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { DeleteRole, MakeCountry } from "./land";
+import { DeleteCountry, DeleteRole, MakeCountry } from "./land";
 import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
 /**
@@ -21,9 +21,15 @@ export function settingCountry(player) {
         if (rs.canceled) return;
         switch (rs.selection) {
             case 0: {
+                settingCountryInfoForm(player)
                 break;
             };
             case 1: {
+                settingCountryRoleForm(player);
+                break;
+            };
+            case 2: {
+                countryDeleteCheckForm(player);
                 break;
             };
         };
@@ -31,11 +37,11 @@ export function settingCountry(player) {
 };
 
 /**
- * 完成
+ * 
  * 国の情報表示
  * @param {Player} player 
  */
-export function settingCountryInfo(player) {
+export function settingCountryInfoForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.setting.info.title` });
     form.body({ translate: `form.setting.info.body` });
@@ -72,6 +78,40 @@ const rolePermissions = [
 ];
 
 /**
+ * 国を消す前の確認
+ * @param {Player} player 
+ */
+export function countryDeleteCheckForm(player) {
+    try {
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const form = new ActionFormData();
+        form.title({translate: `form.dismantle.check`});
+        form.body({translate: `form.dismantle.body`});
+        form.button({translate: `mc.button.back`});
+        form.button({translate: `mc.button.dismantle`});
+        form.show(player).then(rs => {
+            if(rs.canceled) {
+                settingCountry(player);
+                return;
+            };
+            switch(rs.selection) {
+                case 0: {
+                    settingCountry(player);
+                    break;
+                };
+                case 1: {
+                    player.sendMessage({translate: `form.dismantle.complete`})
+                    DeleteCountry(playerData.id);
+                    break;
+                };
+            };
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
  * 完成
  * ロールの一覧表示
  * @param {Player} player 
@@ -103,6 +143,31 @@ export function settingCountryRoleForm(player) {
 
 /**
  * 完成
+ * ロールのアイコンを変更
+ * @param {Player} player 
+ * @param {any} roleData 
+ */
+export function RoleIconChange(player, roleData) {
+    if (HasPermission(player, `admin`)) {
+        const form = new ModalFormData();
+        form.title({ translate: `form.role.iconchange.title`, with: [roleData.name] });
+        form.textField({translate: `form.role.iconchange.label`},{translate: `form.role.iconchange.input`},roleData.icon);
+        form.submitButton({translate: `mc.button.change`});
+        form.show(player).then(rs => {
+            if(rs.canceled) {
+                selectRoleEditType(player,roleData.id);
+                return;
+            };
+            roleData.icon = rs.formValues[0];
+            if(rs.formValues[0] === ``) roleData.icon = undefined;
+            StringifyAndSavePropertyData(`role_${roleData.id}`,roleData);
+            return;
+        });
+    };
+};
+
+/**
+ * 完成
  * ロールの名前を変更
  * @param {Player} player 
  * @param {any} roleData 
@@ -126,7 +191,7 @@ export function RoleNameChange(player, roleData) {
 };
 
 /**
- * 完成(?)
+ * 完成
  * ロールの詳細
  * @param {Player} player 
  * @param {any} roleData 
@@ -137,6 +202,7 @@ export function selectRoleEditType(player, roleData) {
         const form = new ActionFormData();
         form.title({ translate: `form.role.edit.select.title`, with: [roleData.name] });
         form.button({ translate: `form.role.edit.select.button.name` });
+        form.button({ translate: `form.role.edit.select.button.icon` });
         //form.button({translate: `form.role.edit.select.button.members`});
         form.button({ translate: `form.role.edit.select.button.permission` });
         form.button({ translate: `form.role.edit.select.button.delete` });
@@ -149,15 +215,20 @@ export function selectRoleEditType(player, roleData) {
                     break;
                 };
                 case 1: {
+                    //アイコンの変更
+                    RoleIconChange(player,roleData);
+                    break;
+                };
+                case 2: {
                     //権限の編集
                     setRolePermissionForm(player, roleData);
                     break;
                 };
-                case 2: {
+                case 3: {
                     //ロールの削除
                     DeleteRole(player, roleData.id, playerData.country);
                     break;
-                }
+                };
             };
         });
     };
@@ -178,7 +249,10 @@ export function setRolePermissionForm(player, roleData) {
         };
         form.submitButton({ translate: `mc.button.save` });
         form.show(player).then(rs => {
-            if (rs.canceled) return;
+            if (rs.canceled) {
+                selectRoleEditType(player,roleData.id)
+                return;
+            };
             const values = rs.formValues;
             let newRolePermissions = [];
             for (let i = 0; i < values.length; i++) {
