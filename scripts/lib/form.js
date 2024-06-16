@@ -2,7 +2,7 @@ import { Player, system } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { MakeCountry } from "./land";
+import { DeleteRole, MakeCountry } from "./land";
 import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
 /**
@@ -69,30 +69,90 @@ const rolePermissions = [
 
 /**
  * 完成
- * ロールの権限編集
+ * ロールの名前を変更
+ * @param {Player} player 
+ * @param {any} roleData 
+ */
+export function RoleNameChange(player, roleData) {
+    if (HasPermission(player, `admin`)) {
+        const form = new ModalFormData();
+        form.title({ translate: `form.role.namechange.title`, with: [roleData.name] });
+        form.textField({translate: `form.role.namechange.label`},{translate: `form.role.namechange.input`},roleData.name);
+        form.submitButton({translate: `mc.button.change`});
+        form.show(player).then(rs => {
+            if(rs.canceled) {
+                selectRoleEditType(player,roleData.id);
+                return;
+            };
+            roleData.name = rs.formValues[0] ?? `None`;
+            StringifyAndSavePropertyData(`role_${roleData.id}`,roleData);
+        });
+    };
+};
+
+/**
+ * 完成(?)
+ * ロールの詳細
  * @param {Player} player 
  * @param {string} roleId 
  */
-export function setRolePermissionForm(player, roleId) {
+export function selectRoleEditType(player, roleId) {
     if (HasPermission(player, `admin`)) {
         const roleData = GetAndParsePropertyData(`role_${roleId}`);
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const form = new ActionFormData();
+        form.title({ translate: `form.role.edit.select.title`, with: [roleData.name] });
+        form.button({ translate: `form.role.edit.select.button.name` });
+        //form.button({translate: `form.role.edit.select.button.members`});
+        form.button({ translate: `form.role.edit.select.button.permission` });
+        form.button({ translate: `form.role.edit.select.button.delete` });
+        form.show(player).then(rs => {
+            if (rs.canceled) return;
+            switch (rs.selection) {
+                case 0: {
+                    //名前の変更
+                    break;
+                };
+                case 1: {
+                    //権限の編集
+                    setRolePermissionForm(player, roleData);
+                    break;
+                };
+                case 2: {
+                    //ロールの削除
+                    DeleteRole(player, roleData.id, playerData.country);
+                    break;
+                }
+            };
+        });
+    };
+};
+
+/**
+ * 完成
+ * ロールの権限編集
+ * @param {Player} player 
+ * @param {any} roleData 
+ */
+export function setRolePermissionForm(player, roleData) {
+    if (HasPermission(player, `admin`)) {
         const form = new ModalFormData();
-        form.title({translate: `role.permission.edit`,with: [roleData.name]});
+        form.title({ translate: `role.permission.edit`, with: [roleData.name] });
         for (const permission of rolePermissions) {
             form.toggle({ translate: `permission.${permission}` }, roleData.permissions.includes(permission));
         };
-        form.submitButton({translate: `mc.button.save`});
+        form.submitButton({ translate: `mc.button.save` });
         form.show(player).then(rs => {
-            if(rs.canceled) return;
+            if (rs.canceled) return;
             const values = rs.formValues;
             let newRolePermissions = [];
-            for(let i = 0;i < values.length;i++) {
-                if(values[i]) {
+            for (let i = 0; i < values.length; i++) {
+                if (values[i]) {
                     newRolePermissions.push(rolePermissions[i]);
                 };
             };
             roleData.permissions = newRolePermissions;
-            StringifyAndSavePropertyData(`role_${roleId}`,roleData);
+            StringifyAndSavePropertyData(`role_${roleData.id}`, roleData);
         });
     };
 };
