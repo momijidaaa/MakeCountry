@@ -80,6 +80,12 @@ const checkOnlyRole = [
     `owner`,
     `admin`
 ];
+
+const restrictionPermissions = [
+    `makeCountry`,
+    `buyChunk`,
+    `sellChunk`
+];
 /**
  * 権限確認
  * @param {Player} player 
@@ -142,6 +148,11 @@ export function CheckPermission(player, permission) {
     };
     //個人所有の土地 → 規制がなければ許可 → 規制があってもallowListにいれば許可 → 自分の国かつownerがあるとき許可 また、戦争中なら許可 → なければキャンセル
     if (chunkData?.owner) {
+        if (chunkData?.owner === playerData?.id) {
+            if (!restrictionPermissions.includes(permission)) {
+                return false;
+            };
+        };
         if (chunkData[`${permission}Restriction`]) {
             const allow = chunkData[`${permission}Allow`].includes(player.id);
             if (allow) {
