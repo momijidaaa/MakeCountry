@@ -152,32 +152,33 @@ export function CheckPermission(player, permission) {
             if (!restrictionPermissions.includes(permission)) {
                 return false;
             };
-        };
-        if (chunkData[`${permission}Restriction`]) {
-            const allow = chunkData[`${permission}Allow`].includes(player.id);
-            if (allow) {
-                return false;
-            } else {
-                if (chunkData?.countryId) {
-                    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-                    if (!playerData?.country) {
-                        return true;
-                    };
-                    if (countryData?.warNowCountries.includes(playerData.country)) {
-                        return false;
-                    };
-                    if (countryData?.id === playerData?.country) {
-                        for (const role of playerData.roles) {
-                            if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
-                                return false;
-                            };
+        } else {
+            if (chunkData[`${permission}Restriction`]) {
+                const allow = chunkData[`${permission}Allow`].includes(player.id);
+                if (allow) {
+                    return false;
+                } else {
+                    if (chunkData?.countryId) {
+                        const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+                        if (!playerData?.country) {
+                            return true;
                         };
-                        return true;
+                        if (countryData?.warNowCountries.includes(playerData.country)) {
+                            return false;
+                        };
+                        if (countryData?.id === playerData?.country) {
+                            for (const role of playerData.roles) {
+                                if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
+                                    return false;
+                                };
+                            };
+                            return true;
+                        };
                     };
                 };
+            } else {
+                return false;
             };
-        } else {
-            return false;
         };
     };
     if (chunkData?.countryId) {
