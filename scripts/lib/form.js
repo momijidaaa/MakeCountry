@@ -582,7 +582,6 @@ const rolePermissions = [
     `noTarget`,
     `buyChunk`,
     `sellChunk`,
-    `peaceChange`,
     `taxAdmin`,
     `allyAdmin`,
     `hostilityAdmin`,

@@ -66,14 +66,56 @@ export function ConvertChunk(rawX, rawZ) {
     return { x, z }
 };
 
+const checkOnlyRole = [
+    `invite`,
+    `editCountryName`,
+    `editCountryLore`,
+    `inviteChange`,
+    `neutralityPermission`,
+    `warAdmin`,
+    `allyAdmin`,
+    `hostilityAdmin`,
+    `taxAdmin`,
+    `peaceChange`,
+    `owner`,
+    `admin`
+];
 /**
  * 権限確認
  * @param {Player} player 
  * @param {string} permission 
  * @returns {boolean}
  */
+//AdminMode 許可
+//ロールのみチェックすれば良い権限の場合 → チェックしてキャンセル or 許可
+//チャンクデータなし → 荒野の権限があれば許可
+//荒野 → 荒野の権限があれば許可
+//特別区 → 特別区のがあれば許可
+//個人所有の土地 → 規制がなければ許可 → 規制があってもallowListにいれば許可 → 自分の国かつownerがあるとき許可 → なければキャンセル
+//自分の国 → ロールに権限があれば許可 → なければキャンセル but ownerやadminの権限あれば許可
+//他国 → それぞれの国の権限があれば許可 → なければキャンセル
 export function CheckPermission(player, permission) {
+    //AdminMode 許可
     if (player.hasTag(`adminmode`)) return false;
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    //ロールのみチェックすれば良い権限の場合 → チェックしてキャンセル or 許可
+    if (checkOnlyRole.includes(permission)) {
+        const roleIds = playerData.roles;
+        roleIds.forEach(id => {
+            const role = GetAndParsePropertyData(`role_${id}`);
+            const permissions = role.permissions;
+            if (permissions.includes(permission)) {
+                return false;
+            };
+            if (permission !== `owner` || permission !== `admin`) {
+                if (permissions.includes(`admin`) || permissions.includes(`owner`)) {
+                    return false;
+                };
+            };
+        });
+        return true;;
+    };
+    //チャンクデータなし → 荒野の権限があれば許可
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
@@ -82,38 +124,75 @@ export function CheckPermission(player, permission) {
             return true;
         };
     };
-    if(!chunkData?.countryId && !chunkData.owner && !chunkData?.special) return false;
-    const allow = chunkData[`${permission}Allow`].includes(player.id);
-    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    if (!chunkData.countryId && !chunkData.special && !chunkData.owner && !config.wildernessAllowPermissions.includes(permission)) return true;
-    if (countryData?.warNowCountries.includes(playerData.country)) return false;
-    if (allow) return false;
-    if (chunkData[`${permission}Restriction`] && !allow) {
+    //荒野 → 荒野の権限があれば許可
+    if (!chunkData?.countryId && !chunkData.owner && !chunkData?.special) {
+        if (config.wildernessAllowPermissions.includes(permission)) {
+            return false;
+        } else {
+            return true;
+        };
+    };
+    //特別区 → 特別区のがあれば許可
+    if (chunkData?.special) {
+        if (config.specialAllowPermissions.includes(permission)) {
+            return false;
+        } else {
+            return true;
+        };
+    };
+    //個人所有の土地 → 規制がなければ許可 → 規制があってもallowListにいれば許可 → 自分の国かつownerがあるとき許可 また、戦争中なら許可 → なければキャンセル
+    if (chunkData?.owner) {
+        if (chunkData[`${permission}Restriction`]) {
+            const allow = chunkData[`${permission}Allow`].includes(player.id);
+            if (allow) {
+                return false;
+            } else {
+                if (chunkData?.countryId) {
+                    const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+                    if (!playerData?.country) {
+                        return true;
+                    };
+                    if (countryData?.warNowCountries.includes(playerData.country)) {
+                        return false;
+                    };
+                    if (countryData?.id === playerData?.country) {
+                        for (const role of playerData.roles) {
+                            if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
+                                return false;
+                            };
+                        };
+                        return true;
+                    };
+                };
+            };
+        } else {
+            return false;
+        };
+    };
+    if (chunkData?.countryId) {
         if (countryData?.id === playerData.country) {
             for (const role of playerData.roles) {
-                if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) return false;
+                const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                if (perms.includes(permission)) {
+                    return false;
+                } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                    return false;
+                };
             };
+            return true;
         };
-        return true;
-    };
-    if (chunkData.special && !config.specialAllowPermissions.includes(permission)) return true;
-    if (countryData?.id === playerData.country) {
-        for (const role of playerData.roles) {
-            if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
+        if (countryData.alliance.includes(playerData.country)) {
+            if (countryData.alliancePermission.includes(permission)) return false;
+            return true;
         };
+        if (countryData.hostility.includes(playerData.country)) {
+            if (countryData.hostilityPermission.includes(permission)) return false;
+            return true;
+        };
+        if (countryData.neutralityPermission.includes(permission)) return false;
         return true;
     };
-    if (countryData.alliance.includes(playerData.country)) {
-        if (countryData.alliancePermission.includes(permission)) return false;
-        return true;
-    };
-    if (countryData.hostility.includes(playerData.country)) {
-        if (countryData.hostilityPermission.includes(permission)) return false;
-        return true;
-    };
-    if (countryData.neutralityPermission.includes(permission)) return false;
-    return true;
+    return false;
 };
 
 /**
@@ -124,8 +203,8 @@ export function CheckPermission(player, permission) {
  */
 export function CheckPermissionFromLocation(player, x, z, dimension, permission) {
     if (player.hasTag(`adminmode`)) return false;
-    const restrictionPermissions = [`makeCountry`,`buyChunk`,`sellChunk`];
-    const selfCountryRestrictionPermissions = [`makeCountry`,`buyChunk`];
+    const restrictionPermissions = [`makeCountry`, `buyChunk`, `sellChunk`];
+    const selfCountryRestrictionPermissions = [`makeCountry`, `buyChunk`];
     const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x, z, dimension));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
@@ -134,9 +213,9 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
             return true;
         };
     };
-    if(chunkData.owner) {
-        if(chunkData.owner === player.id) return false;
-        if(restrictionPermissions.includes(permission)) return true;
+    if (chunkData.owner) {
+        if (chunkData.owner === player.id) return false;
+        if (restrictionPermissions.includes(permission)) return true;
     };
     const allow = chunkData[`${permission}Allow`].includes(player.id);
     if (!chunkData.countryId && !chunkData.special && chunkData.owner && chunkData[`${permission}Restriction`] && !config.wildernessAllowPermissions.includes(permission)) return true;
@@ -154,7 +233,7 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
         return true;
     };
     if (countryData.id === playerData.country) {
-        if(selfCountryRestrictionPermissions.includes(permission)) return true;
+        if (selfCountryRestrictionPermissions.includes(permission)) return true;
         for (const role of playerData.roles) {
             if (GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return false;
         };
@@ -178,10 +257,10 @@ export function CheckPermissionFromLocation(player, x, z, dimension, permission)
  * @param {string} permission 
  * @returns {boolean}
  */
-export function HasPermission(player,permission) {
+export function HasPermission(player, permission) {
     if (player.hasTag(`adminmode`)) return true;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     for (const role of playerData.roles) {
-        if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission) ) return true;
+        if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return true;
     };
 };
