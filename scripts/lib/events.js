@@ -1,56 +1,60 @@
 import { world } from "@minecraft/server";
-import { CheckPermission, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, CheckPermissionFromLocation, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
 
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const permission = `break`
     const { player } = ev;
-    const cannot = CheckPermission(player,permission);
+    const { x, z } = player.location;
+    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
-    if(!cannot) return;
-    player.sendMessage({translate: `cannot.permission.${permission}`});
+    if (!cannot) return;
+    player.sendMessage({ translate: `cannot.permission.${permission}` });
     return;
 });
 
 world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     const permission = `place`
     const { player } = ev;
-    const cannot = CheckPermission(player,permission);
+    const { x, z } = player.location;
+    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
-    if(!cannot) return;
-    player.sendMessage({translate: `cannot.permission.${permission}`});
+    if (!cannot) return;
+    player.sendMessage({ translate: `cannot.permission.${permission}` });
     return;
 });
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission = `blockUse`
     const { player } = ev;
-    const cannot = CheckPermission(player,permission);
+    const { x, z } = player.location;
+    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
-    if(!cannot) return;
-    player.sendMessage({translate: `cannot.permission.${permission}`});
+    if (!cannot) return;
+    player.sendMessage({ translate: `cannot.permission.${permission}` });
     return;
 });
 
 world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
     const permission = `entityUse`
     const { player } = ev;
-    const cannot = CheckPermission(player,permission);
+    const { x, z } = player.location;
+    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
-    if(!cannot) return;
-    player.sendMessage({translate: `cannot.permission.${permission}`});
+    if (!cannot) return;
+    player.sendMessage({ translate: `cannot.permission.${permission}` });
     return;
 });
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
-    const { player , initialSpawn } = ev;
-    if(initialSpawn) {
+    const { player, initialSpawn } = ev;
+    if (initialSpawn) {
         const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
-        if(dataCheck) {
+        if (dataCheck) {
             const playerData = JSON.parse(dataCheck);
             playerData.name = player.name;
-            StringifyAndSavePropertyData(`player_${player.id}`,playerData);
+            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
             return;
         };
         const newPlayerData = {
@@ -63,6 +67,6 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
             days: 0,
             invite: []
         };
-        StringifyAndSavePropertyData(`player_${player.id}`,newPlayerData);
+        StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
     };
 });
