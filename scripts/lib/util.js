@@ -182,6 +182,7 @@ export function CheckPermission(player, permission) {
         };
     };
     if (chunkData?.countryId) {
+        const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
         if (countryData?.id === playerData.country) {
             for (const role of playerData.roles) {
                 const perms = GetAndParsePropertyData(`role_${role}`).permissions;
@@ -277,6 +278,7 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
         };
     };
     if (chunkData?.countryId) {
+        const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
         if (countryData?.id === playerData.country) {
             for (const role of playerData.roles) {
                 const perms = GetAndParsePropertyData(`role_${role}`).permissions;
