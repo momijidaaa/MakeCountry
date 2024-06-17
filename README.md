@@ -24,7 +24,7 @@
   
 > 詳しい仕様を知りたい  
   
-[wiki]()を見てください  
+[wiki](https://github.com/karonyt/MakeCountry/wiki)を見てください  
   
 > カスタマイズしたい？
 
