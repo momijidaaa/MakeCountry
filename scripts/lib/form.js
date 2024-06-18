@@ -75,10 +75,10 @@ export function memberSelectedShowForm(player, member, countryData) {
             case 1: {
                 //国から追い出す
                 if (player.id === member.id) {
-                    player.sendMessage({ translate: `form.kick.error.same` });
+                    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.same` }] });
                     return;
                 };
-                playerCountryKick(member);
+                playerKickCheckForm(player, member, countryData);
                 break;
             };
             case 2: {
@@ -87,12 +87,42 @@ export function memberSelectedShowForm(player, member, countryData) {
             };
             case 3: {
                 //オーナー権限の譲渡
-                player.sendMessage({ translate: `form.owner.error.same` });
+                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.owner.error.same` }] });
                 break;
             };
         };
     });
 }
+
+/**
+ * キックチェック
+ * @param {Player} player 
+ * @param {Player} member 
+ */
+export function playerKickCheckForm(player, member, countryData) {
+    const form = new ActionFormData();
+    form.body({ translate: `kick.check.body`, with: [member.name] });
+    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.kick` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            memberSelectedShowForm(player, member, countryData);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                memberSelectedShowForm(player, member, countryData);
+                break;
+            };
+            case 1: {
+                playerCountryKick(member);
+                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `kicked.finish.message.sender`,with: [member.name] }] });
+                settingCountryMembersForm(player);
+                break;
+            };
+        };
+    });
+};
 
 /**
  * 
