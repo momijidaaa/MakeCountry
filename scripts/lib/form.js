@@ -13,6 +13,7 @@ export function playerMainMenu(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.mainmenu.title` });
     form.button({ translate: `form.mainmenu.button.profile` });
+    form.button({ translate: `form.mainmenu.button.sendmoney` });
     form.button({ translate: `form.mainmenu.button.join` });
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -30,6 +31,10 @@ export function playerMainMenu(player) {
                 break;
             };
             case 1: {
+                sendMoneyForm(player);
+                break;
+            };
+            case 2: {
                 joinTypeSelectForm(player);
                 break;
             };
