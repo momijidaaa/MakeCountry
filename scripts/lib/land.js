@@ -1,6 +1,6 @@
 import { Player, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
 
 /**
@@ -41,7 +41,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     const [ownerRole, adminRole, peopleRole] = CreateRole([
         { name: `Owner`, permissions: [`owner`], iconTextureId: `gold_block`, color: `e` },
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
-        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`,`invite`], iconTextureId: `stone`, color: `a` }
+        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`], iconTextureId: `stone`, color: `a` }
     ]);
     ownerData.roles.push(ownerRole)
     const countryData = {
@@ -73,9 +73,9 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         //敵対国
         hostility: [],
         //中立国の権限
-        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`,`setHome`],
+        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`],
         //同盟国の権限
-        alliancePermission: [`blockUse`, `entityUse`, `noTarget`,`setHome`],
+        alliancePermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`],
         //敵対国の権限
         hostilityPermission: [],
         //加盟している国際組織
@@ -389,6 +389,33 @@ export function playerCountryLeave(player) {
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
         StringifyAndSavePropertyData(`country_${countryId}`, countryData);
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `left.country` }] });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
+ * プレイヤーに招待を送る
+ * @param {Player} receivePlayer 
+ * @param {Player} sendPlayer 
+ * @param {Number} countryId 
+ */
+export function playerCountryInvite(receivePlayer, sendPlayer) {
+    try {
+        if (!CheckPermission(sendPlayer, `invite`)) {
+            sendPlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§c\n` }, { translate: `send.invite.error.permission.message` }] });
+            return;
+        };
+        const sendPlayerData = GetAndParsePropertyData(`player_${sendPlayer.id}`);
+        const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
+        const countryId = sendPlayerData.country;
+        receivePlayerData.invite.splice(receivePlayerData.invite.indexOf(countryId), 1);
+        receivePlayer.invite.push(countryId);
+        StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData);
+        StringifyAndSavePropertyData(`country_${receivePlayer.id}`, receivePlayerData);
+        sendPlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `send.invite.message` }] });
+        if (receivePlayerData.settings.inviteReceiveMessage) receivePlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `receive.invite.message` }] });
+        return;
     } catch (error) {
         console.warn(error);
     };

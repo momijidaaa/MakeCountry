@@ -2,8 +2,8 @@ import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { DeleteCountry, DeleteRole, MakeCountry, playerCountryJoin } from "./land";
-import { GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
+import { DeleteCountry, DeleteRole, MakeCountry, playerCountryInvite, playerCountryJoin } from "./land";
+import { CheckPermission, GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
 /**
  * 
@@ -31,6 +31,89 @@ export function playerMainMenu(player) {
             };
             case 1: {
                 joinTypeSelectForm(player);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 招待を送れるプレイヤーのリスト
+ * @param {Player} player 
+ * @param {boolean} serch 
+ * @param {string} keyword 
+ */
+export function inviteForm(player, serch = false, keyword = ``) {
+    if (!CheckPermission(player, `invite`)) {
+        player.sendMessage({ translate: `send.invite.error.permission.message` });
+        return;
+    };
+    const form = new ActionFormData();
+    let players = world.getPlayers().filter(p => !GetAndParsePropertyData(`player_${p.id}`)?.country);
+    form.title({ translate: `form.sendinvite.list.title` })
+    form.button({ translate: `form.invite.button.serch` });
+    if (serch) {
+        players = players.filter(p => p.name.includes(keyword));
+    };
+    players.forEach(p => {
+        form.button(`${p.name}§r\n${p.id}`);
+    });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            settingCountry(player);
+        };
+        switch (rs.selection) {
+            case 0: {
+                //検索form
+                serchInviteForm(player, keyword);
+                break;
+            };
+            default: {
+                sendInviteCheckForm(player, players[0]);
+                break;
+            };
+        };
+    });
+};
+
+export function serchInviteForm(player, keyword) {
+    const form = new ModalFormData();
+    form.title({ translate: `form.serchinvite.title` });
+    form.textField({ translate: `form.serchinvite.word.label` }, { translate: `form.serchinvite.word.input` }, keyword);
+    form.submitButton({ translate: `mc.button.serch` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            inviteForm(player, true, keyword);
+            return;
+        };
+        inviteForm(player, true, rs.formValues[0]);
+        return;
+    });
+};
+
+/**
+ * 招待チェックフォーム
+ * @param {Player} sendPlayer 
+ * @param {Player} receivePlayer 
+ */
+export function sendInviteCheckForm(sendPlayer, receivePlayer) {
+    const form = new ActionFormData();
+    form.title(`form.sendinvite.check.title`);
+    form.body({ translate: `form.sendinvite.check.body`, with: [receivePlayer.name] });
+    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.send` });
+    form.show(sendPlayer).then(rs => {
+        if (rs.canceled) {
+            inviteForm(sendPlayer);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                inviteForm(sendPlayer);
+                break;
+            };
+            case 1: {
+                playerCountryInvite(receivePlayer, sendPlayer);
                 break;
             };
         };
@@ -343,6 +426,7 @@ export function settingCountry(player) {
     form.title({ translate: `form.setting.title` });
     form.body({ translate: `form.setting.body` });
     form.button({ translate: `form.setting.button.info` });
+    form.button({ translate: `form.setting.button.invite` });
     form.button({ translate: `form.setting.button.role` });
     form.button({ translate: `form.setting.button.delete` });
 
@@ -364,10 +448,14 @@ export function settingCountry(player) {
                 break;
             };
             case 1: {
-                settingCountryRoleForm(player);
+                inviteForm(player);
                 break;
             };
             case 2: {
+                settingCountryRoleForm(player);
+                break;
+            };
+            case 3: {
                 countryDeleteCheckForm(player);
                 break;
             };
@@ -517,7 +605,7 @@ export function editCountryPeaceForm(player, countryData) {
             return;
         };
         if (0 < countryData.peaceChangeCooltime) {
-            player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `peace.cooltime` },{text: ` (${countryData.peaceChangeCooltime})`}] });
+            player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `peace.cooltime` }, { text: ` (${countryData.peaceChangeCooltime})` }] });
         };
         const beforeValue = countryData.peace;
         let value = rs.formValues[0];

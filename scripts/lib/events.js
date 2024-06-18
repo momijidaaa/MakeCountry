@@ -65,7 +65,10 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
             roles: [],
             chunks: [],
             days: 0,
-            invite: []
+            invite: [],
+            settings: {
+                inviteReceiveMessage: true,
+            }
         };
         StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
     };
