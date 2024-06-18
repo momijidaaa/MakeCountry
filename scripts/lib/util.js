@@ -77,6 +77,7 @@ const checkOnlyRole = [
     `hostilityAdmin`,
     `taxAdmin`,
     `peaceChange`,
+    `kick`,
     `owner`,
     `admin`
 ];
