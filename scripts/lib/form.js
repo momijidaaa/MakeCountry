@@ -92,6 +92,8 @@ export function memberSelectedShowForm(player, member, countryData) {
                     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.owner.error.same` }] });
                     return;
                 };
+                //譲渡可能なメンバー一覧のフォーム → 確認フォーム → 譲渡(countryData.owner変更,ownerロールを外して新オーナーに追加)
+                break;
             };
         };
     });
