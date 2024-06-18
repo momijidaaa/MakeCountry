@@ -11,7 +11,7 @@ import { CheckPermission, GetAndParsePropertyData, HasPermission, StringifyAndSa
  */
 export function settingCountryMembersForm(player) {
     const form = new ActionFormData();
-    form.title({translate: `form.setting.members.title`});
+    form.title({ translate: `form.setting.members.title` });
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
     const members = [];
@@ -20,9 +20,47 @@ export function settingCountryMembersForm(player) {
     });
     members.forEach(member => {
         form.button(`${member.name}\n${member.id}`);
-    })
+    });
     //処理書け
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            playerMainMenu(player);
+            return;
+        };
+        memberSelectedShowForm(player, members[rs.selection], countryData);
+        return;
+    });
 };
+
+/**
+ * 選んだメンバーを表示
+ * @param {Player} player 
+ * @param {member} member 
+ * @param {any} countryData
+ */
+export function memberSelectedShowForm(player, member, countryData) {
+    const form = new ActionFormData();
+    form.title({ translate: `form.memberselectedshow.title` });
+    //ボタン追加
+    form.body({ translate: `form.memberselectedshow.body` });
+    form.button({ translate: `form.memberselectedshow.button.kick` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            settingCountryMembersForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //処理
+                break;
+            };
+            case 1: {
+                //処理
+                break;
+            };
+        };
+    });
+}
 
 /**
  * 
