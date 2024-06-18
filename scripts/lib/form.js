@@ -35,7 +35,7 @@ export function settingCountryMembersForm(player) {
 /**
  * 選んだメンバーを表示
  * @param {Player} player 
- * @param {member} member 
+ * @param {Player} member 
  * @param {any} countryData
  */
 export function memberSelectedShowForm(player, member, countryData) {
@@ -46,7 +46,7 @@ export function memberSelectedShowForm(player, member, countryData) {
         { translate: `` }
     ];
     const form = new ActionFormData();
-    form.title({ translate: `form.memberselectedshow.title` });
+    form.title({ translate: `form.memberselectedshow.title`, with: [member.name] });
     form.body({ rawtext: bodyData });
     //ボタン追加
     //設定項目考えとけ
