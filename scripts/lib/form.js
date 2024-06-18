@@ -88,8 +88,10 @@ export function memberSelectedShowForm(player, member, countryData) {
             };
             case 3: {
                 //オーナー権限の譲渡
-                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.owner.error.same` }] });
-                break;
+                if (player.id === member.id) {
+                    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.owner.error.same` }] });
+                    return;
+                };
             };
         };
     });
