@@ -116,12 +116,81 @@ export function playerKickCheckForm(player, member, countryData) {
             };
             case 1: {
                 playerCountryKick(member);
-                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `kicked.finish.message.sender`,with: [member.name] }] });
+                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `kicked.finish.message.sender`, with: [member.name] }] });
                 settingCountryMembersForm(player);
                 break;
             };
         };
     });
+};
+
+/**
+ * 
+ * @param {Player} player 
+ * @param {Player} member 
+ * @param {any} countryData 
+ */
+export function playerRoleChangeForm(player, member, countryData) {
+    let EnableEditRoleIds = [];
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const memberData = GetAndParsePropertyData(`player_${member.id}`);
+    if (countryData?.owner === player.id) {
+        for (const role of countryData?.roles) {
+            EnableEditRoleIds.push(role);
+        };
+    } else {
+        const playerAdminRoles = [];
+        for (const playerRoleId of playerData.roles) {
+            const role = GetAndParsePropertyData(`role_${playerRoleId}`);
+            if (role.permissions.includes(`admin`)) {
+                playerAdminRoles.push(role);
+            };
+        };
+
+        let maxRoleNumber = countryData.roles.length;
+        for (const role of playerAdminRoles) {
+            const place = countryData.roles.indexOf(role);
+            if (-1 < place) {
+                if (maxRoleNumber < place) maxRoleNumber = place;
+            };
+        };
+        EnableEditRoleIds = countryData.roles.slice(maxRoleNumber + 1);
+    };
+    if (EnableEditRoleIds.length === 0) {
+        const form = new ActionFormData();
+        form.title({ translate: `error.message` });
+        form.body({ translate: `not.exsit.can.accessrole` });
+        form.button({ translate: `mc.button.back` });
+        form.show(player).then(rs => {
+            memberSelectedShowForm(player, member, countryData);
+            return;
+        });
+    } else {
+        let memberRoleExsits = [];
+        const form = new ModalFormData();
+        form.title({ translate: `form.role.change.title` });
+        for (const roleId of EnableEditRoleIds) {
+            const role = GetAndParsePropertyData(`role_${roleId}`);
+            const value = memberData.roles.includes(roleId);
+            if (value) memberData.roles.splice(memberData.roles.indexOf(roleId), 1);
+            memberRoleExsits.push(value);
+            form.toggle(role.name, value);
+            form.submitButton({ translate: `mc.button.update` });
+        };
+        form.show(player).then(rs => {
+            if (rs.canceled) {
+                memberSelectedShowForm(player, member, countryData);
+                return;
+            };
+            for (let i = 0; i < memberRoleExsits.length; i++) {
+                if (rs.formValues[i]) {
+                    memberData.roles.push(EnableEditRoleIds[i]);
+                };
+            };
+            StringifyAndSavePropertyData(`player_${memberData.id}`,memberData);
+            return;
+        });
+    };
 };
 
 /**
