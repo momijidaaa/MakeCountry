@@ -2,7 +2,7 @@ import { Player, system, world, RawMessage } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { DeleteCountry, DeleteRole, MakeCountry, playerCountryInvite, playerCountryJoin } from "./land";
+import { DeleteCountry, DeleteRole, MakeCountry, playerCountryInvite, playerCountryJoin, playerCountryKick } from "./land";
 import { CheckPermission, GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
 /**
@@ -49,12 +49,18 @@ export function memberSelectedShowForm(player, member, countryData) {
     form.title({ translate: `form.memberselectedshow.title`, with: [member.name] });
     form.body({ rawtext: bodyData });
     //ボタン追加
-    //設定項目考えとけ
+    /*
+    明日の自分へ
+    設定項目考えておいて
+    */
 
     //ロール変更(admin権限)
     //国から追い出す(kickMember)
     //オーナー権限の譲渡(owner)
-    form.button({ translate: `form.memberselectedshow.button.kick` });
+    form.button({ translate: `mc.button.back` });
+    if (CheckPermission(player, `kick`)) form.button({ translate: `form.memberselectedshow.button.kick` });
+    if (CheckPermission(player, `admin`)) form.button({ translate: `form.memberselectedshow.button.role` });
+    if (CheckPermission(player, `owner`)) form.button({ translate: `form.memberselectedshow.button.owner` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             settingCountryMembersForm(player);
@@ -62,11 +68,26 @@ export function memberSelectedShowForm(player, member, countryData) {
         };
         switch (rs.selection) {
             case 0: {
-                //処理
+                //戻る
+                settingCountryMembersForm(player);
                 break;
             };
             case 1: {
-                //処理
+                //国から追い出す
+                if (player.id === member.id) {
+                    player.sendMessage({ translate: `form.kick.error.same` });
+                    return;
+                };
+                playerCountryKick(member);
+                break;
+            };
+            case 2: {
+                //ロール変更
+                break;
+            };
+            case 3: {
+                //オーナー権限の譲渡
+                player.sendMessage({ translate: `form.owner.error.same` });
                 break;
             };
         };

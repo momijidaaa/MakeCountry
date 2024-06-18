@@ -185,6 +185,7 @@ export function CheckPermission(player, permission) {
     if (chunkData?.countryId) {
         const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
         if (countryData?.id === playerData.country) {
+            if (countryData?.owner === playerData?.id) return false;
             for (const role of playerData.roles) {
                 const perms = GetAndParsePropertyData(`role_${role}`).permissions;
                 if (perms.includes(permission)) {
@@ -219,7 +220,7 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
     if (player.hasTag(`adminmode`)) return false;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     //チャンクデータなし → 荒野の権限があれば許可
-    const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x,z,dimensionId));
+    const chunkData = GetAndParsePropertyData(GetChunkPropertyId(x, z, dimensionId));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
             return false;
@@ -280,7 +281,8 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
     };
     if (chunkData?.countryId) {
         const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-        if (countryData?.id === playerData.country) {
+        if (countryData?.id === playerData?.country) {
+            if (countryData?.owner === playerData?.id) return false;
             for (const role of playerData.roles) {
                 const perms = GetAndParsePropertyData(`role_${role}`).permissions;
                 if (perms.includes(permission)) {
@@ -314,6 +316,8 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
 export function HasPermission(player, permission) {
     if (player.hasTag(`adminmode`)) return true;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
+    if (countryData?.owner === playerData?.id) return false;
     for (const role of playerData.roles) {
         if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return true;
     };

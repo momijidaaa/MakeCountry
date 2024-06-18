@@ -39,7 +39,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     ownerData.country = id;
     ownerData.money -= config.MakeCountryCost;
     const [ownerRole, adminRole, peopleRole] = CreateRole([
-        { name: `Owner`, permissions: [`owner`], iconTextureId: `gold_block`, color: `e` },
+        { name: `Owner`, permissions: [`admin`], iconTextureId: `gold_block`, color: `e` },
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
         { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`], iconTextureId: `stone`, color: `a` }
     ]);
@@ -389,6 +389,22 @@ export function playerCountryLeave(player) {
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
         StringifyAndSavePropertyData(`country_${countryId}`, countryData);
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `left.country` }] });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+export function playerCountryKick(player) {
+    try {
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const countryId = playerData.country;
+        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
+        playerData.roles = [];
+        playerData.country = undefined;
+        StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
+        StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `kicked.country` }] });
     } catch (error) {
         console.warn(error);
     };
