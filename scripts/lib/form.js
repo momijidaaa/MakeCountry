@@ -187,7 +187,7 @@ export function playerRoleChangeForm(player, member, countryData) {
                     memberData.roles.push(EnableEditRoleIds[i]);
                 };
             };
-            StringifyAndSavePropertyData(`player_${memberData.id}`,memberData);
+            StringifyAndSavePropertyData(`player_${memberData.id}`, memberData);
             return;
         });
     };
@@ -1114,24 +1114,55 @@ export function showCountryInfo(player, countryData) {
  */
 export function settingCountryRoleForm(player) {
     try {
+        let EnableEditRoleIds = [];
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const memberData = GetAndParsePropertyData(`player_${member.id}`);
+        if (countryData?.owner === player.id) {
+            for (const role of countryData?.roles) {
+                EnableEditRoleIds.push(role);
+            };
+        } else {
+            const playerAdminRoles = [];
+            for (const playerRoleId of playerData.roles) {
+                const role = GetAndParsePropertyData(`role_${playerRoleId}`);
+                if (role.permissions.includes(`admin`)) {
+                    playerAdminRoles.push(role);
+                };
+            };
+            let maxRoleNumber = countryData.roles.length;
+            for (const role of playerAdminRoles) {
+                const place = countryData.roles.indexOf(role);
+                if (-1 < place) {
+                    if (maxRoleNumber < place) maxRoleNumber = place;
+                };
+            };
+            EnableEditRoleIds = countryData.roles.slice(maxRoleNumber + 1);
+        };
         const form = new ActionFormData();
-        form.title({ translate: `form.setting.button.role` });
-        const playerData = GetAndParsePropertyData(`player_${player.id}`)
-        const roleIds = GetAndParsePropertyData(`country_${playerData.country}`).roles;
-        let roles = [];
-        roleIds.forEach(id => {
-            roles.push(GetAndParsePropertyData(`role_${id}`));
-        });
-        roles.forEach(role => {
-            form.button(role.name, role.icon);
-        });
-        form.show(player).then(rs => {
-            if (rs.canceled) {
+        if (EnableEditRoleIds.length === 0) {
+            form.body({ translate: `not.exsit.can.accessrole` });
+            form.button({ translate: `mc.button.back` });
+            form.show(player).then(rs => {
                 settingCountry(player);
                 return;
-            };
-            selectRoleEditType(player, roles[rs.selection]);
-        });
+            });
+        } else {
+            form.title({ translate: `form.setting.button.role` });
+            let roles = [];
+            EnableEditRoleIds.forEach(id => {
+                roles.push(GetAndParsePropertyData(`role_${id}`));
+            });
+            roles.forEach(role => {
+                form.button(role.name, role.icon);
+            });
+            form.show(player).then(rs => {
+                if (rs.canceled) {
+                    settingCountry(player);
+                    return;
+                };
+                selectRoleEditType(player, roles[rs.selection]);
+            });
+        };
     } catch (error) {
         console.warn(error);
     };
