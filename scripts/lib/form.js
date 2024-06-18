@@ -92,7 +92,7 @@ export function memberSelectedShowForm(player, member, countryData) {
             };
         };
     });
-}
+};
 
 /**
  * キックチェック
