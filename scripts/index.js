@@ -29,4 +29,5 @@ form.sendmoney.check.title=送金確認
 mc.button.sendmoney=送金する
 form.sendmoney.check.label=送金額
 form.mainmenu.button.sendmoney=送金
+form.setting.members.title=国民リスト
 */

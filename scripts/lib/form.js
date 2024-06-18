@@ -6,6 +6,25 @@ import { DeleteCountry, DeleteRole, MakeCountry, playerCountryInvite, playerCoun
 import { CheckPermission, GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
 
 /**
+ * 国民一覧
+ * @param {Player} player 
+ */
+export function settingCountryMembersForm(player) {
+    const form = new ActionFormData();
+    form.title({translate: `form.setting.members.title`});
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
+    const members = [];
+    countryData.forEach(memberId => {
+        members.push(GetAndParsePropertyData(`player_${memberId}`));
+    });
+    members.forEach(member => {
+        form.button(`${member.name}\n${member.id}`);
+    })
+    //処理書け
+};
+
+/**
  * 
  * @param {Player} player 
  */
@@ -42,7 +61,6 @@ export function playerMainMenu(player) {
     });
 };
 
-
 /**
  * 金を送れるプレイヤーのリスト
  * @param {Player} player 
@@ -52,7 +70,7 @@ export function playerMainMenu(player) {
 export function sendMoneyForm(player, serch = false, keyword = ``) {
     const form = new ActionFormData();
     let players = world.getPlayers();
-    form.title({ translate: `form.sendmoney.list.title` })
+    form.title({ translate: `form.sendmoney.list.title` });
     form.button({ translate: `form.sendmoney.button.serch` });
     if (serch) {
         players = players.filter(p => p.name.includes(keyword));
@@ -516,6 +534,7 @@ export function settingCountry(player) {
     form.body({ translate: `form.setting.body` });
     form.button({ translate: `form.setting.button.info` });
     form.button({ translate: `form.setting.button.invite` });
+    form.button({ translate: `form.setting.button.members` });
     form.button({ translate: `form.setting.button.role` });
     form.button({ translate: `form.setting.button.delete` });
 
@@ -545,6 +564,10 @@ export function settingCountry(player) {
                 break;
             };
             case 3: {
+                settingCountryMembersForm(player);
+                break;
+            };
+            case 4: {
                 countryDeleteCheckForm(player);
                 break;
             };
