@@ -37,6 +37,90 @@ export function playerMainMenu(player) {
     });
 };
 
+
+/**
+ * 金を送れるプレイヤーのリスト
+ * @param {Player} player 
+ * @param {boolean} serch 
+ * @param {string} keyword 
+ */
+export function sendMoneyForm(player, serch = false, keyword = ``) {
+    const form = new ActionFormData();
+    let players = world.getPlayers();
+    form.title({ translate: `form.sendmoney.list.title` })
+    form.button({ translate: `form.sendmoney.button.serch` });
+    if (serch) {
+        players = players.filter(p => p.name.includes(keyword));
+    };
+    players.forEach(p => {
+        form.button(`${p.name}§r\n${p.id}`);
+    });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            playerMainMenu(player);
+        };
+        switch (rs.selection) {
+            case 0: {
+                //検索form
+                serchSendMoneyForm(player, keyword);
+                break;
+            };
+            default: {
+                sendMoneyCheckForm(player, players[0]);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 送金するプレイヤーの条件絞り込み検索
+ * @param {Player} player 
+ * @param {string} keyword 
+ */
+export function serchSendMoneyForm(player, keyword) {
+    const form = new ModalFormData();
+    form.title({ translate: `form.serchsendmoney.title` });
+    form.textField({ translate: `form.serchsendmoney.word.label` }, { translate: `form.serchsendmoney.word.input` }, keyword);
+    form.submitButton({ translate: `mc.button.serch` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            sendMoneyForm(player, true, keyword);
+            return;
+        };
+        sendMoneyForm(player, true, rs.formValues[0]);
+        return;
+    });
+};
+
+/**
+ * 送金チェックフォーム
+ * @param {Player} sendPlayer 
+ * @param {Player} receivePlayer 
+ */
+export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
+    const sendPlayerData = GetAndParsePropertyData(`player_${sendPlayer.id}`);
+    const form = new ModalFormData();
+    form.title({ translate: `form.sendmoney.check.title` });
+    form.slider({ translate: `form.sendmoney.check.label` }, 0, sendPlayerData?.money, 1);
+    form.submitButton({ translate: `mc.button.sendmoney` });
+    form.show(sendPlayer).then(rs => {
+        if (rs.canceled) {
+            sendMoneyForm(sendPlayer);
+            return;
+        };
+        const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
+        const value = rs.formValues[0];
+        receivePlayerData.money += value;
+        sendPlayerData.money -= value;
+        sendPlayer.sendMessage({ translate: `command.sendmoney.result.sender`, with: [receivePlayer.name, `${config.MoneyName} ${value}`] });
+        receivePlayer.sendMessage({ translate: `command.sendmoney.result.receiver`, with: [sendPlayer.name, `${config.MoneyName} ${value}`] });
+        StringifyAndSavePropertyData(`player_${receivePlayer.id}`, receivePlayerData);
+        StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData);
+        return;
+    });
+};
+
 /**
  * 招待を送れるプレイヤーのリスト
  * @param {Player} player 
@@ -98,7 +182,7 @@ export function serchInviteForm(player, keyword) {
  */
 export function sendInviteCheckForm(sendPlayer, receivePlayer) {
     const form = new ActionFormData();
-    form.title(`form.sendinvite.check.title`);
+    form.title({ translate: `form.sendinvite.check.title` });
     form.body({ translate: `form.sendinvite.check.body`, with: [receivePlayer.name] });
     form.button({ translate: `mc.button.back` });
     form.button({ translate: `mc.button.send` });

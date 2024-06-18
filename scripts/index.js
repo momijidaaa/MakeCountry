@@ -20,4 +20,12 @@ form.serchinvite.title=プレイヤー検索
 form.sendinvite.check.body= %s §rに国への招待を送りますか？
 form.serchinvite.word.label=検索ワード
 form.serchinvite.word.input=プレイヤー名に含まれる単語を入力
+form.sendmoney.list.title=送金する
+form.sendmoney.button.serch=検索する
+form.serchsendmoney.title=プレイヤー検索
+form.serchsendmoney.word.label=検索ワード
+form.serchsendmoney.word.input=プレイヤー名に含まれる単語を入力
+form.sendmoney.check.title=送金確認
+mc.button.sendmoney=送金する
+form.sendmoney.check.label=送金額
 */
