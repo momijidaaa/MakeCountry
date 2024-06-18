@@ -826,6 +826,7 @@ const rolePermissions = [
     `place`,
     `break`,
     `setHome`,
+    `kick`,
     `blockUse`,
     `entityUse`,
     `noTarget`,
