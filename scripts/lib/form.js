@@ -3,7 +3,7 @@ import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
 import { DeleteCountry, DeleteRole, MakeCountry, playerCountryInvite, playerCountryJoin, playerCountryKick } from "./land";
-import { CheckPermission, GetAndParsePropertyData, HasPermission, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 
 /**
  * 国民一覧
@@ -820,7 +820,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
             if (rs.canceled) return;
             switch (rs.selection) {
                 case 0: {
-                    if (HasPermission(player, `editCountryName`)) {
+                    if (CheckPermission(player, `editCountryName`)) {
                         editCountryNameForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -828,7 +828,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     break;
                 };
                 case 1: {
-                    if (HasPermission(player, `editCountryLore`)) {
+                    if (CheckPermission(player, `editCountryLore`)) {
                         editCountryLoreForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -836,7 +836,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     break;
                 };
                 case 2: {
-                    if (HasPermission(player, `peaceChange`)) {
+                    if (CheckPermission(player, `peaceChange`)) {
                         editCountryPeaceForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -844,7 +844,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     break;
                 };
                 case 3: {
-                    if (HasPermission(player, `inviteChange`)) {
+                    if (CheckPermission(player, `inviteChange`)) {
                         editCountryInviteForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -1181,7 +1181,7 @@ export function settingCountryRoleForm(player) {
  * @param {any} roleData 
  */
 export function RoleIconChange(player, roleData) {
-    if (HasPermission(player, `admin`)) {
+    if (CheckPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.iconchange.title`, with: [roleData.name] });
         form.textField({ translate: `form.role.iconchange.label` }, { translate: `form.role.iconchange.input` }, roleData.icon);
@@ -1207,7 +1207,7 @@ export function RoleIconChange(player, roleData) {
  * @param {any} roleData 
  */
 export function RoleNameChange(player, roleData) {
-    if (HasPermission(player, `admin`)) {
+    if (CheckPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.namechange.title`, with: [roleData.name] });
         form.textField({ translate: `form.role.namechange.label` }, { translate: `form.role.namechange.input` }, roleData.name);
@@ -1232,7 +1232,7 @@ export function RoleNameChange(player, roleData) {
  * @param {any} roleData 
  */
 export function selectRoleEditType(player, roleData) {
-    if (HasPermission(player, `admin`)) {
+    if (CheckPermission(player, `admin`)) {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const form = new ActionFormData();
         form.title({ translate: `form.role.edit.select.title`, with: [roleData.name] });
@@ -1279,7 +1279,7 @@ export function selectRoleEditType(player, roleData) {
  * @param {any} roleData 
  */
 export function setRolePermissionForm(player, roleData) {
-    if (HasPermission(player, `admin`)) {
+    if (CheckPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `role.permission.edit`, with: [roleData.name] });
         for (const permission of rolePermissions) {

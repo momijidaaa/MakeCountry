@@ -319,7 +319,7 @@ export function HasPermission(player, permission) {
     if (player.hasTag(`adminmode`)) return true;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
-    if (countryData?.owner === playerData?.id) return false;
+    if (countryData?.owner === playerData?.id) return true;
     for (const role of playerData.roles) {
         if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return true;
     };
