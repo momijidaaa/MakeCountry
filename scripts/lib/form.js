@@ -1102,6 +1102,7 @@ export function MakeCountryForm(player) {
         };
         if (rs.formValues) {
             MakeCountry(player, rs.formValues[0], rs.formValues[1], rs.formValues[2]);
+            return;
         };
     });
 };
