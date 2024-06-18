@@ -168,6 +168,7 @@ export function CheckPermission(player, permission) {
                             return false;
                         };
                         if (countryData?.id === playerData?.country) {
+                            if (countryData?.owner === playerData?.id) return false;
                             for (const role of playerData.roles) {
                                 if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
                                     return false;
@@ -265,6 +266,7 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
                             return false;
                         };
                         if (countryData?.id === playerData?.country) {
+                            if (countryData?.owner === playerData?.id) return false;
                             for (const role of playerData.roles) {
                                 if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
                                     return false;
