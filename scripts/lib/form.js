@@ -1,4 +1,4 @@
-import { Player, system, world } from "@minecraft/server";
+import { Player, system, world, RawMessage } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
@@ -39,10 +39,21 @@ export function settingCountryMembersForm(player) {
  * @param {any} countryData
  */
 export function memberSelectedShowForm(player, member, countryData) {
+    /**
+     * @type {RawMessage}
+     */
+    const bodyData = [
+        { translate: `` }
+    ];
     const form = new ActionFormData();
     form.title({ translate: `form.memberselectedshow.title` });
+    form.body({ rawtext: bodyData });
     //ボタン追加
-    form.body({ translate: `form.memberselectedshow.body` });
+    //設定項目考えとけ
+    
+    //ロール更新
+    //国から追い出す(kickMember)
+    //オーナー権限の譲渡(owner)
     form.button({ translate: `form.memberselectedshow.button.kick` });
     form.show(player).then(rs => {
         if (rs.canceled) {
