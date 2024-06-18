@@ -50,8 +50,8 @@ export function memberSelectedShowForm(player, member, countryData) {
     form.body({ rawtext: bodyData });
     //ボタン追加
     //設定項目考えとけ
-    
-    //ロール更新
+
+    //ロール変更(admin権限)
     //国から追い出す(kickMember)
     //オーナー権限の譲渡(owner)
     form.button({ translate: `form.memberselectedshow.button.kick` });
