@@ -1,4 +1,4 @@
-import { Player, system, world, RawMessage } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
@@ -15,7 +15,7 @@ export function settingCountryMembersForm(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
     const members = [];
-    countryData.forEach(memberId => {
+    countryData.members.forEach(memberId => {
         members.push(GetAndParsePropertyData(`player_${memberId}`));
     });
     members.forEach(member => {
@@ -24,7 +24,7 @@ export function settingCountryMembersForm(player) {
     //処理書け
     form.show(player).then(rs => {
         if (rs.canceled) {
-            playerMainMenu(player);
+            settingCountry(player);
             return;
         };
         memberSelectedShowForm(player, members[rs.selection], countryData);
@@ -83,6 +83,7 @@ export function memberSelectedShowForm(player, member, countryData) {
             };
             case 2: {
                 //ロール変更
+                playerRoleChangeForm(player,member,countryData);
                 break;
             };
             case 3: {
@@ -188,6 +189,7 @@ export function playerRoleChangeForm(player, member, countryData) {
                 };
             };
             StringifyAndSavePropertyData(`player_${memberData.id}`, memberData);
+            memberSelectedShowForm(player, member, countryData);
             return;
         });
     };
@@ -729,11 +731,11 @@ export function settingCountry(player) {
                 break;
             };
             case 2: {
-                settingCountryRoleForm(player);
+                settingCountryMembersForm(player);
                 break;
             };
             case 3: {
-                settingCountryMembersForm(player);
+                settingCountryRoleForm(player);
                 break;
             };
             case 4: {
@@ -1116,7 +1118,7 @@ export function settingCountryRoleForm(player) {
     try {
         let EnableEditRoleIds = [];
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
-        const memberData = GetAndParsePropertyData(`player_${member.id}`);
+        const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
         if (countryData?.owner === player.id) {
             for (const role of countryData?.roles) {
                 EnableEditRoleIds.push(role);
@@ -1140,6 +1142,7 @@ export function settingCountryRoleForm(player) {
         };
         const form = new ActionFormData();
         if (EnableEditRoleIds.length === 0) {
+            form.title({ translate: `form.setting.button.role` });
             form.body({ translate: `not.exsit.can.accessrole` });
             form.button({ translate: `mc.button.back` });
             form.show(player).then(rs => {
@@ -1161,6 +1164,7 @@ export function settingCountryRoleForm(player) {
                     return;
                 };
                 selectRoleEditType(player, roles[rs.selection]);
+                return;
             });
         };
     } catch (error) {
