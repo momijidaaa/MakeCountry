@@ -92,7 +92,37 @@ export function memberSelectedShowForm(player, member, countryData) {
                     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.owner.error.same` }] });
                     return;
                 };
-                //譲渡可能なメンバー一覧のフォーム → 確認フォーム → 譲渡(countryData.owner変更,ownerロールを外して新オーナーに追加)
+                //確認フォーム → 譲渡(countryData.owner変更,ownerロールを外して新オーナーに追加)
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 所有権譲渡チェック
+ * @param {Player} player 
+ * @param {Player} member 
+ */
+export function playerOwnerChangeCheckForm(player, member, countryData) {
+    const form = new ActionFormData();
+    form.body({ translate: `ownerchange.check.body`, with: [member.name] });
+    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.ownerchange` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            memberSelectedShowForm(player, member, countryData);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                memberSelectedShowForm(player, member, countryData);
+                break;
+            };
+            case 1: {
+                playerChangeOwner(player,member,countryData);
+                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.sender`, with: [member.name] }] });
+                settingCountryMembersForm(player);
                 break;
             };
         };
