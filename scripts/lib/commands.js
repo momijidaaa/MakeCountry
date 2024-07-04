@@ -279,7 +279,15 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
-        const playerCountryData = GetAndParsePropertyData(this.playerData.country);
+        if (chunkData.countryId) {
+            if (chunkData.countryId === this.playerData.country) {
+                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
+                return;
+            };
+            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
+            return;
+        };
+        const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
         if (playerCountryData.resourcePoint < chunkPrice) {
             this.sender.sendMessage({ translate: `command.buychunk.error.not.enough.money`, with: [`${chunkPrice}`] });
             return;
@@ -310,9 +318,9 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` })
             return;
         };
-        const playerCountryData = GetAndParsePropertyData(this.playerData.country);
-        if (playerCountryData.resourcePoint < chunkPrice) {
-            this.sender.sendMessage({ translate: `command.buychunk.error.not.enough.money`, with: [`${chunkPrice}`] });
+        const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        if (playerCountryData.territories.length < 2) {
+            this.sender.sendMessage({ translate: `command.sellchunk.error.morechunk`, with: [`${chunkPrice}`] });
             return;
         };
 
