@@ -246,7 +246,7 @@ class ChatHandler {
     };
 
     buyChunk() {
-        if (!this.playerData.country) {
+        if (!this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.buychunk.error.notjoin.country` });
             return;
         };
@@ -279,7 +279,7 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
-        if (chunkData.countryId) {
+        if (chunkData?.countryId) {
             if (chunkData.countryId === this.playerData.country) {
                 this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
                 return;
