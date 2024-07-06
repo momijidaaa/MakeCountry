@@ -770,7 +770,7 @@ export function treasurybudgetSelectForm(player) {
     form.title({ translate: `treasurybudget` });
     form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}` }] });
     form.button({ translate: `deposit` });
-    if (CheckPermission(player, `withDrawTreasurybudget`)) form.button({ translate: `withdraw` });
+    if (CheckPermission(player, `withDrawTreasurybudget`) === false) form.button({ translate: `withdraw` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             treasuryMainForm(player);

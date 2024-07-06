@@ -107,21 +107,22 @@ export function CheckPermission(player, permission) {
     //AdminMode 許可
     if (player.hasTag(`adminmode`)) return false;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    
     //ロールのみチェックすれば良い権限の場合 → チェックしてキャンセル or 許可
     if (checkOnlyRole.includes(permission)) {
         const roleIds = playerData.roles;
-        roleIds.forEach(id => {
-            const role = GetAndParsePropertyData(`role_${id}`);
+        for (let i = 0; i < roleIds.length; i++) {
+            const role = GetAndParsePropertyData(`role_${roleIds[i]}`);
             const permissions = role.permissions;
             if (permissions.includes(permission)) {
                 return false;
-            };
+            }
             if (permission !== `owner` || permission !== `admin`) {
                 if (permissions.includes(`admin`) || permissions.includes(`owner`)) {
                     return false;
                 };
             };
-        });
+        };
         return true;
     };
     //チャンクデータなし → 荒野の権限があれば許可
@@ -141,7 +142,7 @@ export function CheckPermission(player, permission) {
             return true;
         };
     };
-    //特別区 → 特別区のがあれば許可
+    //特別区 → 特別区の権限があれば許可
     if (chunkData?.special) {
         if (config.specialAllowPermissions.includes(permission)) {
             return false;
@@ -154,7 +155,7 @@ export function CheckPermission(player, permission) {
         if (chunkData?.owner === playerData?.id) {
             if (!restrictionPermissions.includes(permission)) {
                 return false;
-            };
+            }
         } else {
             if (chunkData[`${permission}Restriction`]) {
                 const allow = chunkData[`${permission}Allow`].includes(player.id);
@@ -165,10 +166,10 @@ export function CheckPermission(player, permission) {
                         const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
                         if (!playerData?.country) {
                             return true;
-                        };
+                        }
                         if (countryData?.warNowCountries.includes(playerData.country)) {
                             return false;
-                        };
+                        }
                         if (countryData?.id === playerData?.country) {
                             if (countryData?.owner === playerData?.id) return false;
                             for (const role of playerData.roles) {
