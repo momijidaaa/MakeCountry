@@ -327,7 +327,7 @@ class ChatHandler {
             return;
         };
 
-        chunkData.country = this.playerData.country;
+        chunkData.countryId = undefined;
         playerCountryData.resourcePoint += chunkPrice;
         playerCountryData.territories.splice(playerCountryData.territories.indexOf(chunkData.id), 1);
         StringifyAndSavePropertyData(chunkData.id, chunkData);
