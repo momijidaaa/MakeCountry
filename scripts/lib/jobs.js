@@ -5,7 +5,8 @@ import jobs_config from "../jobs_config";
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
     const { brokenBlockPermutation, player } = ev;
-    world.sendMessage(`${brokenBlockPermutation.getTags()} ${brokenBlockPermutation.type.id} ${brokenBlockPermutation.getState(`age`)}`)
+
+    //木こり
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     if (brokenBlockPermutation.hasTag(`log`) && player.hasTag(`mcjobs_woodcutter`)) {
         const random = getRandomInteger(jobs_config.woodCutReward.min, jobs_config.woodCutReward.max);
@@ -14,6 +15,8 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
+
+    //鉱夫
     if (brokenBlockPermutation.type.id.endsWith(`_ore`) && player.hasTag(`mcjobs_miner`)) {
         const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max);
         playerData.money += random;
@@ -28,14 +31,16 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
-    if (brokenBlockPermutation.hasTag(`crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) === 7 ) {
+
+    //農家
+    if (brokenBlockPermutation.hasTag(`crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) === 7) {
         const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
-    if (brokenBlockPermutation.type.id === `minecraft:cocoa` && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`age`) === 2 ) {
+    if (brokenBlockPermutation.type.id === `minecraft:cocoa` && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`age`) === 2) {
         const random = getRandomInteger(jobs_config.cocoaHarvestReward.min, jobs_config.cocoaHarvestReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
@@ -46,9 +51,11 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
 
 world.afterEvents.entityDie.subscribe((ev) => {
     if (!jobs_config.validity) return;
+
     try {
         if (!(ev.damageSource.damagingEntity instanceof Player)) { return };
         const player = ev.damageSource.damagingEntity;
+        //狩人
         if (!player.hasTag(`mcjobs_hunter`)) return;
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         try {
