@@ -250,7 +250,7 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.buychunk.error.notjoin.country` });
             return;
         };
-        const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
+        let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
         let chunkPrice = config.defaultChunkPrice;
         if (chunkData && chunkData.price) chunkPrice = chunkData.price;
         const cannotBuy = CheckPermission(this.sender, `buyChunk`);
@@ -293,7 +293,7 @@ class ChatHandler {
             return;
         };
 
-        chunkData.country = this.playerData.country;
+        chunkData.countryId = this.playerData.country;
         playerCountryData.resourcePoint -= chunkPrice;
         playerCountryData.territories.push(chunkData.id);
         StringifyAndSavePropertyData(chunkData.id, chunkData);

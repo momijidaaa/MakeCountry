@@ -122,7 +122,7 @@ export function CheckPermission(player, permission) {
                 };
             };
         });
-        return true;;
+        return true;
     };
     //チャンクデータなし → 荒野の権限があれば許可
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
