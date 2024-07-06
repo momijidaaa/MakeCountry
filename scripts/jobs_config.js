@@ -1,6 +1,7 @@
 export default {
     //jobsを有効化するか
     validity: true,
+    maxEmploymentNum: 3, //同時に就ける職業の最大数
 
     showRewardMessage: true, //メッセージをアクションバーに表示するか
 
