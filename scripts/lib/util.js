@@ -327,3 +327,7 @@ export function HasPermission(player, permission) {
         if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return true;
     };
 };
+
+export function getRandomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
