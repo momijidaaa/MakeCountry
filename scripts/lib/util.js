@@ -79,7 +79,9 @@ const checkOnlyRole = [
     `peaceChange`,
     `kick`,
     `owner`,
-    `admin`
+    `admin`,
+    `withDrawResourcepoint`,
+    `withDrawTreasurybudget`
 ];
 
 const restrictionPermissions = [

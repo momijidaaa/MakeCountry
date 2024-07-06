@@ -865,7 +865,7 @@ export function resourcepointSelectForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `resourcepoint` });
     form.body({ rawtext: [{ translate: `resourcepoint` }, { text: `${config.MoneyName} ${countryData.resourcePoint}` }] });
-    form.button({ translate: `deposit` });
+    form.button({ translate: `conversion` });
     if (!CheckPermission(player, `withDrawResourcepoint`)) form.button({ translate: `withdraw` });
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -952,41 +952,6 @@ export function resourcepointWithdrawForm(player) {
 
 /**
  * 
- * 国家予算の入金フォーム
- * @param {Player} player 
- */
-export function treasurybudgetDepositForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
-    const form = new ModalFormData();
-    form.title({ translate: `treasurybudget.deposit` });
-    form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}` }] });
-    form.button({ translate: `deposit` });
-    if (!CheckPermission(player, `withDrawTreasurybudget`)) form.button({ translate: `withdraw` });
-    form.show(player).then(rs => {
-        if (rs.canceled) {
-            treasurybudgetSelectForm(player);
-            return;
-        };
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
-        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
-        let hasMoney = playerData2.money;
-        let needMoney = rs.formValues[0];
-        if (hasMoney < needMoney) {
-            player.sendMessage({ translate: `error.notenough.money` });
-            return;
-        };
-        countryData2.money += needMoney;
-        playerData2.money -= needMoney;
-        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
-        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
-        treasurybudgetSelectForm(player);
-        return;
-    });
-};
-
-/**
- * 
  * 国の設定
  * @param {Player} player 
  */
@@ -995,6 +960,7 @@ export function settingCountry(player) {
     form.title({ translate: `form.setting.title` });
     form.body({ translate: `form.setting.body` });
     form.button({ translate: `form.setting.button.info` });
+    form.button({ translate: `form.setting.button.treasury` });
     form.button({ translate: `form.setting.button.invite` });
     form.button({ translate: `form.setting.button.members` });
     form.button({ translate: `form.setting.button.role` });
