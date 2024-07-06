@@ -83,7 +83,7 @@ export function memberSelectedShowForm(player, member, countryData) {
             };
             case 2: {
                 //ロール変更
-                playerRoleChangeForm(player,member,countryData);
+                playerRoleChangeForm(player, member, countryData);
                 break;
             };
             case 3: {
@@ -120,7 +120,7 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
                 break;
             };
             case 1: {
-                playerChangeOwner(player,member,countryData);
+                playerChangeOwner(player, member, countryData);
                 player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.sender`, with: [member.name] }] });
                 settingCountryMembersForm(player);
                 break;
@@ -729,6 +729,263 @@ export function allowJoinCountriesList(player) {
 };
 
 /**
+ * 国庫
+ * @param {Player} player 
+ */
+export function treasuryMainForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ActionFormData();
+    form.title({ translate: `form.treasurymain.title` });
+    form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}\n` }, { translate: `resourcepoint` }, { text: `${countryData.resourcePoint}` }] });
+    form.button({ translate: `treasurybudget` });
+    form.button({ translate: `resourcepoint` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            settingCountry(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                treasurybudgetSelectForm(player);
+                break;
+            };
+            case 1: {
+                resourcepointSelectForm(player);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 
+ * 国家予算のメインフォーム
+ * @param {Player} player 
+ */
+export function treasurybudgetSelectForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ActionFormData();
+    form.title({ translate: `treasurybudget` });
+    form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}` }] });
+    form.button({ translate: `deposit` });
+    if (!CheckPermission(player, `withDrawTreasurybudget`)) form.button({ translate: `withdraw` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            treasuryMainForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                treasurybudgetDepositForm(player);
+                break;
+            };
+            case 1: {
+                treasurybudgetWithdrawForm(player);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 
+ * 国家予算の入金フォーム
+ * @param {Player} player 
+ */
+export function treasurybudgetDepositForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const form = new ModalFormData();
+    form.title({ translate: `treasurybudget.deposit` });
+    form.slider({ translate: `deposit` }, 0, playerData.money, 1);
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            treasurybudgetSelectForm(player);
+            return;
+        };
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        let hasMoney = playerData2.money;
+        let needMoney = rs.formValues[0];
+        if (hasMoney < needMoney) {
+            player.sendMessage({ translate: `error.notenough.money` });
+            return;
+        };
+        countryData2.money += needMoney;
+        playerData2.money -= needMoney;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        treasurybudgetSelectForm(player);
+        return;
+    });
+};
+
+/**
+ * 
+ * 国家予算の入金フォーム
+ * @param {Player} player 
+ */
+export function treasurybudgetWithdrawForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ModalFormData();
+    form.title({ translate: `treasurybudget.deposit` });
+    form.slider({ translate: `deposit` }, 0, countryData.money, 1);
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            treasurybudgetSelectForm(player);
+            return;
+        };
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        let hasMoney = countryData2.money;
+        let needMoney = rs.formValues[0];
+        if (hasMoney < needMoney) {
+            player.sendMessage({ translate: `error.notenough.treasurybudget` });
+            return;
+        };
+        countryData2.money -= needMoney;
+        playerData2.money += needMoney;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        treasurybudgetSelectForm(player);
+        return;
+    });
+};
+
+/**
+ * 
+ * リソースポイントのメインフォーム
+ * @param {Player} player 
+ */
+export function resourcepointSelectForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ActionFormData();
+    form.title({ translate: `resourcepoint` });
+    form.body({ rawtext: [{ translate: `resourcepoint` }, { text: `${config.MoneyName} ${countryData.resourcePoint}` }] });
+    form.button({ translate: `deposit` });
+    if (!CheckPermission(player, `withDrawResourcepoint`)) form.button({ translate: `withdraw` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            treasuryMainForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                resourcepointDepositForm(player);
+                break;
+            };
+            case 1: {
+                resourcepointWithdrawForm(player);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 
+ * リソースポイントの入金フォーム
+ * @param {Player} player 
+ */
+export function resourcepointDepositForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const form = new ModalFormData();
+    form.title({ translate: `resourcepoint.conversion` });
+    form.slider({ translate: `conversion` }, 0, playerData.money, 1);
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            resourcepointSelectForm(player);
+            return;
+        };
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        let hasMoney = playerData2.money;
+        let needMoney = rs.formValues[0];
+        if (hasMoney < needMoney) {
+            player.sendMessage({ translate: `error.notenough.money` });
+            return;
+        };
+        countryData2.resourcePoint += needMoney;
+        playerData2.money -= needMoney;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        treasurybudgetSelectForm(player);
+        return;
+    });
+};
+
+/**
+ * 
+ * リソースポイント→金フォーム
+ * @param {Player} player 
+ */
+export function resourcepointWithdrawForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ModalFormData();
+    form.title({ translate: `resourcepoint.withdraw` });
+    form.slider({ translate: `withdraw` }, 0, countryData.resourcePoint, 1);
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            resourcepointSelectForm(player);
+            return;
+        };
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        let hasMoney = countryData2.resourcePoint;
+        let needMoney = rs.formValues[0];
+        if (hasMoney < needMoney) {
+            player.sendMessage({ translate: `error.notenough.resourcepoint` });
+            return;
+        };
+        countryData2.resourcePoint -= needMoney;
+        playerData2.money += needMoney;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        resourcepointSelectForm(player);
+        return;
+    });
+};
+
+/**
+ * 
+ * 国家予算の入金フォーム
+ * @param {Player} player 
+ */
+export function treasurybudgetDepositForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ModalFormData();
+    form.title({ translate: `treasurybudget.deposit` });
+    form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}` }] });
+    form.button({ translate: `deposit` });
+    if (!CheckPermission(player, `withDrawTreasurybudget`)) form.button({ translate: `withdraw` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            treasurybudgetSelectForm(player);
+            return;
+        };
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        let hasMoney = playerData2.money;
+        let needMoney = rs.formValues[0];
+        if (hasMoney < needMoney) {
+            player.sendMessage({ translate: `error.notenough.money` });
+            return;
+        };
+        countryData2.money += needMoney;
+        playerData2.money -= needMoney;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        treasurybudgetSelectForm(player);
+        return;
+    });
+};
+
+/**
  * 
  * 国の設定
  * @param {Player} player 
@@ -757,22 +1014,26 @@ export function settingCountry(player) {
         };
         switch (rs.selection) {
             case 0: {
-                settingCountryInfoForm(player)
+                settingCountryInfoForm(player);
                 break;
             };
             case 1: {
-                inviteForm(player);
+                treasuryMainForm(player);
                 break;
             };
             case 2: {
-                settingCountryMembersForm(player);
+                inviteForm(player);
                 break;
             };
             case 3: {
-                settingCountryRoleForm(player);
+                settingCountryMembersForm(player);
                 break;
             };
             case 4: {
+                settingCountryRoleForm(player);
+                break;
+            };
+            case 5: {
                 countryDeleteCheckForm(player);
                 break;
             };
