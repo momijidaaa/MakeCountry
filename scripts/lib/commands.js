@@ -251,6 +251,9 @@ class ChatHandler {
             return;
         };
         let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
+        const { x, z } = this.sender.location;
+        const dimention = this.sender.dimension.id;
+        if (!chunkData) chunkData = GenerateChunkData(x, z, dimention);
         let chunkPrice = config.defaultChunkPrice;
         if (chunkData && chunkData.price) chunkPrice = chunkData.price;
         const cannotBuy = CheckPermission(this.sender, `buyChunk`);
