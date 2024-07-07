@@ -62,8 +62,8 @@ system.runInterval(() => {
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
                 continue;
             };
-            let upkeepCosts = config.MaintenanceFeeNonPeacefulCountries * countryData.territories;
-            if (countryData.peace) upkeepCosts = config.MaintenanceFeePacifistCountries * countryData.territories;
+            let upkeepCosts = config.MaintenanceFeeNonPeacefulCountries * countryData.territories.length;
+            if (countryData.peace) upkeepCosts = config.MaintenanceFeePacifistCountries * countryData.territories.length;
             if (countryData.money < upkeepCosts) {
                 countryData.money = 0;
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
