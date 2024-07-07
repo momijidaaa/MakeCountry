@@ -27,6 +27,7 @@ system.runInterval(() => {
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     let taxTimer = Number(taxTimerString) - 1;
+    taxTimerString = taxTimer;
     if (taxTimer === 0) {
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
@@ -34,20 +35,18 @@ system.runInterval(() => {
             playerData.days += 1;
             StringifyAndSavePropertyData(pId, playerData);
             if (!playerData.country) continue;
-            const countryData = GetAndParsePropertyData(playerData.country)
+            const countryData = GetAndParsePropertyData(playerData.country);
             if (countryData.taxInstitutionIsPer) {
                 let taxValue = playerData.money * (countryData.taxPer / 100);
                 playerData.money -= taxValue;
                 countryData.money += taxValue;
                 StringifyAndSavePropertyData(pId, playerData);
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
-                return;
             } else {
                 playerData.money -= countryData.taxPer;
                 countryData.money += countryData.taxPer;
                 StringifyAndSavePropertyData(pId, playerData);
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
-                return;
             };
         };
         for (const cId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`))) {
@@ -67,7 +66,7 @@ system.runInterval(() => {
                 countryData.money = 0;
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
                 DeleteCountry(countryData.id);
-                return;
+                continue;
             };
             countryData.money -= upkeepCosts;
             StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
