@@ -5,6 +5,7 @@ export default {
 
     showRewardMessage: true, //メッセージをアクションバーに表示するか
 
+    fishingReward: { min: 1, max: 3 },
     woodCutReward: { min: 1, max: 10 }, //木を切ったときにもらえるお金の変域
     cropHarvestReward: { min: 5, max: 15 }, //作物収穫時にもらえるお金の変域
     cocoaHarvestReward: { min: 5, max: 15 }, //ココア収穫時にもらえるお金の変域
