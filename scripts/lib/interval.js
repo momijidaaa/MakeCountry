@@ -25,6 +25,7 @@ system.runInterval(() => {
 }, 20);
 
 system.runInterval(() => {
+    if (!world.getDynamicProperty(`start`)) return;
     let taxTimer = Number(taxTimerString) - 1;
     if (taxTimer === 0) {
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
