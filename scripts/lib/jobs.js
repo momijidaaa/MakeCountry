@@ -1,6 +1,7 @@
 import { Player, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
+import { ActionFormData } from "@minecraft/server-ui";
 
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
@@ -74,3 +75,45 @@ world.afterEvents.entityDie.subscribe((ev) => {
         return;
     };
 });
+
+const mcjobs = [
+    `hunter`,
+    `farmer`,
+    `miner`,
+    `woodcutter`
+];
+
+/**
+ * 職業メニュー
+ * @param {Player} player 
+ */
+export function jobsForm(player) {
+    const form = new ActionFormData();
+    form.title({ translate: `jobs.title` });
+    for (const jobId in mcjobs) {
+        let isEmploy = player.hasTag(`mcjobs_${jobId}`);
+        let employMessage = `not.yet.employed`;
+        if (isEmploy) employMessage = `already.found.employment`;
+        form.button({ rawtext: [{ translate: jobId }, { text: `\n` }, { translate: employMessage }] });
+    };
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            return;
+        };
+        const selected = rs.selection;
+        let isEmploy = player.hasTag(`mcjobs_${mcjobs[selected]}`);
+        if(isEmploy) {
+            player.removeTag(`mcjobs_${mcjobs[selected]}`);
+            jobsForm(player);
+            return;
+        };
+        let employAmount = player.getTags().filter(t => t.startsWith(`mcjobs_`)).length;
+        if (employAmount === jobs_config.maxEmploymentNum) {
+            player.sendMessage({ translate: `message.max.employment.num.over`, with: [`${employAmount}`] });
+            return;
+        };
+        player.addTag(`mcjobs_${mcjobs[selected]}`);
+        jobsForm(player);
+        return;
+    });
+};

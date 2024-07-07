@@ -4,6 +4,8 @@ import * as DyProp from "./DyProp";
 import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData, playerCountryLeave } from "./land";
 import { MakeCountryForm, countryList, playerMainMenu, settingCountry } from "./form";
+import jobs_config from "../jobs_config";
+import { jobsForm } from "./jobs";
 
 class ChatHandler {
     constructor(event) {
@@ -102,6 +104,9 @@ class ChatHandler {
                     break;
                 case `${this.prefix}menu`:
                     this.mainMenu();
+                    break;
+                case `${this.prefix}jobs`:
+                    this.jobs();
                     break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
@@ -336,6 +341,15 @@ class ChatHandler {
         return;
     };
 
+    jobs() {
+        if(!jobs_config.validity) {
+            this.sender.sendMessage({translate: `command.error.jobs.novalidity`});
+            return;
+        };
+        jobsForm(this.sender);
+        return;
+    };
+
     sendHelp() {
         /** 
          * @type {import("@minecraft/server").RawMessage}
@@ -360,7 +374,8 @@ class ChatHandler {
         { translate: `command.help.joincountry` }, { text: `\n` },
         { translate: `command.help.chome` }, { text: `\n` },
         { translate: `command.help.menu` }, { text: `\n` },
-        { text: `§a------------------------------------` }]
+        { translate: `command.help.jobs` }, { text: `\n` },
+        { text: `§a------------------------------------` }];
         this.sender.sendMessage({
             rawtext: helpMessage
         });
