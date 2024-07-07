@@ -367,6 +367,9 @@ export function playerCountryJoin(player, countryId) {
         countryData.members.push(playerData.id);
         playerData.roles.push(countryData.peopleRole);
         playerData.country = countryId;
+        const memberRoleData = GetAndParsePropertyData(`role_${ownerRole}`);
+        memberRoleData.members.push(`${player.id}`);
+        StringifyAndSavePropertyData(`role_${memberRoleData.id}`, memberRoleData);
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
         StringifyAndSavePropertyData(`country_${countryId}`, countryData);
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `joined.country` }] });
@@ -413,6 +416,20 @@ export function playerCountryKick(player) {
 };
 
 /**
+ * 
+ * @param {Player} player 
+ * @param {Player} member 
+ * @param {object} countryData 
+ */
+export function playerChangeOwner(player, member, countryData) {
+    const memberData = GetAndParsePropertyData(`player_${member.id}`);
+    if (memberData?.country !== countryData.id) return
+    countryData.owner = member.id;
+    StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+    return;
+};
+
+/**
  * プレイヤーに招待を送る
  * @param {Player} receivePlayer 
  * @param {Player} sendPlayer 
@@ -420,7 +437,7 @@ export function playerCountryKick(player) {
  */
 export function playerCountryInvite(receivePlayer, sendPlayer) {
     try {
-        if (!CheckPermission(sendPlayer, `invite`)) {
+        if (CheckPermission(sendPlayer, `invite`)) {
             sendPlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§c\n` }, { translate: `send.invite.error.permission.message` }] });
             return;
         };
@@ -428,11 +445,11 @@ export function playerCountryInvite(receivePlayer, sendPlayer) {
         const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
         const countryId = sendPlayerData.country;
         receivePlayerData.invite.splice(receivePlayerData.invite.indexOf(countryId), 1);
-        receivePlayer.invite.push(countryId);
+        receivePlayerData.invite.push(countryId);
         StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData);
-        StringifyAndSavePropertyData(`country_${receivePlayer.id}`, receivePlayerData);
+        StringifyAndSavePropertyData(`player_${receivePlayer.id}`, receivePlayerData);
         sendPlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `send.invite.message` }] });
-        if (receivePlayerData.settings.inviteReceiveMessage) receivePlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `receive.invite.message` }] });
+        if (receivePlayerData?.settings?.inviteReceiveMessage) receivePlayer.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `receive.invite.message` }] });
         return;
     } catch (error) {
         console.warn(error);

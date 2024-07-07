@@ -111,7 +111,7 @@ export function CheckPermission(player, permission) {
 
     //ロールのみチェックすれば良い権限の場合 → チェックしてキャンセル or 許可
     if (checkOnlyRole.includes(permission)) {
-        const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`);
+        const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
         if (countryData.owner === player.id) return false;
         const roleIds = playerData.roles;
         for (let i = 0; i < roleIds.length; i++) {

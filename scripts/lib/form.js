@@ -2,7 +2,7 @@ import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { DeleteCountry, DeleteRole, MakeCountry, playerCountryInvite, playerCountryJoin, playerCountryKick } from "./land";
+import { DeleteCountry, DeleteRole, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick } from "./land";
 import { CheckPermission, GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 
 /**
@@ -58,9 +58,9 @@ export function memberSelectedShowForm(player, member, countryData) {
     //国から追い出す(kickMember)
     //オーナー権限の譲渡(owner)
     form.button({ translate: `mc.button.back` });
-    if (CheckPermission(player, `kick`)) form.button({ translate: `form.memberselectedshow.button.kick` });
-    if (CheckPermission(player, `admin`)) form.button({ translate: `form.memberselectedshow.button.role` });
-    if (CheckPermission(player, `owner`)) form.button({ translate: `form.memberselectedshow.button.owner` });
+    if (!CheckPermission(player, `kick`)) form.button({ translate: `form.memberselectedshow.button.kick` });
+    if (!CheckPermission(player, `admin`)) form.button({ translate: `form.memberselectedshow.button.role` });
+    if (!CheckPermission(player, `owner`)) form.button({ translate: `form.memberselectedshow.button.owner` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             settingCountryMembersForm(player);
@@ -121,7 +121,7 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
                 break;
             };
             case 1: {
-                playerChangeOwner(player, member, countryData);
+                playerChangeOwner(player, member, GetAndParsePropertyData(`country_${GetAndParsePropertyData(`player_${player.id}`).country}`));
                 player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.sender`, with: [member.name] }] });
                 settingCountryMembersForm(player);
                 break;
@@ -366,7 +366,7 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
  * @param {string} keyword 
  */
 export function inviteForm(player, serch = false, keyword = ``) {
-    if (!CheckPermission(player, `invite`)) {
+    if (CheckPermission(player, `invite`)) {
         player.sendMessage({ translate: `send.invite.error.permission.message` });
         return;
     };
@@ -781,7 +781,7 @@ export function treasurybudgetSelectForm(player) {
     form.title({ translate: `treasurybudget` });
     form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}` }] });
     form.button({ translate: `deposit` });
-    if (CheckPermission(player, `withDrawTreasurybudget`) === false) form.button({ translate: `withdraw` });
+    if (!CheckPermission(player, `withDrawTreasurybudget`)) form.button({ translate: `withdraw` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             treasuryMainForm(player);
@@ -1090,7 +1090,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
             if (rs.canceled) return;
             switch (rs.selection) {
                 case 0: {
-                    if (CheckPermission(player, `editCountryName`)) {
+                    if (!CheckPermission(player, `editCountryName`)) {
                         editCountryNameForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -1098,7 +1098,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     break;
                 };
                 case 1: {
-                    if (CheckPermission(player, `editCountryLore`)) {
+                    if (!CheckPermission(player, `editCountryLore`)) {
                         editCountryLoreForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -1106,7 +1106,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     break;
                 };
                 case 2: {
-                    if (CheckPermission(player, `peaceChange`)) {
+                    if (!CheckPermission(player, `peaceChange`)) {
                         editCountryPeaceForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -1114,7 +1114,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     break;
                 };
                 case 3: {
-                    if (CheckPermission(player, `inviteChange`)) {
+                    if (!CheckPermission(player, `inviteChange`)) {
                         editCountryInviteForm(player, countryData);
                     } else {
                         player.sendMessage({ translate: `no.permission` });
@@ -1458,7 +1458,7 @@ export function settingCountryRoleForm(player) {
  * @param {any} roleData 
  */
 export function RoleIconChange(player, roleData) {
-    if (CheckPermission(player, `admin`)) {
+    if (!CheckPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.iconchange.title`, with: [roleData.name] });
         form.textField({ translate: `form.role.iconchange.label` }, { translate: `form.role.iconchange.input` }, roleData.icon);
@@ -1484,7 +1484,7 @@ export function RoleIconChange(player, roleData) {
  * @param {any} roleData 
  */
 export function RoleNameChange(player, roleData) {
-    if (CheckPermission(player, `admin`)) {
+    if (!CheckPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.namechange.title`, with: [roleData.name] });
         form.textField({ translate: `form.role.namechange.label` }, { translate: `form.role.namechange.input` }, roleData.name);
@@ -1509,7 +1509,7 @@ export function RoleNameChange(player, roleData) {
  * @param {any} roleData 
  */
 export function selectRoleEditType(player, roleData) {
-    if (CheckPermission(player, `admin`)) {
+    if (!CheckPermission(player, `admin`)) {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const form = new ActionFormData();
         form.title({ translate: `form.role.edit.select.title`, with: [roleData.name] });
@@ -1556,7 +1556,7 @@ export function selectRoleEditType(player, roleData) {
  * @param {any} roleData 
  */
 export function setRolePermissionForm(player, roleData) {
-    if (CheckPermission(player, `admin`)) {
+    if (!CheckPermission(player, `admin`)) {
         const form = new ModalFormData();
         form.title({ translate: `role.permission.edit`, with: [roleData.name] });
         for (const permission of rolePermissions) {
