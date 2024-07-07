@@ -93,6 +93,7 @@ export function memberSelectedShowForm(player, member, countryData) {
                     return;
                 };
                 //確認フォーム → 譲渡(countryData.owner変更,ownerロールを外して新オーナーに追加)
+                playerOwnerChangeCheckForm(player,member,countryData);
                 break;
             };
         };
