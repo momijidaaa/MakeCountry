@@ -120,7 +120,7 @@ export function CheckPermission(player, permission) {
             if (permissions.includes(permission)) {
                 return false;
             }
-            if (permission !== `owner` || permission !== `admin`) {
+            if (permission !== `owner` && permission !== `admin`) {
                 if (permissions.includes(`admin`) || permissions.includes(`owner`)) {
                     return false;
                 };

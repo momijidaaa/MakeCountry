@@ -78,6 +78,12 @@ export function memberSelectedShowForm(player, member, countryData) {
                     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.same` }] });
                     return;
                 };
+                const playerData = GetAndParsePropertyData(`player_${player.id}`);
+                const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+                if (member.id === countryData.owner) {
+                    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.owner` }] });
+                    return;
+                };
                 playerKickCheckForm(player, member, countryData);
                 break;
             };
@@ -267,6 +273,11 @@ export function playerMainMenu(player) {
                 break;
             };
             case 2: {
+                const playerData = GetAndParsePropertyData(`player_${player.id}`);
+                if (playerData?.country) {
+                    player.sendMessage({ translate: `already.country.join` });
+                    return;
+                };
                 joinTypeSelectForm(player);
                 break;
             };
@@ -976,7 +987,7 @@ export function settingCountry(player) {
     form.button({ translate: `form.setting.button.invite` });
     form.button({ translate: `form.setting.button.members` });
     form.button({ translate: `form.setting.button.role` });
-    if(!CheckPermission(player,`owner`)) form.button({ translate: `form.setting.button.delete` });
+    if (!CheckPermission(player, `owner`)) form.button({ translate: `form.setting.button.delete` });
 
     form.show(player).then(rs => {
         if (rs.canceled) {

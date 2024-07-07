@@ -367,7 +367,7 @@ export function playerCountryJoin(player, countryId) {
         countryData.members.push(playerData.id);
         playerData.roles.push(countryData.peopleRole);
         playerData.country = countryId;
-        const memberRoleData = GetAndParsePropertyData(`role_${ownerRole}`);
+        const memberRoleData = GetAndParsePropertyData(`role_${countryData.peopleRole}`);
         memberRoleData.members.push(`${player.id}`);
         StringifyAndSavePropertyData(`role_${memberRoleData.id}`, memberRoleData);
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
