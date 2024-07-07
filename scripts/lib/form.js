@@ -84,7 +84,10 @@ export function memberSelectedShowForm(player, member, countryData) {
                     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.owner` }] });
                     return;
                 };
-                playerKickCheckForm(player, member, countryData);
+                if (player.id != countryData.owner && !CheckPermission(world.getPlayers().find(p => p.id == member.id), `admin`)) {
+                    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.admin` }] });
+                };
+                    playerKickCheckForm(player, member, countryData);
                 break;
             };
             case 2: {
