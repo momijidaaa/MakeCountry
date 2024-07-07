@@ -122,7 +122,6 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
             };
             case 1: {
                 playerChangeOwner(player, member, GetAndParsePropertyData(`country_${GetAndParsePropertyData(`player_${player.id}`).country}`));
-                player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.sender`, with: [member.name] }] });
                 break;
             };
         };
