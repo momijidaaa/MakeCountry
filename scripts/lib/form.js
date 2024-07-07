@@ -339,13 +339,14 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
             return;
         };
         const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
+        const sendPlayerData2 = GetAndParsePropertyData(`player_${sendPlayer.id}`);
         const value = rs.formValues[0];
         receivePlayerData.money += value;
-        sendPlayerData.money -= value;
+        sendPlayerData2.money -= value;
         sendPlayer.sendMessage({ translate: `command.sendmoney.result.sender`, with: [receivePlayer.name, `${config.MoneyName} ${value}`] });
         receivePlayer.sendMessage({ translate: `command.sendmoney.result.receiver`, with: [sendPlayer.name, `${config.MoneyName} ${value}`] });
         StringifyAndSavePropertyData(`player_${receivePlayer.id}`, receivePlayerData);
-        StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData);
+        StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData2);
         return;
     });
 };
