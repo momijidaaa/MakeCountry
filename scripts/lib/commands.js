@@ -404,7 +404,7 @@ class ChatHandler {
 
     joinCountry() {
         if (this.playerData?.country) {
-            this.sender.sendMessage({ translate: `command.makecountry.error.belong.country` });
+            this.sender.sendMessage({ translate: `already.country.join` });
             return;
         };
         joinTypeSelectForm(this.sender);
