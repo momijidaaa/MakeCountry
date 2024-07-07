@@ -6,4 +6,6 @@ import "./lib/interval";
 
 import "./lib/jobs";
 
+import "./lib/scripteventCommand";
+
 import "./lib/test";
