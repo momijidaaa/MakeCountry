@@ -33,7 +33,6 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
-world.sendMessage(`${brokenBlockPermutation.getTags()} ${brokenBlockPermutation.getState(`growth`)}`)
     //農家
     if (brokenBlockPermutation.getTags().includes(`minecraft:crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) == 7) {
         const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
