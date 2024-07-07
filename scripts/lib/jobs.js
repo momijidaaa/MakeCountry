@@ -90,11 +90,11 @@ const mcjobs = [
 export function jobsForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `jobs.title` });
-    for (const jobId in mcjobs) {
+    for (const jobId of mcjobs) {
         let isEmploy = player.hasTag(`mcjobs_${jobId}`);
         let employMessage = `not.yet.employed`;
         if (isEmploy) employMessage = `already.found.employment`;
-        form.button({ rawtext: [{ translate: jobId }, { text: `\n` }, { translate: employMessage }] });
+        form.button({ rawtext: [{text: `§l`},{ translate: jobId }, { text: `\n` }, { translate: employMessage }] });
     };
     form.show(player).then((rs) => {
         if (rs.canceled) {
