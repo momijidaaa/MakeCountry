@@ -5,8 +5,8 @@ import config from "../config";
 
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const permission = `break`
-    const { player } = ev;
-    const { x, z } = player.location;
+    const { player, block } = ev;
+    const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;
@@ -16,8 +16,19 @@ world.beforeEvents.playerBreakBlock.subscribe((ev) => {
 
 world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     const permission = `place`
-    const { player } = ev;
-    const { x, z } = player.location;
+    const { player, block } = ev;
+    const { x, z } = block.location;
+    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
+    ev.cancel = cannot;
+    if (!cannot) return;
+    player.sendMessage({ translate: `cannot.permission.${permission}` });
+    return;
+});
+
+world.beforeEvents.itemUseOn.subscribe((ev) => {
+    const permission = `place`
+    const { source: player, block } = ev;
+    const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;
@@ -27,8 +38,8 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission = `blockUse`
-    const { player } = ev;
-    const { x, z } = player.location;
+    const { player, block } = ev;
+    const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;
@@ -38,8 +49,8 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
 
 world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
     const permission = `entityUse`
-    const { player } = ev;
-    const { x, z } = player.location;
+    const { player, target } = ev;
+    const { x, z } = target.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;
@@ -76,7 +87,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
 
 try {
     const players = world.getAllPlayers();
-    for(const player of players) {
+    for (const player of players) {
         const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
         if (dataCheck) {
             const playerData = JSON.parse(dataCheck);
@@ -99,4 +110,4 @@ try {
             StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
         };
     };
-} catch (error) {};
+} catch (error) { };
