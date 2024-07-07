@@ -2,6 +2,7 @@ import { Player, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
 import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
+import playerFishingAfterEvent from "./lib/FishingEvent";
 
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
@@ -76,11 +77,27 @@ world.afterEvents.entityDie.subscribe((ev) => {
     };
 });
 
+playerFishingAfterEvent.subscribe((event) => {
+    if (!jobs_config.validity) return;
+    if(!event.result) return;
+    // 漁師
+    /**
+     * @type {Player}
+     */
+    const player = event.player;
+    if(!player.hasTag(`mcjobs_fisherman`)) return;
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const random = getRandomInteger(configs.fishingReward.min, configs.fishingReward.max)
+    if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
+    playerData.money += random;
+});
+
 const mcjobs = [
     `hunter`,
     `farmer`,
     `miner`,
-    `woodcutter`
+    `woodcutter`,
+    `fisherman`
 ];
 
 /**
