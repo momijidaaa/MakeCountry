@@ -1,5 +1,6 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { uiManager } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -31,6 +32,12 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
                 dyp.push(`§6${id}§r\n${world.getDynamicProperty(id)}\n`)
             })
             world.sendMessage(`${dyp.join(`\n`)}`);
+            break;
+        };
+        case `karo:form`: {
+            for(const player of world.getAllPlayers()) {
+                uiManager.closeAllForms(player);
+            };
             break;
         };
     };

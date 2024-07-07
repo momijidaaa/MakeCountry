@@ -288,9 +288,10 @@ export function sendMoneyForm(player, serch = false, keyword = ``) {
     if (serch) {
         players = players.filter(p => p.name.includes(keyword));
     };
-    players.forEach(p => {
+    for(const p of players) {
+        if(p.id === player.id) continue;
         form.button(`${p.name}§r\n${p.id}`);
-    });
+    };
     form.show(player).then(rs => {
         if (rs.canceled) {
             playerMainMenu(player);
@@ -1170,6 +1171,11 @@ export function editCountryPeaceForm(player, countryData) {
     });
 };
 
+/**
+ * 
+ * @param {Player} player 
+ * @param {object} countryData 
+ */
 export function editCountryInviteForm(player, countryData) {
     const form = new ModalFormData();
     form.title({ translate: `form.editcountryinvite.title` });

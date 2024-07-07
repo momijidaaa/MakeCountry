@@ -97,6 +97,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     const ownerRoleData = GetAndParsePropertyData(`role_${ownerRole}`);
     ownerRoleData.members.push(`${owner.id}`);
     StringifyAndSavePropertyData(`country_${id}`, countryData);
+    StringifyAndSavePropertyData(`role_${ownerRole}`, ownerRoleData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
     StringifyAndSavePropertyData(chunkData.id, chunkData);
     world.setDynamicProperty(`countryId`, `${id++}`);
