@@ -73,3 +73,30 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
         StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
     };
 });
+
+try {
+    const players = world.getAllPlayers();
+    for(const player of players) {
+        const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
+        if (dataCheck) {
+            const playerData = JSON.parse(dataCheck);
+            playerData.name = player.name;
+            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+            return;
+        };
+        const newPlayerData = {
+            name: player.name,
+            id: player.id,
+            country: undefined,
+            money: config.initialMoney,
+            roles: [],
+            chunks: [],
+            days: 0,
+            invite: [],
+            settings: {
+                inviteReceiveMessage: true,
+            }
+        };
+        StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
+    };
+} catch (error) {};
