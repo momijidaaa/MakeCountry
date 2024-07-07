@@ -494,6 +494,12 @@ export function joinTypeSelectForm(player) {
     form.button({ translate: `form.invite.list.allowjoin` });
     form.show(player).then(rs => {
         if (rs.canceled) {
+            if(rs.cancelationReason === FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
+                    joinTypeSelectForm(player);
+                },10);
+                return;
+            };
             playerMainMenu(player);
             return;
         };

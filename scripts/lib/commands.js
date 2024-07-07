@@ -90,6 +90,9 @@ class ChatHandler {
                 case `${this.prefix}settingcountry`:
                     this.settingCountry();
                     break;
+                case `${this.prefix}joincountry`:
+                    this.joinCountry();
+                    break;
                 case `${this.prefix}leavecountry`:
                     this.leaveCountry();
                     break;
@@ -342,8 +345,8 @@ class ChatHandler {
     };
 
     jobs() {
-        if(!jobs_config.validity) {
-            this.sender.sendMessage({translate: `command.error.jobs.novalidity`});
+        if (!jobs_config.validity) {
+            this.sender.sendMessage({ translate: `command.error.jobs.novalidity` });
             return;
         };
         jobsForm(this.sender);
@@ -397,6 +400,10 @@ class ChatHandler {
         };
         settingCountry(this.sender);
         return;
+    };
+
+    joinCountry() {
+        
     };
 
     leaveCountry() {
