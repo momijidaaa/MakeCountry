@@ -37,7 +37,7 @@ system.runInterval(() => {
             playerData.days += 1;
             StringifyAndSavePropertyData(pId, playerData);
             if (!playerData.country) continue;
-            const countryData = GetAndParsePropertyData(playerData.country);
+            const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
             if (countryData.taxInstitutionIsPer) {
                 let taxValue = playerData.money * (countryData.taxPer / 100);
                 playerData.money -= taxValue;
