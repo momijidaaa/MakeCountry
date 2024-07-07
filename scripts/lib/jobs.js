@@ -33,9 +33,9 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
-
+world.sendMessage(`${brokenBlockPermutation.getTags()} ${brokenBlockPermutation.getState(`growth`)}`)
     //農家
-    if (brokenBlockPermutation.hasTag(`crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) === 7) {
+    if (brokenBlockPermutation.getTags().includes(`minecraft:crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) == 7) {
         const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
@@ -67,7 +67,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
             playerData.money += random;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         } catch (error) {
-            const random = getRandomInteger(configs.oreMiningReward.min, configs.otherMobkillReward.max)
+            const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.otherMobkillReward.max)
             if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
             playerData.money += random;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
@@ -87,7 +87,7 @@ playerFishingAfterEvent.subscribe((event) => {
     const player = event.player;
     if(!player.hasTag(`mcjobs_fisherman`)) return;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const random = getRandomInteger(configs.fishingReward.min, configs.fishingReward.max)
+    const random = getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max)
     if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
     playerData.money += random;
 });
