@@ -5,6 +5,7 @@ import config from "../config";
 import { DeleteCountry } from "./land";
 
 let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
+world.setDynamicProperty(`taxTimer`, taxTimerString);
 
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
@@ -27,7 +28,8 @@ system.runInterval(() => {
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     let taxTimer = Number(taxTimerString) - 1;
-    taxTimerString = taxTimer;
+    world.setDynamicProperty(`taxTimer`,`${taxTimer}`);
+    taxTimerString = `${taxTimer}`;
     if (taxTimer === 0) {
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
@@ -72,4 +74,4 @@ system.runInterval(() => {
             StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         };
     };
-}, 20*60);
+}, 20 * 60);
