@@ -107,11 +107,12 @@ export function CheckPermission(player, permission) {
     //AdminMode 許可
     if (player.hasTag(`adminmode`)) return false;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    
+    let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
+
     //ロールのみチェックすれば良い権限の場合 → チェックしてキャンセル or 許可
     if (checkOnlyRole.includes(permission)) {
-        const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-        if(countryData.owner === player.id) return false;
+        const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`);
+        if (countryData.owner === player.id) return false;
         const roleIds = playerData.roles;
         for (let i = 0; i < roleIds.length; i++) {
             const role = GetAndParsePropertyData(`role_${roleIds[i]}`);
@@ -128,7 +129,6 @@ export function CheckPermission(player, permission) {
         return true;
     };
     //チャンクデータなし → 荒野の権限があれば許可
-    let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
             return false;
