@@ -1,7 +1,7 @@
 import { Player, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
-import { ActionFormData } from "@minecraft/server-ui";
+import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
 
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
@@ -98,6 +98,10 @@ export function jobsForm(player) {
     };
     form.show(player).then((rs) => {
         if (rs.canceled) {
+            if(rs.cancelationReason === FormCancelationReason.UserBusy) {
+                jobsForm(player);
+                return;
+            };
             return;
         };
         const selected = rs.selection;
