@@ -423,12 +423,12 @@ export function playerCountryKick(player) {
  */
 export function playerChangeOwner(player, member, countryData) {
     const memberData = GetAndParsePropertyData(`player_${member.id}`);
-    if (memberData?.country !== countryData.id) {
+    if (memberData?.country != countryData?.id) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `ownerchange.error` }] });
         return;
     };
     countryData.owner = member.id;
-    member.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.newowner` }] });
+    world.getPlayers().find(p => p.id == member.id).sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.newowner` }] });
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.sender`, with: [member.name] }] });
     StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
     return;

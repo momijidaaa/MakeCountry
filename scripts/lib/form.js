@@ -106,6 +106,7 @@ export function memberSelectedShowForm(player, member, countryData) {
  * @param {Player} member 
  */
 export function playerOwnerChangeCheckForm(player, member, countryData) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const form = new ActionFormData();
     form.body({ translate: `ownerchange.check.body`, with: [member.name] });
     form.button({ translate: `mc.button.back` });
@@ -121,7 +122,8 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
                 break;
             };
             case 1: {
-                playerChangeOwner(player, member, GetAndParsePropertyData(`country_${GetAndParsePropertyData(`player_${player.id}`).country}`));
+                const newCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+                playerChangeOwner(player, member, newCountryData);
                 break;
             };
         };
@@ -286,8 +288,8 @@ export function sendMoneyForm(player, serch = false, keyword = ``) {
     if (serch) {
         players = players.filter(p => p.name.includes(keyword));
     };
-    for(const p of players) {
-        if(p.id === player.id) continue;
+    for (const p of players) {
+        if (p.id === player.id) continue;
         form.button(`${p.name}§r\n${p.id}`);
     };
     form.show(player).then(rs => {
@@ -382,6 +384,7 @@ export function inviteForm(player, serch = false, keyword = ``) {
     form.show(player).then(rs => {
         if (rs.canceled) {
             settingCountry(player);
+            return;
         };
         switch (rs.selection) {
             case 0: {
@@ -973,7 +976,7 @@ export function settingCountry(player) {
     form.button({ translate: `form.setting.button.invite` });
     form.button({ translate: `form.setting.button.members` });
     form.button({ translate: `form.setting.button.role` });
-    form.button({ translate: `form.setting.button.delete` });
+    if(!CheckPermission(player,`owner`)) form.button({ translate: `form.setting.button.delete` });
 
     form.show(player).then(rs => {
         if (rs.canceled) {
