@@ -34,6 +34,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     };
     const idString = world.getDynamicProperty(`countryId`) ?? "1"
     let id = Number(idString);
+    world.setDynamicProperty(`countryId`, `${id + 1}`);
     if (!chunkData) chunkData = GenerateChunkData(x, z, dimensionId, undefined, id, undefined, false);
     chunkData.countryId = id;
     ownerData.country = id;
@@ -100,7 +101,6 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     StringifyAndSavePropertyData(`role_${ownerRole}`, ownerRoleData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
     StringifyAndSavePropertyData(chunkData.id, chunkData);
-    world.setDynamicProperty(`countryId`, `${id++}`);
 };
 
 export function GenerateChunkData(x, z, dimensionId, ownerId = undefined, countryId = undefined, price = config.defaultChunkPrice, special = false) {

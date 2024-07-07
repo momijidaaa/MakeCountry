@@ -23,7 +23,7 @@ class ChatHandler {
          */
         this.prefix = config.prefix;
         this.playerData = GetAndParsePropertyData(`player_${this.sender.id}`);
-        this.playerCountryData = GetAndParsePropertyData(`country_${this.sender?.country}`);
+        this.playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
     }
 
     isCommand() {
@@ -382,7 +382,7 @@ class ChatHandler {
     };
 
     makeCountry() {
-        if (this.playerData.country) {
+        if (this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.makecountry.error.belong.country` });
             return;
         };
@@ -391,7 +391,7 @@ class ChatHandler {
     };
 
     settingCountry() {
-        if (!this.playerData.country) {
+        if (!this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.settingcountry.error.nobelong.country` });
             return;
         };
@@ -422,7 +422,7 @@ class ChatHandler {
     };
 
     chome() {
-        if (!this.playerData.country) {
+        if (!this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.chome.error.notjoin.country` });
             return;
         };

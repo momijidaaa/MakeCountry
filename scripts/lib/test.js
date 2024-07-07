@@ -1,6 +1,6 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
-import { uiManager } from "@minecraft/server-ui";
+//import { uiManager } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -34,12 +34,12 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             world.sendMessage(`${dyp.join(`\n`)}`);
             break;
         };
-        case `karo:form`: {
+        /*case `karo:form`: {
             for(const player of world.getAllPlayers()) {
                 uiManager.closeAllForms(player);
             };
             break;
-        };
+        };*/
     };
 });
 

@@ -282,7 +282,7 @@ export function playerMainMenu(player) {
  */
 export function sendMoneyForm(player, serch = false, keyword = ``) {
     const form = new ActionFormData();
-    let players = world.getPlayers();
+    let players = world.getPlayers().filter(p => p.id != player.id);
     form.title({ translate: `form.sendmoney.list.title` });
     form.button({ translate: `form.sendmoney.button.serch` });
     if (serch) {
@@ -303,7 +303,7 @@ export function sendMoneyForm(player, serch = false, keyword = ``) {
                 break;
             };
             default: {
-                sendMoneyCheckForm(player, players[0]);
+                sendMoneyCheckForm(player, players[rs.selection - 1]);
                 break;
             };
         };
@@ -372,6 +372,7 @@ export function inviteForm(player, serch = false, keyword = ``) {
     };
     const form = new ActionFormData();
     let players = world.getPlayers().filter(p => !GetAndParsePropertyData(`player_${p.id}`)?.country);
+    players.filter(p => p.id !== player.id);
     form.title({ translate: `form.sendinvite.list.title` })
     form.button({ translate: `form.invite.button.serch` });
     if (serch) {
@@ -391,7 +392,7 @@ export function inviteForm(player, serch = false, keyword = ``) {
                 break;
             };
             default: {
-                sendInviteCheckForm(player, players[0]);
+                sendInviteCheckForm(player, players[rs.selection - 1]);
                 break;
             };
         };

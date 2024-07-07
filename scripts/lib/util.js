@@ -128,7 +128,7 @@ export function CheckPermission(player, permission) {
         return true;
     };
     //チャンクデータなし → 荒野の権限があれば許可
-    const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
+    let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
     if (!chunkData) {
         if (config.wildernessAllowPermissions.includes(permission)) {
             return false;

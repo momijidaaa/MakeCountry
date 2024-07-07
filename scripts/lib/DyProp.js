@@ -37,10 +37,12 @@ export function getDynamicProperty(id) {
         })
         .filter(item => item !== null)
         .sort((a, b) => a.index - b.index);
+    if(matches.length == 0) return undefined;
     let longString = ``;
     matches.map(item => item.original).forEach(id => {
         longString = longString + world.getDynamicProperty(id);
     });
+    if(longString.length == 0) return undefined;
     return longString;
 };
 
