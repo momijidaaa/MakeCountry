@@ -22,7 +22,7 @@ export default {
     //初期のリソースポイント
     initialCountryResourcePoint: 0,
     //徴税間隔(分)
-    taxTimer: 2,
+    taxTimer: 2 * 60,
     //初期設定で税金をパーセント式にするか(falseの場合,定額制)
     taxInstitutionIsPer: true,
     //初期の税率(税額)
@@ -38,5 +38,5 @@ export default {
     //非平和主義国の維持費(1チャンク)
     MaintenanceFeeNonPeacefulCountries: 50,
     //建国後何回分の徴税をなしにするか
-    NonMaintenanceCostAccrualPeriod: 0
+    NonMaintenanceCostAccrualPeriod: 3
 };

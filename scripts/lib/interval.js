@@ -30,7 +30,8 @@ system.runInterval(() => {
     let taxTimer = Number(taxTimerString) - 1;
     world.setDynamicProperty(`taxTimer`,`${taxTimer}`);
     taxTimerString = `${taxTimer}`;
-    if (taxTimer === 0) {
+    if (taxTimer <= 0) {
+        world.setDynamicProperty(`taxTimer`,`${config.taxTimer}`);
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
             const playerData = GetAndParsePropertyData(pId);
