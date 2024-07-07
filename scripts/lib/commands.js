@@ -3,7 +3,7 @@ import config from "../config";
 import * as DyProp from "./DyProp";
 import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData, playerCountryLeave } from "./land";
-import { MakeCountryForm, countryList, playerMainMenu, settingCountry } from "./form";
+import { MakeCountryForm, countryList, joinTypeSelectForm, playerMainMenu, settingCountry } from "./form";
 import jobs_config from "../jobs_config";
 import { jobsForm } from "./jobs";
 
@@ -403,7 +403,12 @@ class ChatHandler {
     };
 
     joinCountry() {
-        
+        if (this.playerData?.country) {
+            this.sender.sendMessage({ translate: `command.makecountry.error.belong.country` });
+            return;
+        };
+        joinTypeSelectForm(this.sender);
+        return;
     };
 
     leaveCountry() {
