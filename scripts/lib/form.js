@@ -987,7 +987,7 @@ export function settingCountry(player) {
                 }, 10);
                 return;
             };
-            player.sendMessage({ translate: `form.cancel.message` });
+            //player.sendMessage({ translate: `form.cancel.message` });
             return;
         };
         switch (rs.selection) {
