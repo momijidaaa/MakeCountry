@@ -423,7 +423,10 @@ export function playerCountryKick(player) {
  */
 export function playerChangeOwner(player, member, countryData) {
     const memberData = GetAndParsePropertyData(`player_${member.id}`);
-    if (memberData?.country !== countryData.id) return
+    if (memberData?.country !== countryData.id) {
+        player.sendMessage({translate: `ownerchange.error`});
+        return;
+    };
     countryData.owner = member.id;
     StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
     return;
