@@ -944,7 +944,7 @@ export function resourcepointDepositForm(player) {
         playerData2.money -= needMoney;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
-        treasurybudgetSelectForm(player);
+        resourcepointSelectForm(player);
         return;
     });
 };
