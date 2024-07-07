@@ -93,7 +93,7 @@ export function memberSelectedShowForm(player, member, countryData) {
                     return;
                 };
                 //確認フォーム → 譲渡(countryData.owner変更,ownerロールを外して新オーナーに追加)
-                playerOwnerChangeCheckForm(player,member,countryData);
+                playerOwnerChangeCheckForm(player, member, countryData);
                 break;
             };
         };
@@ -221,6 +221,13 @@ export function playerRoleChangeForm(player, member, countryData) {
             for (let i = 0; i < memberRoleExsits.length; i++) {
                 if (rs.formValues[i]) {
                     memberData.roles.push(EnableEditRoleIds[i]);
+                    const roleData = GetAndParsePropertyData(`role_${EnableEditRoleIds[i]}`);
+                    roleData.members.push(`${memberData.id}`);
+                    StringifyAndSavePropertyData(`role_${EnableEditRoleIds[i]}`, roleData);
+                } else {
+                    const roleData = GetAndParsePropertyData(`role_${EnableEditRoleIds[i]}`);
+                    roleData.members.splice(roleData.members.indexOf(memberData.id), 1);
+                    StringifyAndSavePropertyData(`role_${EnableEditRoleIds[i]}`, roleData);
                 };
             };
             StringifyAndSavePropertyData(`player_${memberData.id}`, memberData);

@@ -37,7 +37,7 @@ class ChatHandler {
         };
         let landId = this.playerData?.country;
         let land = `chat.player.no.join.any.country`;
-        if (landId) land = this.playerCountryData.name;
+        if (landId) land = this.playerCountryData?.name;
         world.sendMessage([{ text: `<§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
         this.event.cancel = true;
     };

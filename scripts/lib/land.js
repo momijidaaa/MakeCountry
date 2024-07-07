@@ -43,7 +43,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
         { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`], iconTextureId: `stone`, color: `a` }
     ]);
-    ownerData.roles.push(ownerRole)
+    ownerData.roles.push(ownerRole);
     const countryData = {
         name: name,
         id: id,
@@ -94,6 +94,8 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         invite: invite,
     };
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `born.country`, with: [name] }] });
+    const ownerRoleData = GetAndParsePropertyData(`role_${ownerRole}`);
+    ownerRoleData.members.push(`${owner.id}`);
     StringifyAndSavePropertyData(`country_${id}`, countryData);
     StringifyAndSavePropertyData(`player_${owner.id}`, ownerData);
     StringifyAndSavePropertyData(chunkData.id, chunkData);

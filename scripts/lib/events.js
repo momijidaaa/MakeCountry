@@ -82,21 +82,21 @@ try {
             const playerData = JSON.parse(dataCheck);
             playerData.name = player.name;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-            return;
+        } else {
+            const newPlayerData = {
+                name: player.name,
+                id: player.id,
+                country: undefined,
+                money: config.initialMoney,
+                roles: [],
+                chunks: [],
+                days: 0,
+                invite: [],
+                settings: {
+                    inviteReceiveMessage: true,
+                }
+            };
+            StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
         };
-        const newPlayerData = {
-            name: player.name,
-            id: player.id,
-            country: undefined,
-            money: config.initialMoney,
-            roles: [],
-            chunks: [],
-            days: 0,
-            invite: [],
-            settings: {
-                inviteReceiveMessage: true,
-            }
-        };
-        StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
     };
 } catch (error) {};
