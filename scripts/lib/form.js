@@ -1225,7 +1225,7 @@ export function externalAffairsMainForm(player) {
                 if (!CheckPermission(player, `warAdmin`)) {
                     //form
                     //かみんぐすーん
-                    player.sendMessage({ translate: `comingsoon` });
+                    player.sendMessage({ translate: `comingsoon.message` });
                     return;
                 } else {
                     player.sendMessage({ translate: `no.permission` });
