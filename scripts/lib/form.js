@@ -1108,6 +1108,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         form.button({ translate: `form.setting.info.button.peace` });
         form.button({ translate: `form.setting.info.button.invite` });
         form.button({ translate: `form.setting.info.button.tax` });
+        form.button({ translate: `form.setting.info.button.external.affairs` });
 
         form.show(player).then(rs => {
             if (rs.canceled) {
@@ -1155,11 +1156,247 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     };
                     break;
                 };
+                case 5: {
+                    externalAffairsMainForm(player);
+                    break;
+                };
             };
         });
     } catch (error) {
         console.warn(error);
     };
+};
+
+/**
+ * 対外関係メインフォーム
+ * @param {Player} player 
+ */
+export function externalAffairsMainForm(player) {
+    const form = new ActionFormData();
+    form.title({ translate: `form.setting.info.button.external.affairs` });
+    //中立国の権限設定
+    form.button({ translate: `` });
+    //同盟国
+    form.button({ translate: `` });
+    //敵対国
+    form.button({ translate: `` });
+    //宣戦布告
+    form.button({ translate: `` });
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            settingCountryInfoForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //中立国の権限設定
+                if (!CheckPermission(player, `neutralityPermission`)) {
+                    //form
+                    break;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+            };
+            case 1: {
+                //同盟国
+                if (!CheckPermission(player, `allyAdmin`)) {
+                    //form
+                    AllianceMainForm(player);
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+            case 2: {
+                //敵対国
+                if (!CheckPermission(player, `hostilityAdmin`)) {
+                    //form
+                    HostilityMainForm(player);
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+            case 3: {
+                //宣戦布告
+                if (!CheckPermission(player, `warAdmin`)) {
+                    //form
+                    //かみんぐすーん
+                    player.sendMessage({ translate: `comingsoon` });
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 同盟国メインフォーム
+ * @param {Player} player 
+ */
+export function AllianceMainForm(player) {
+    const form = new ActionFormData();
+    form.title({ translate: `form.alliance.main.title` });
+    form.button({ translate: `alliance.permission.edit` });
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            externalAffairsMainForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                if (!CheckPermission(player, `allyAdmin`)) {
+                    //form
+                    setAlliancePermissionForm(player);
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 敵対国メインフォーム
+ * @param {Player} player 
+ */
+export function HostilityMainForm(player) {
+    const form = new ActionFormData();
+    form.title({ translate: `form.alliance.main.title` });
+    form.button({ translate: `alliance.permission.edit` });
+    //ここに一覧ボタン
+    //一覧フォームには追加ボタンも用意する
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            externalAffairsMainForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                if (!CheckPermission(player, `hostilityAdmin`)) {
+                    //form
+                    setHostilityPermissionForm(player);
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+        };
+    });
+};
+
+
+const landPermissions = [
+    `place`,
+    `break`,
+    `setHome`,
+    `blockUse`,
+    `entityUse`,
+    `noTarget`,
+];
+
+/**
+ * 中立国の権限を編集
+ * @param {Player} player 
+ */
+export function setNeutralityPermissionForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ModalFormData();
+    form.title({ translate: `neutrality.permission.edit` });
+    for (const permission of landPermissions) {
+        form.toggle({ translate: `permission.${permission}` }, countryData.neutralityPermission.includes(permission));
+    };
+    form.submitButton({ translate: `mc.button.save` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            externalAffairsMainForm(player);
+            return;
+        };
+        const values = rs.formValues;
+        let newLandPermissions = [];
+        for (let i = 0; i < values.length; i++) {
+            if (values[i]) {
+                newLandPermissions.push(landPermissions[i]);
+            };
+        };
+        countryData.neutralityPermission = newLandPermissions;
+        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        externalAffairsMainForm(player);
+        return;
+    });
+};
+
+/**
+ * 敵対国の権限を編集
+ * @param {Player} player 
+ */
+export function setHostilityPermissionForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ModalFormData();
+    form.title({ translate: `hostility.permission.edit` });
+    for (const permission of landPermissions) {
+        form.toggle({ translate: `permission.${permission}` }, countryData.hostilityPermission.includes(permission));
+    };
+    form.submitButton({ translate: `mc.button.save` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            HostilityMainForm(player);
+            return;
+        };
+        const values = rs.formValues;
+        let newLandPermissions = [];
+        for (let i = 0; i < values.length; i++) {
+            if (values[i]) {
+                newLandPermissions.push(landPermissions[i]);
+            };
+        };
+        countryData.hostilityPermission = newLandPermissions;
+        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        HostilityMainForm(player);
+        return;
+    });
+};
+
+/**
+ * 同盟国の権限を編集
+ * @param {Player} player 
+ */
+export function setAlliancePermissionForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const form = new ModalFormData();
+    form.title({ translate: `alliance.permission.edit` });
+    for (const permission of landPermissions) {
+        form.toggle({ translate: `permission.${permission}` }, countryData.alliancePermission.includes(permission));
+    };
+    form.submitButton({ translate: `mc.button.save` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            AllianceMainForm(player);
+            return;
+        };
+        const values = rs.formValues;
+        let newLandPermissions = [];
+        for (let i = 0; i < values.length; i++) {
+            if (values[i]) {
+                newLandPermissions.push(landPermissions[i]);
+            };
+        };
+        countryData.alliancePermission = newLandPermissions;
+        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        AllianceMainForm(player);
+        return;
+    });
 };
 
 /**
@@ -1194,7 +1431,7 @@ export function editTaxMainForm(player) {
             player.sendMessage({ translate: `input.error.over100` });
             return;
         };
-        if ( Number(rs.formValues[1]) < 0) {
+        if (Number(rs.formValues[1]) < 0) {
             player.sendMessage({ translate: `input.error.under0` });
             return;
         };
