@@ -1243,6 +1243,8 @@ export function AllianceMainForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.alliance.main.title` });
     form.button({ translate: `alliance.permission.edit` });
+    //ここに一覧ボタン
+    //一覧フォームには追加ボタンも用意する
     form.show(player).then((rs) => {
         if (rs.canceled) {
             externalAffairsMainForm(player);
@@ -1259,6 +1261,7 @@ export function AllianceMainForm(player) {
                 };
                 break;
             };
+            //1 一覧フォーム
         };
     });
 };
@@ -1289,6 +1292,7 @@ export function HostilityMainForm(player) {
                 };
                 break;
             };
+            //1 一覧フォーム
         };
     });
 };
