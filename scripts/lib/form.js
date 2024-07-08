@@ -1273,8 +1273,8 @@ export function AllianceMainForm(player) {
  */
 export function HostilityMainForm(player) {
     const form = new ActionFormData();
-    form.title({ translate: `form.alliance.main.title` });
-    form.button({ translate: `alliance.permission.edit` });
+    form.title({ translate: `form.hostility.main.title` });
+    form.button({ translate: `hostility.permission.edit` });
     //ここに一覧ボタン
     //一覧フォームには追加ボタンも用意する
     form.show(player).then((rs) => {
