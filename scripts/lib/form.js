@@ -3,7 +3,7 @@ import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
 import { DeleteCountry, DeleteRole, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick } from "./land";
-import { CheckPermission, GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
 
 /**
  * 国民一覧
@@ -495,10 +495,10 @@ export function joinTypeSelectForm(player) {
     form.button({ translate: `form.invite.list.allowjoin` });
     form.show(player).then(rs => {
         if (rs.canceled) {
-            if(rs.cancelationReason === FormCancelationReason.UserBusy) {
+            if (rs.cancelationReason === FormCancelationReason.UserBusy) {
                 system.runTimeout(() => {
                     joinTypeSelectForm(player);
-                },10);
+                }, 10);
                 return;
             };
             playerMainMenu(player);
@@ -770,7 +770,7 @@ export function treasuryMainForm(player) {
     const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const form = new ActionFormData();
     form.title({ translate: `form.treasurymain.title` });
-    form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}\n` }, { translate: `resourcepoint` }, { text: `${countryData.resourcePoint}` }] });
+    form.body({ rawtext: [{ translate: `treasurybudget.body` }, { text: `${config.MoneyName} ${countryData.money}\n` }, { translate: `resourcepoint.body` }, { text: `${countryData.resourcePoint}` }] });
     form.button({ translate: `treasurybudget` });
     form.button({ translate: `resourcepoint` });
     form.show(player).then(rs => {
@@ -1059,7 +1059,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         let money = `show.private`;
         let resourcePoint = `show.private`;
         if (!countryData.hideMoney) {
-            money = countryData.money;
+            money = `${config.MoneyName} ${countryData.money}`;
             resourcePoint = countryData.resourcePoint;
         };
         const allianceIds = countryData.alliance;
@@ -1089,8 +1089,8 @@ export function settingCountryInfoForm(player, countryData = undefined) {
             { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
             { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
             { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-            { translate: `form.showcountry.option.money`, with: [`${config.MoneyName} ${countryData.money}`] }, { text: `\n` },
-            { translate: `form.showcountry.option.resourcepoint`, with: [`${countryData.resourcePoint}`] }, { text: `\n` },
+            { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
+            { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
             { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
             { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
             { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -1107,9 +1107,13 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         form.button({ translate: `form.setting.info.button.lore` });
         form.button({ translate: `form.setting.info.button.peace` });
         form.button({ translate: `form.setting.info.button.invite` });
+        form.button({ translate: `form.setting.info.button.tax` });
 
         form.show(player).then(rs => {
-            if (rs.canceled) return;
+            if (rs.canceled) {
+                settingCountry(player);
+                return;
+            };
             switch (rs.selection) {
                 case 0: {
                     if (!CheckPermission(player, `editCountryName`)) {
@@ -1143,11 +1147,65 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     };
                     break;
                 };
+                case 4: {
+                    if (!CheckPermission(player, `taxAdmin`)) {
+                        editTaxMainForm(player);
+                    } else {
+                        player.sendMessage({ translate: `no.permission` });
+                    };
+                    break;
+                };
             };
         });
     } catch (error) {
         console.warn(error);
     };
+};
+
+/**
+ * 税金管理メインフォーム
+ * @param {Player} player 
+ */
+export function editTaxMainForm(player) {
+    const form = new ModalFormData();
+    const lastPlayerData = GetAndParsePropertyData(`player_${player.id}`)
+    const lastountryData = GetAndParsePropertyData(`country_${lastPlayerData?.country}`);
+    let taxMessageLabel = `label.input.taxnum`;
+    if (lastountryData.taxInstitutionIsPer) taxMessageLabel = `label.input.taxper`;
+    form.title({ translate: `form.setting.info.button.tax` })
+    form.toggle({ translate: `tax.select.toggle.label` }, lastountryData.taxInstitutionIsPer);
+    form.textField({ translate: taxMessageLabel }, { translate: `input.number` }, `${lastountryData.taxPer}`);
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            settingCountryInfoForm(player);
+            return;
+        };
+        const cancel = CheckPermission(player, `taxAdmin`);
+        if (cancel) {
+            player.sendMessage({ translate: `no.permission` });
+            return;
+        };
+        let value = rs.formValues[1];
+        if (!isDecimalNumber(value)) {
+            player.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
+        if (100 < Number(rs.formValues[1]) && rs.formValues[0] == true) {
+            player.sendMessage({ translate: `input.error.over100` });
+            return;
+        };
+        if ( Number(rs.formValues[1]) < 0) {
+            player.sendMessage({ translate: `input.error.under0` });
+            return;
+        };
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+        countryData.taxInstitutionIsPer = rs.formValues[0];
+        countryData.taxPer = Number(rs.formValues[1]);
+        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        player.sendMessage({ translate: `updated` });
+        return;
+    });
 };
 
 export function editCountryNameForm(player, countryData) {

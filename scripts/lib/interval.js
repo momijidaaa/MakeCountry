@@ -32,6 +32,7 @@ system.runInterval(() => {
     taxTimerString = `${taxTimer}`;
     if (taxTimer <= 0) {
         world.setDynamicProperty(`taxTimer`,`${config.taxTimer}`);
+        taxTimerString = `${config.taxTimer}`;
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
             const playerData = GetAndParsePropertyData(pId);
@@ -63,6 +64,7 @@ system.runInterval(() => {
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
                 continue;
             };
+            world.sendMessage(`${JSON.stringify(countryData)}`)
             let upkeepCosts = config.MaintenanceFeeNonPeacefulCountries * countryData.territories.length;
             if (countryData.peace) upkeepCosts = config.MaintenanceFeePacifistCountries * countryData.territories.length;
             if (countryData.money < upkeepCosts) {

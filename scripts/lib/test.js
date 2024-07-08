@@ -34,6 +34,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             world.sendMessage(`${dyp.join(`\n`)}`);
             break;
         };
+        case `karo:taxtimer`: {
+            world.setDynamicProperty(`taxTimer`,message);
+            break;
+        };
         /*case `karo:form`: {
             for(const player of world.getAllPlayers()) {
                 uiManager.closeAllForms(player);

@@ -333,3 +333,13 @@ export function HasPermission(player, permission) {
 export function getRandomInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
+
+/**
+ * 数値かどうか
+ * @param {number|string} value 
+ * @returns 
+ */
+export function isDecimalNumber(value) {
+    let newValue = Number(value);
+    return typeof newValue === 'number' && isFinite(newValue);
+};
