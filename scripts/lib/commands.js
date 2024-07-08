@@ -60,6 +60,9 @@ class ChatHandler {
                 case `${this.prefix}checkchunk`:
                     this.checkChunk();
                     break;
+                case `${this.prefix}cc`:
+                    this.checkChunk();
+                    break;
                 case `${this.prefix}sethome`:
                     this.setHome();
                     break;
@@ -72,13 +75,25 @@ class ChatHandler {
                 case `${this.prefix}adminchunk`:
                     this.setAdminChunk();
                     break;
+                case `${this.prefix}adminc`:
+                    this.setAdminChunk();
+                    break;
                 case `${this.prefix}resetchunk`:
+                    this.resetChunk();
+                    break;
+                case `${this.prefix}resetc`:
                     this.resetChunk();
                     break;
                 case `${this.prefix}buychunk`:
                     this.buyChunk();
                     break;
+                case `${this.prefix}buyc`:
+                    this.buyChunk();
+                    break;
                 case `${this.prefix}sellchunk`:
+                    this.sellChunk();
+                    break;
+                case `${this.prefix}sellc`:
                     this.sellChunk();
                     break;
                 case `${this.prefix}help`:
@@ -87,19 +102,34 @@ class ChatHandler {
                 case `${this.prefix}makecountry`:
                     this.makeCountry();
                     break;
+                case `${this.prefix}mc`:
+                    this.makeCountry();
+                    break;
                 case `${this.prefix}settingcountry`:
+                    this.settingCountry();
+                    break;
+                case `${this.prefix}sc`:
                     this.settingCountry();
                     break;
                 case `${this.prefix}joincountry`:
                     this.joinCountry();
                     break;
+                case `${this.prefix}jc`:
+                    this.joinCountry();
+                    break;
                 case `${this.prefix}leavecountry`:
+                    this.leaveCountry();
+                    break;
+                case `${this.prefix}lc`:
                     this.leaveCountry();
                     break;
                 case `${this.prefix}kill`:
                     this.kill();
                     break;
                 case `${this.prefix}countrylist`:
+                    this.CountryList();
+                    break;
+                case `${this.prefix}cl`:
                     this.CountryList();
                     break;
                 case `${this.prefix}chome`:
@@ -362,19 +392,29 @@ class ChatHandler {
         { translate: `command.help.setup` }, { text: `\n` },
         { translate: `command.help.msend` }, { text: `\n` },
         { translate: `command.help.checkchunk` }, { text: `\n` },
+        { translate: `command.help.cc` }, { text: `\n` },
         { translate: `command.help.sethome` }, { text: `\n` },
         { translate: `command.help.home` }, { text: `\n` },
         { translate: `command.help.checkhome` }, { text: `\n` },
         { translate: `command.help.adminchunk` }, { text: `\n` },
+        { translate: `command.help.adminc` }, { text: `\n` },
         { translate: `command.help.resetchunk`, with: { rawtext: [{ translate: `special.name` }] } }, { text: `\n` },
+        { translate: `command.help.resetc`, with: { rawtext: [{ translate: `special.name` }] } }, { text: `\n` },
         { translate: `command.help.buychunk` }, { text: `\n` },
+        { translate: `command.help.buyc` }, { text: `\n` },
         { translate: `command.help.sellchunk` }, { text: `\n` },
+        { translate: `command.help.sellc` }, { text: `\n` },
         { translate: `command.help.makecountry` }, { text: `\n` },
+        { translate: `command.help.mc` }, { text: `\n` },
         { translate: `command.help.settingcountry` }, { text: `\n` },
+        { translate: `command.help.sc` }, { text: `\n` },
         { translate: `command.help.leavecountry` }, { text: `\n` },
+        { translate: `command.help.lc` }, { text: `\n` },
         { translate: `command.help.kill` }, { text: `\n` },
         { translate: `command.help.countrylist` }, { text: `\n` },
+        { translate: `command.help.cl` }, { text: `\n` },
         { translate: `command.help.joincountry` }, { text: `\n` },
+        { translate: `command.help.jc` }, { text: `\n` },
         { translate: `command.help.chome` }, { text: `\n` },
         { translate: `command.help.menu` }, { text: `\n` },
         { translate: `command.help.jobs` }, { text: `\n` },
