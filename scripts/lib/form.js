@@ -1175,13 +1175,13 @@ export function externalAffairsMainForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.setting.info.button.external.affairs` });
     //中立国の権限設定
-    form.button({ translate: `` });
+    form.button({ translate: `neutrality.permission.edit` });
     //同盟国
-    form.button({ translate: `` });
+    form.button({ translate: `alliance` });
     //敵対国
-    form.button({ translate: `` });
-    //宣戦布告
-    form.button({ translate: `` });
+    form.button({ translate: `hostility` });
+    //戦争
+    form.button({ translate: `war` });
     form.show(player).then((rs) => {
         if (rs.canceled) {
             settingCountryInfoForm(player);
@@ -1192,6 +1192,7 @@ export function externalAffairsMainForm(player) {
                 //中立国の権限設定
                 if (!CheckPermission(player, `neutralityPermission`)) {
                     //form
+                    setNeutralityPermissionForm(player);
                     break;
                 } else {
                     player.sendMessage({ translate: `no.permission` });
