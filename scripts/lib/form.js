@@ -309,6 +309,7 @@ export function sendMoneyForm(player, serch = false, keyword = ``) {
     form.show(player).then(rs => {
         if (rs.canceled) {
             playerMainMenu(player);
+            return;
         };
         switch (rs.selection) {
             case 0: {
