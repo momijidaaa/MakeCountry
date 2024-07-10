@@ -58,8 +58,8 @@ system.runInterval(() => {
             if (0 < countryData.peaceChangeCooltime) {
                 countryData.peaceChangeCooltime -= 1;
             };
+            if(!countryData?.days) countryData.days = 0;
             countryData.days += 1;
-            StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
             if (countryData.days < config.NonMaintenanceCostAccrualPeriod) {
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
                 continue;
