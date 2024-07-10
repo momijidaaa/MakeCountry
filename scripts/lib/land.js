@@ -52,6 +52,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         lore: ``,
         //通貨のID(0が共通通貨)
         currencyUnitId: 0,
+        days: 0,
         members: [owner.id],
         peaceChangeCooltime: 0,
         territories: [chunkId],
