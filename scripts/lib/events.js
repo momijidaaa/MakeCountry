@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { CheckPermission, CheckPermissionFromLocation, StringifyAndSavePropertyData } from "./util";
+import { CheckPermissionFromLocation, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
 

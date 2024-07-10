@@ -1,4 +1,4 @@
-import { Player, world } from "@minecraft/server";
+import { Player } from "@minecraft/server";
 import * as Dyprop from "./DyProp";
 import config from "../config";
 
@@ -58,7 +58,7 @@ export function StringifyAndSavePropertyData(id, data) {
  * x座標とz座標をチャンクデータに変換
  * @param {*} rawX 
  * @param {*} rawZ 
- * @returns {{x: number,y: number}}
+ * @returns {{x: number, z: number}}
  */
 export function ConvertChunk(rawX, rawZ) {
     const x = Math.floor(rawX / 16);
@@ -328,6 +328,7 @@ export function HasPermission(player, permission) {
     for (const role of playerData.roles) {
         if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return true;
     };
+    return false;
 };
 
 export function getRandomInteger(min, max) {

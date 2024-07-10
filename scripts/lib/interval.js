@@ -1,8 +1,8 @@
 import { system, world } from "@minecraft/server";
-import { GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
-import config from "../config";
+import { GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import { DeleteCountry } from "./land";
+import config from "../config";
 
 let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
 world.setDynamicProperty(`taxTimer`, taxTimerString);

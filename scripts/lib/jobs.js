@@ -2,7 +2,7 @@ import { Player, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
 import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
-import playerFishingAfterEvent from "./FishingEvent";
+import playerFishingAfterEvent from "./fishingEvent";
 
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
