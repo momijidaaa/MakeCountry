@@ -32,7 +32,7 @@ export default {
     //特別区域で許可する権限
     specialAllowPermissions: [`entityUse`, `blockUse`],
     //荒野で許可する権限
-    wildernessAllowPermissions: [`entityUse`, `blockUse`, `makeCountry`, `buyChunk`, `place`, `break`, `setHome`],
+    wildernessAllowPermissions: [`entityUse`, `blockUse`, `makeCountry`, `buyChunk`, `place`, `break`, `setHome`,`openContainer`],
     //平和主義国の維持費(1チャンク)
     MaintenanceFeePacifistCountries: 500,
     //非平和主義国の維持費(1チャンク)

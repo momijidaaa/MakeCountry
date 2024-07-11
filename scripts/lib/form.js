@@ -1614,8 +1614,10 @@ export function AddAllianceListForm(player) {
     let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(id));
     let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(id));
     form.button({ translate: `mc.button.back` });
+    let lands = [];
     for (const countryId of filtered2) {
-        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        const countryData = GetAndParsePropertyData(countryId);
+        lands.push(countryData.id);
         form.button(`${countryData.name}\nID: ${countryData.id}`);
     };
     form.show(player).then((rs) => {
@@ -1633,7 +1635,7 @@ export function AddAllianceListForm(player) {
                 return;
             };
             case 1: {
-                addAllianceCountryFromListForm(player, filtered2[rs.selection - 1]);
+                addAllianceCountryFromListForm(player, lands[rs.selection - 1]);
                 return;
             };
         };
@@ -1703,7 +1705,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
         form.title(countryData.name);
         form.body(showBody);
         form.button({ translate: `mc.button.back` });
-        form.button({ translate: `mc.button.add` });
+        form.button({ translate: `mc.button.send` });
         form.show(player).then(rs => {
             if (CheckPermission(player, `allyAdmin`)) {
                 player.sendMessage({ translate: `no.permission` });
@@ -1715,7 +1717,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    HAllianceListForm(player);
+                    AllianceListForm(player);
                     return;
                 };
                 case 1: {
@@ -1976,9 +1978,11 @@ export function AddHostilityListForm(player) {
     let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
     let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(id));
     let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(id));
+    let lands = [];
     form.button({ translate: `mc.button.back` });
     for (const countryId of filtered2) {
-        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        const countryData = GetAndParsePropertyData(countryId);
+        lands.push(countryData.id);
         form.button(`${countryData.name}\nID: ${countryData.id}`);
     };
     form.show(player).then((rs) => {
@@ -1996,7 +2000,7 @@ export function AddHostilityListForm(player) {
                 return;
             };
             default: {
-                addHostilityCountryFromListForm(player, allianceCountryIds[rs.selection - 1]);
+                addHostilityCountryFromListForm(player, lands[rs.selection - 1]);
                 return;
             };
         };
