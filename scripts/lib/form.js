@@ -2,7 +2,7 @@ import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { acceptApplicationRequest, AddAlliance, AddHostilityByPlayer, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace } from "./land";
+import { acceptApplicationRequest, AddAlliance, AddHostilityByPlayer, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace } from "./land";
 import { CheckPermission, GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
 
 /**
@@ -2705,6 +2705,7 @@ export function settingCountryRoleForm(player) {
             });
         } else {
             form.title({ translate: `form.setting.button.role` });
+            form.button({ translate: `mc.button.addrole` });
             let roles = [];
             EnableEditRoleIds.forEach(id => {
                 roles.push(GetAndParsePropertyData(`role_${id}`));
@@ -2713,12 +2714,29 @@ export function settingCountryRoleForm(player) {
                 form.button(role.name, role.icon);
             });
             form.show(player).then(rs => {
+                const newCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
                 if (rs.canceled) {
                     settingCountry(player);
                     return;
                 };
-                selectRoleEditType(player, roles[rs.selection]);
-                return;
+                switch(rs.selection) {
+                    case 0: {
+                        if(config.maxRoleAmount < newCountryData.roles.length) {
+                            player.sendMessage({translate: `error.limit.maxrole`});
+                            return;
+                        };
+                        CreateRoleToCountry(newCountryData.id,`newRole`);
+                        system.runTimeout(() => {
+                            settingCountryRoleForm(player);
+                            return;
+                        },2);
+                        break;
+                    };
+                    default: {
+                        selectRoleEditType(player, roles[rs.selection - 1]);
+                        break;
+                    };
+                };
             });
         };
     } catch (error) {

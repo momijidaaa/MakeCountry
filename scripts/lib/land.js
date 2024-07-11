@@ -42,7 +42,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     const [ownerRole, adminRole, peopleRole] = CreateRole([
         { name: `Owner`, permissions: [`admin`], iconTextureId: `gold_block`, color: `e` },
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
-        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`, `setHome`,`container`], iconTextureId: `stone`, color: `a` }
+        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`, `setHome`, `container`], iconTextureId: `stone`, color: `a` }
     ]);
     ownerData.roles.push(ownerRole);
     const countryData = {
@@ -193,7 +193,7 @@ export function DeleteCountry(countryId) {
  * @param {string} color 
  */
 export function CreateRoleToCountry(countryId, name, permissions = [], iconTextureId = `stone`, color = `e`) {
-    const roleId = CreateRole(name, permissions, iconTextureId, color);
+    const roleId = CreateRole([{ name: name, permissions: permissions, iconTextureId: iconTextureId, color: color }]);
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.roles.push(roleId);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
@@ -481,7 +481,7 @@ export function sendApplicationForPeace(player, countryId) {
     playerCountryData.applicationPeaceRequestSend.push(countryId);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.application.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.application.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -499,7 +499,7 @@ export function sendAllianceRequest(player, countryId) {
     playerCountryData.allianceRequestSend.push(countryId);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.alliance.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.alliance.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -515,7 +515,7 @@ export function cancelSendApplicationForPeace(player, countryId) {
     playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.application.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.application.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -531,7 +531,7 @@ export function cancelAllianceRequest(player, countryId) {
     playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.alliance.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.alliance.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -551,7 +551,7 @@ export function acceptAlliance(player, countryId) {
     playerCountryData.alliance.push(countryId);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.alliance.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.alliance.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -567,7 +567,7 @@ export function denyAllianceRequest(player, countryId) {
     playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.alliance.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.alliance.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -583,7 +583,7 @@ export function denyApplicationRequest(player, countryId) {
     playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(countryId), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.application.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.application.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -605,7 +605,7 @@ export function acceptApplicationRequest(player, countryId) {
     playerCountryData.warNowCountries.splice(playerCountryData.warNowCountries.indexOf(countryId), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.application.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.application.request`, with: [`${countryData.name}`] }] })
 };
 
 /**
@@ -629,5 +629,5 @@ export function AddHostilityByPlayer(player, countryId) {
     playerCountryData.hostility.push(countryId);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
-    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `add.hostility.request`,with: [`${countryData.name}`] }] })
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `add.hostility.request`, with: [`${countryData.name}`] }] })
 };
