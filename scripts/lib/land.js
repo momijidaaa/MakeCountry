@@ -42,7 +42,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     const [ownerRole, adminRole, peopleRole] = CreateRole([
         { name: `Owner`, permissions: [`admin`], iconTextureId: `gold_block`, color: `e` },
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
-        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`, `setHome`, `container`], iconTextureId: `stone`, color: `a` }
+        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`, `setHome`, `openContainer`], iconTextureId: `stone`, color: `a` }
     ]);
     ownerData.roles.push(ownerRole);
     const countryData = {

@@ -26,7 +26,14 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
-    if (brokenBlockPermutation.hasTag(`stone`) && player.hasTag(`mcjobs_miner`)) {
+    if (brokenBlockPermutation.type.id === `minecraft:deepslate` && player.hasTag(`mcjobs_miner`)) {
+        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.oreMiningReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+    if (brokenBlockPermutation.hasTag(`stone`) && player.hasTag(`mcjobs_miner`) && brokenBlockPermutation.type.id != `minecraft:cobblestone`) {
         const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
