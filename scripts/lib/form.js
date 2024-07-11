@@ -2710,9 +2710,9 @@ export function settingCountryRoleForm(player) {
             EnableEditRoleIds.forEach(id => {
                 roles.push(GetAndParsePropertyData(`role_${id}`));
             });
-            roles.forEach(role => {
+            for(const role of roles) {
                 form.button(role.name, role.icon);
-            });
+            };
             form.show(player).then(rs => {
                 const newCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
                 if (rs.canceled) {
@@ -2721,7 +2721,7 @@ export function settingCountryRoleForm(player) {
                 };
                 switch(rs.selection) {
                     case 0: {
-                        if(config.maxRoleAmount < newCountryData.roles.length) {
+                        if(config.maxRoleAmount <= newCountryData.roles.length) {
                             player.sendMessage({translate: `error.limit.maxrole`});
                             return;
                         };

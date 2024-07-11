@@ -193,7 +193,7 @@ export function DeleteCountry(countryId) {
  * @param {string} color 
  */
 export function CreateRoleToCountry(countryId, name, permissions = [], iconTextureId = `stone`, color = `e`) {
-    const roleId = CreateRole([{ name: name, permissions: permissions, iconTextureId: iconTextureId, color: color }]);
+    const roleId = CreateRole([{ name: name, permissions: permissions, iconTextureId: iconTextureId, color: color }])[0];
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.roles.push(roleId);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
@@ -250,10 +250,13 @@ export function DeleteRole(player, roleId, countryId, deleteCountry = false) {
         try {
             const memberData = GetAndParsePropertyData(`player_${memberId}`);
             memberData.roles.splice(memberData.roles.indexOf(roleId), 1);
+            StringifyAndSavePropertyData(`player_${memberId}`, memberData);
         } catch (error) {
             console.warn(error);
         };
     });
+    countryData.roles.splice(countryData.roles.indexOf(roleId), 1);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     DyProp.setDynamicProperty(`role_${roleId}`);
     player.sendMessage({ translate: `complete.delete.role` })
 };
