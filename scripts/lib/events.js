@@ -37,9 +37,16 @@ world.beforeEvents.itemUseOn.subscribe((ev) => {
 });
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
+    const permission2 = `openContainer`
     const permission = `blockUse`
     const { player, block } = ev;
     const { x, z } = block.location;
+    if (block.getComponent(`inventory`)) {
+        const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
+        ev.cancel = cannot2;
+        player.sendMessage({ translate: `cannot.permission.${permission2}` });
+        return;
+    };
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;

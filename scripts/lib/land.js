@@ -42,7 +42,7 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
     const [ownerRole, adminRole, peopleRole] = CreateRole([
         { name: `Owner`, permissions: [`admin`], iconTextureId: `gold_block`, color: `e` },
         { name: `Admin`, permissions: [`admin`], iconTextureId: `iron_block`, color: `f` },
-        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`, `setHome`], iconTextureId: `stone`, color: `a` }
+        { name: `People`, permissions: [`place`, `break`, `blockUse`, `entityUse`, `noTarget`, `invite`, `setHome`,`container`], iconTextureId: `stone`, color: `a` }
     ]);
     ownerData.roles.push(ownerRole);
     const countryData = {
@@ -464,4 +464,170 @@ export function playerCountryInvite(receivePlayer, sendPlayer) {
     } catch (error) {
         console.warn(error);
     };
+};
+
+/**
+ * 講和申請送信
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function sendApplicationForPeace(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
+    countryData.applicationPeaceRequestReceive.push(playerData.country);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    playerCountryData.applicationPeaceRequestSend.push(countryId);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.application.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 同盟申請送信
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function sendAllianceRequest(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
+    countryData.allianceRequestReceive.push(playerData.country);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
+    playerCountryData.allianceRequestSend.push(countryId);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.alliance.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 講和申請キャンセル
+ * @param {Player} player 
+ * @param {number} countryId 
+*/
+export function cancelSendApplicationForPeace(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.application.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 同盟申請キャンセル
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function cancelAllianceRequest(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.alliance.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 同盟追加
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function acceptAlliance(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
+    countryData.allianceRequestSend.splice(countryData.allianceRequestSend.indexOf(playerData.country), 1);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
+    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
+    countryData.alliance.push(playerData.country);
+    playerCountryData.alliance.push(countryId);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.alliance.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 同盟申請を拒否
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function denyAllianceRequest(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.allianceRequestSend.splice(countryData.allianceRequestSend.indexOf(playerData.country), 1);
+    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.alliance.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 講和申請を拒否
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function denyApplicationRequest(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.applicationPeaceRequestSend.splice(countryData.applicationPeaceRequestSend.indexOf(playerData.country), 1);
+    playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(countryId), 1);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.application.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 講和申請を受諾
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function acceptApplicationRequest(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    countryData.applicationPeaceRequestSend.splice(countryData.applicationPeaceRequestSend.indexOf(playerData.country), 1);
+    playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(countryId), 1);
+    countryData.hostility.splice(countryData.hostility.indexOf(playerData.country), 1);
+    playerCountryData.hostility.splice(playerCountryData.hostility.indexOf(countryId), 1);
+    countryData.warNowCountries.splice(countryData.warNowCountries.indexOf(playerData.country), 1);
+    playerCountryData.warNowCountries.splice(playerCountryData.warNowCountries.indexOf(countryId), 1);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.application.request`,with: [`${countryData.name}`] }] })
+};
+
+/**
+ * 敵対国追加
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function AddHostilityByPlayer(player, countryId) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
+    countryData.allianceRequestSend.splice(countryData.allianceRequestSend.indexOf(playerData.country), 1);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
+    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
+    countryData.alliance.splice(countryData.alliance.indexOf(playerData.country), 1);
+    playerCountryData.alliance.splice(playerCountryData.alliance.indexOf(countryId), 1);
+    countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    countryData.hostility.push(playerData.country);
+    playerCountryData.hostility.push(countryId);
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
+    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `add.hostility.request`,with: [`${countryData.name}`] }] })
 };
