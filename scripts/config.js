@@ -38,5 +38,7 @@ export default {
     //非平和主義国の維持費(1チャンク)
     MaintenanceFeeNonPeacefulCountries: 50,
     //建国後何回分の徴税をなしにするか
-    NonMaintenanceCostAccrualPeriod: 3
+    NonMaintenanceCostAccrualPeriod: 3,
+    //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
+    maxRoleAmount: 10,
 };
