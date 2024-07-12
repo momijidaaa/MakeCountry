@@ -542,19 +542,19 @@ export function joinCheckFromInviteForm(player, countryData) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -629,19 +629,19 @@ export function joinCheckFromListForm(player, countryData) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
-        const hostilityIds = countryData.alliance;
+        const hostilityIds = countryData.hostility;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
-        const warNowIds = countryData.hostility;
+        const warNowIds = countryData.warNowCountries;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -1065,19 +1065,19 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const countryData = GetAndParsePropertyData(id);
+            const countryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(countryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const countryData = GetAndParsePropertyData(id);
+            const countryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(countryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const countryData = GetAndParsePropertyData(id);
+            const countryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(countryData.name);
         });
 
@@ -1291,7 +1291,7 @@ export function ReceivedAllianceRequestForm(player) {
                 break;
             };
             default: {
-                allianceRequestCountryForm(player,receivedAllianceRequests[rs.selection - 1]);
+                allianceRequestCountryForm(player, receivedAllianceRequests[rs.selection - 1]);
                 break;
             };
         };
@@ -1303,7 +1303,7 @@ export function ReceivedAllianceRequestForm(player) {
  * @param {Player} player 
  * @param {number} countryId 
  */
-export function allianceRequestCountryForm(player,countryId) {
+export function allianceRequestCountryForm(player, countryId) {
     try {
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
@@ -1322,19 +1322,19 @@ export function allianceRequestCountryForm(player,countryId) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -1421,7 +1421,7 @@ export function ReceivedApplicationRequestForm(player) {
                 break;
             };
             default: {
-                applicationRequestCountryForm(player,receivedApplicationRequests[rs.selection - 1]);
+                applicationRequestCountryForm(player, receivedApplicationRequests[rs.selection - 1]);
                 break;
             };
         };
@@ -1433,7 +1433,7 @@ export function ReceivedApplicationRequestForm(player) {
  * @param {Player} player 
  * @param {number} countryId 
  */
-export function applicationRequestCountryForm(player,countryId) {
+export function applicationRequestCountryForm(player, countryId) {
     try {
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
@@ -1452,19 +1452,19 @@ export function applicationRequestCountryForm(player,countryId) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -1666,19 +1666,19 @@ export function addAllianceCountryFromListForm(player, countryId) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -1787,19 +1787,19 @@ export function AllianceCountryFromListForm(player, countryId) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -2031,19 +2031,19 @@ export function addHostilityCountryFromListForm(player, countryId) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -2152,19 +2152,19 @@ export function HostilityCountryFromListForm(player, countryId) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody = {
@@ -2438,7 +2438,7 @@ export function editCountryPeaceForm(player, countryData) {
         };
         const beforeValue = countryData.peace;
         let value = rs.formValues[0];
-        if(rs.formValues[0] == beforeValue) {
+        if (rs.formValues[0] == beforeValue) {
             settingCountryInfoForm(player, countryData);
             return;
         };
@@ -2618,19 +2618,19 @@ export function showCountryInfo(player, countryData) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             allianceCountryName.push(subCountryData.name);
         });
         const hostilityIds = countryData.alliance;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             hostilityCountryName.push(subCountryData.name);
         });
         const warNowIds = countryData.hostility;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(id);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
             warNowCountryName.push(subCountryData.name);
         });
         const showBody =
@@ -2714,7 +2714,7 @@ export function settingCountryRoleForm(player) {
             EnableEditRoleIds.forEach(id => {
                 roles.push(GetAndParsePropertyData(`role_${id}`));
             });
-            for(const role of roles) {
+            for (const role of roles) {
                 form.button(role.name, role.icon);
             };
             form.show(player).then(rs => {
@@ -2723,17 +2723,17 @@ export function settingCountryRoleForm(player) {
                     settingCountry(player);
                     return;
                 };
-                switch(rs.selection) {
+                switch (rs.selection) {
                     case 0: {
-                        if(config.maxRoleAmount <= newCountryData.roles.length) {
-                            player.sendMessage({translate: `error.limit.maxrole`});
+                        if (config.maxRoleAmount <= newCountryData.roles.length) {
+                            player.sendMessage({ translate: `error.limit.maxrole` });
                             return;
                         };
-                        CreateRoleToCountry(newCountryData.id,`newRole`);
+                        CreateRoleToCountry(newCountryData.id, `newRole`);
                         system.runTimeout(() => {
                             settingCountryRoleForm(player);
                             return;
-                        },2);
+                        }, 2);
                         break;
                     };
                     default: {
