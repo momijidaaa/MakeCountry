@@ -31,14 +31,26 @@ class ChatHandler {
     }
 
     handleChat() {
+        let landId = this.playerData?.country;
+        let role = ``;
+        if(landId && config.showRoleChatLeftName) {
+            let playerRoles = this.playerData.roles;
+            let countryRoles = this.playerCountryData.roles;
+            for(let i = 0;i < countryRoles.length;i++) {
+                if(playerRoles.includes(countryRoles[i])){
+                    const roleData = GetAndParsePropertyData(`role_${countryRoles[i]}`);
+                    role = `${roleData.name}§r|`;
+                    break;
+                };
+            };
+        };
         if (!config.showCountryChatLeftName) {
-            world.sendMessage(`<${this.sender.name}> ${this.message}`);
+            world.sendMessage(`<${role}${this.sender.name}> ${this.message}`);
             return;
         };
-        let landId = this.playerData?.country;
         let land = `chat.player.no.join.any.country`;
         if (landId) land = this.playerCountryData?.name;
-        world.sendMessage([{ text: `<§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
+        world.sendMessage([{ text: `<${role}§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
         this.event.cancel = true;
     };
 

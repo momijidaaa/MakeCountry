@@ -98,14 +98,6 @@ playerFishingAfterEvent.subscribe((event) => {
     playerData.money += random;
 });
 
-const mcjobs = [
-    `hunter`,
-    `farmer`,
-    `miner`,
-    `woodcutter`,
-    `fisherman`
-];
-
 /**
  * 職業メニュー
  * @param {Player} player 
@@ -113,11 +105,11 @@ const mcjobs = [
 export function jobsForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `jobs.title` });
-    for (const jobId of mcjobs) {
-        let isEmploy = player.hasTag(`mcjobs_${jobId}`);
+    for (const job of jobs_config.jobsList) {
+        let isEmploy = player.hasTag(`mcjobs_${job.id}`);
         let employMessage = `not.yet.employed`;
         if (isEmploy) employMessage = `already.found.employment`;
-        form.button({ rawtext: [{text: `§l`},{ translate: jobId }, { text: `\n` }, { translate: employMessage }] });
+        form.button({ rawtext: [{text: `§l`},{ translate: job.name }, { text: `\n` }, { translate: employMessage }] });
     };
     form.show(player).then((rs) => {
         if (rs.canceled) {
@@ -128,9 +120,9 @@ export function jobsForm(player) {
             return;
         };
         const selected = rs.selection;
-        let isEmploy = player.hasTag(`mcjobs_${mcjobs[selected]}`);
+        let isEmploy = player.hasTag(`mcjobs_${jobs_config.jobsList[selected].id}`);
         if(isEmploy) {
-            player.removeTag(`mcjobs_${mcjobs[selected]}`);
+            player.removeTag(`mcjobs_${jobs_config.jobsList[selected].id}`);
             jobsForm(player);
             return;
         };
@@ -139,7 +131,7 @@ export function jobsForm(player) {
             player.sendMessage({ translate: `message.max.employment.num.over`, with: [`${employAmount}`] });
             return;
         };
-        player.addTag(`mcjobs_${mcjobs[selected]}`);
+        player.addTag(`mcjobs_${jobs_config.jobsList[selected].id}`);
         jobsForm(player);
         return;
     });

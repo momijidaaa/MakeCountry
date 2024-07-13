@@ -5,6 +5,37 @@ export default {
 
     showRewardMessage: true, //メッセージをアクションバーに表示するか
 
+    //職業一覧
+    jobsList: [
+        //狩人
+        {
+            id: `hunter`, //職業ID(就いてるときに mcjobs_ID のtagが付く)
+            name: `hunter`, //formに表示する職業名(翻訳キー(lang)も可能)
+        },
+        //農家
+        {
+            id: `farmer`,
+            name: `farmer`,
+        },
+        //鉱夫
+        {
+            id: `miner`,
+            name: `miner`,
+        },
+        //木こり
+        {
+            id: `woodcutter`,
+            name: `woodcutter`,
+        },
+        //漁師
+        {
+            id: `fisherman`,
+            name: `fisherman`,
+        },
+
+        //ここに追加可能
+    ],
+
     fishingReward: { min: 1, max: 3 },
     woodCutReward: { min: 1, max: 10 }, //木を切ったときにもらえるお金の変域
     cropHarvestReward: { min: 5, max: 15 }, //作物収穫時にもらえるお金の変域
