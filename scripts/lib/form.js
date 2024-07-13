@@ -57,7 +57,7 @@ export function memberSelectedShowForm(player, member, countryData) {
     //ロール変更(admin権限)
     //国から追い出す(kickMember)
     //オーナー権限の譲渡(owner)
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     if (!CheckPermission(player, `kick`)) form.button({ translate: `form.memberselectedshow.button.kick` });
     if (!CheckPermission(player, `admin`)) form.button({ translate: `form.memberselectedshow.button.role` });
     if (!CheckPermission(player, `owner`)) form.button({ translate: `form.memberselectedshow.button.owner` });
@@ -68,8 +68,7 @@ export function memberSelectedShowForm(player, member, countryData) {
         };
         switch (rs.selection) {
             case 0: {
-                //戻る
-                settingCountryMembersForm(player);
+                //閉じる
                 break;
             };
             case 1: {
@@ -118,7 +117,7 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const form = new ActionFormData();
     form.body({ translate: `ownerchange.check.body`, with: [member.name] });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.ownerchange` });
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -127,7 +126,7 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
         };
         switch (rs.selection) {
             case 0: {
-                memberSelectedShowForm(player, member, countryData);
+                //閉じる
                 break;
             };
             case 1: {
@@ -147,7 +146,7 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
 export function playerKickCheckForm(player, member, countryData) {
     const form = new ActionFormData();
     form.body({ translate: `kick.check.body`, with: [member.name] });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.kick` });
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -156,7 +155,7 @@ export function playerKickCheckForm(player, member, countryData) {
         };
         switch (rs.selection) {
             case 0: {
-                memberSelectedShowForm(player, member, countryData);
+                //閉じる
                 break;
             };
             case 1: {
@@ -205,9 +204,13 @@ export function playerRoleChangeForm(player, member, countryData) {
         const form = new ActionFormData();
         form.title({ translate: `error.message` });
         form.body({ translate: `not.exsit.can.accessrole` });
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.show(player).then(rs => {
-            memberSelectedShowForm(player, member, countryData);
+            if(rs.canceled) {
+                memberSelectedShowForm(player, member, countryData);
+                return;
+            };
+            //閉じる
             return;
         });
     } else {
@@ -439,7 +442,7 @@ export function sendInviteCheckForm(sendPlayer, receivePlayer) {
     const form = new ActionFormData();
     form.title({ translate: `form.sendinvite.check.title` });
     form.body({ translate: `form.sendinvite.check.body`, with: [receivePlayer.name] });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.send` });
     form.show(sendPlayer).then(rs => {
         if (rs.canceled) {
@@ -448,7 +451,7 @@ export function sendInviteCheckForm(sendPlayer, receivePlayer) {
         };
         switch (rs.selection) {
             case 0: {
-                inviteForm(sendPlayer);
+                //閉じる
                 break;
             };
             case 1: {
@@ -477,9 +480,13 @@ export function showProfileForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.profile.title` });
     form.body({ rawtext: showProfile })
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.show(player).then(rs => {
-        playerMainMenu(player);
+        if (rs.canceled) {
+            playerMainMenu(player);
+            return;
+        };
+        //閉じる
         return;
     });
 };
@@ -583,7 +590,7 @@ export function joinCheckFromInviteForm(player, countryData) {
         form.title(countryData.name);
         form.body(showBody);
         form.button({ translate: `mc.button.join` });
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.show(player).then(rs => {
             if (rs.canceled) {
                 countryInvitesList(player);
@@ -597,7 +604,7 @@ export function joinCheckFromInviteForm(player, countryData) {
                     return;
                 };
                 case 1: {
-                    countryInvitesList(player);
+                    //閉じる
                     return;
                 };
             };
@@ -670,7 +677,7 @@ export function joinCheckFromListForm(player, countryData) {
         form.title(countryData.name);
         form.body(showBody);
         form.button({ translate: `mc.button.join` });
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.show(player).then(rs => {
             if (rs.canceled) {
                 allowJoinCountriesList(player);
@@ -682,7 +689,7 @@ export function joinCheckFromListForm(player, countryData) {
                     return;
                 };
                 case 1: {
-                    allowJoinCountriesList(player);
+                    //閉じる
                     return;
                 };
             };
@@ -712,7 +719,7 @@ export function countryInvitesList(player) {
     const form = new ActionFormData();
     if (countriesData.length === 0) {
         form.body({ translate: `no.invite.country` });
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
     };
     countriesData.forEach(countryData => {
         form.button(`${countryData.name}\nID: ${countryData.id}`);
@@ -723,7 +730,7 @@ export function countryInvitesList(player) {
             return;
         };
         if (countriesData.length === 0) {
-            joinTypeSelectForm(player);
+            //閉じる
             return;
         };
         joinCheckFromInviteForm(player, countriesData[rs.selection]);
@@ -744,7 +751,7 @@ export function allowJoinCountriesList(player) {
     const form = new ActionFormData();
     if (countriesData.length === 0) {
         form.body({ translate: `no.allowjoin.country` })
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
     };
     countriesData.forEach(countryData => {
         form.button(`${countryData.name}\nID: ${countryData.id}`);
@@ -755,7 +762,7 @@ export function allowJoinCountriesList(player) {
             return;
         };
         if (countriesData.length === 0) {
-            joinTypeSelectForm(player);
+            //閉じる
             return;
         };
         joinCheckFromListForm(player, countriesData[rs.selection]);
@@ -1093,8 +1100,8 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: {rawtext:[{translate: `${money}`}]} }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: {rawtext:[{translate: `${resourcePoint}`}]} }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
                 { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -1277,7 +1284,7 @@ export function ReceivedAllianceRequestForm(player) {
     let receivedAllianceRequests = playerCountryData.allianceRequestReceive
     const form = new ActionFormData();
     form.title({ translate: `received.alliance.request` });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     for (const countryId of receivedAllianceRequests) {
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         form.button(`${countryData.name}\nID: ${countryData.id}`);
@@ -1292,7 +1299,7 @@ export function ReceivedAllianceRequestForm(player) {
         };
         switch (rs.selection) {
             case 0: {
-                externalAffairsMainForm(player);
+                //閉じる
                 break;
             };
             default: {
@@ -1365,7 +1372,7 @@ export function allianceRequestCountryForm(player, countryId) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.approval` });
         form.button({ translate: `mc.button.delete` });
         form.show(player).then(rs => {
@@ -1379,7 +1386,7 @@ export function allianceRequestCountryForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    ReceivedAllianceRequestForm(player);
+                    //閉じる
                     break;
                 };
                 case 1: {
@@ -1408,7 +1415,7 @@ export function ReceivedApplicationRequestForm(player) {
     let receivedApplicationRequests = playerCountryData.applicationPeaceRequestReceive
     const form = new ActionFormData();
     form.title({ translate: `received.application.request` });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     for (const countryId of receivedApplicationRequests) {
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         form.button(`${countryData.name}\nID: ${countryData.id}`);
@@ -1423,7 +1430,7 @@ export function ReceivedApplicationRequestForm(player) {
         };
         switch (rs.selection) {
             case 0: {
-                externalAffairsMainForm(player);
+                //閉じる
                 break;
             };
             default: {
@@ -1497,7 +1504,7 @@ export function applicationRequestCountryForm(player, countryId) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.approval` });
         form.button({ translate: `mc.button.delete` });
         form.show(player).then(rs => {
@@ -1511,7 +1518,7 @@ export function applicationRequestCountryForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    ReceivedApplicationRequestForm(player);
+                    //閉じる
                     break;
                 };
                 case 1: {
@@ -1620,7 +1627,7 @@ export function AddAllianceListForm(player) {
     let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
     let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(id));
     let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(id));
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     let lands = [];
     for (const countryId of filtered2) {
         const countryData = GetAndParsePropertyData(countryId);
@@ -1638,7 +1645,7 @@ export function AddAllianceListForm(player) {
         };
         switch (rs.selection) {
             case 0: {
-                AllianceListForm(player);
+                //閉じる
                 break;
             };
             default: {
@@ -1712,7 +1719,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.send` });
         form.show(player).then(rs => {
             if (CheckPermission(player, `allyAdmin`)) {
@@ -1725,7 +1732,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    AllianceListForm(player);
+                    //閉じる
                     return;
                 };
                 case 1: {
@@ -1747,7 +1754,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
 export function checkAddAllianceForm(player, countryId) {
     const form = new ActionFormData();
     form.title({ translate: `form.check.alliance.send.title` });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.send` });
     form.show(player).then((rs) => {
         if (CheckPermission(player, `allyAdmin`)) {
@@ -1760,7 +1767,7 @@ export function checkAddAllianceForm(player, countryId) {
         };
         switch (rs.selection) {
             case 0: {
-                addAllianceCountryFromListForm(player, countryId);
+                //閉じる
                 return;
             };
             case 1: {
@@ -1820,8 +1827,8 @@ export function AllianceCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: {rawtext:[{translate: `${money}`}]} }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: {rawtext:[{translate: `${resourcePoint}`}]} }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
                 { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -1834,7 +1841,7 @@ export function AllianceCountryFromListForm(player, countryId) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.remove.alliance` });
         form.show(player).then(rs => {
             if (CheckPermission(player, `allyAdmin`)) {
@@ -1847,7 +1854,7 @@ export function AllianceCountryFromListForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    AllianceListForm(player);
+                    //閉じる
                     return;
                 };
                 case 1: {
@@ -1869,7 +1876,7 @@ export function AllianceCountryFromListForm(player, countryId) {
 export function checkAllianceRemoveForm(player, countryId) {
     const form = new ActionFormData();
     form.title({ translate: `form.check.alliance.remove.title` });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.remove.alliance` });
     form.show(player).then((rs) => {
         if (CheckPermission(player, `allyAdmin`)) {
@@ -1882,7 +1889,7 @@ export function checkAllianceRemoveForm(player, countryId) {
         };
         switch (rs.selection) {
             case 0: {
-                AllianceCountryFromListForm(player, countryId);
+                //閉じる
                 return;
             };
             case 1: {
@@ -1988,7 +1995,7 @@ export function AddHostilityListForm(player) {
     let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(id));
     let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(id));
     let lands = [];
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     for (const countryId of filtered2) {
         const countryData = GetAndParsePropertyData(countryId);
         lands.push(countryData.id);
@@ -2005,7 +2012,7 @@ export function AddHostilityListForm(player) {
         };
         switch (rs.selection) {
             case 0: {
-                HostilityListForm(player);
+                //閉じる
                 return;
             };
             default: {
@@ -2065,8 +2072,8 @@ export function addHostilityCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: {rawtext:[{translate: `${money}`}]} }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: {rawtext:[{translate: `${resourcePoint}`}]} }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
                 { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -2079,7 +2086,7 @@ export function addHostilityCountryFromListForm(player, countryId) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.add` });
         form.show(player).then(rs => {
             if (CheckPermission(player, `hostilityAdmin`)) {
@@ -2092,7 +2099,7 @@ export function addHostilityCountryFromListForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    HostilityListForm(player);
+                    //閉じる
                     return;
                 };
                 case 1: {
@@ -2114,7 +2121,7 @@ export function addHostilityCountryFromListForm(player, countryId) {
 export function checkAddHostilityForm(player, countryId) {
     const form = new ActionFormData();
     form.title({ translate: `form.check.hostility.add.title` });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.add` });
     form.show(player).then((rs) => {
         if (CheckPermission(player, `hostilityAdmin`)) {
@@ -2127,7 +2134,7 @@ export function checkAddHostilityForm(player, countryId) {
         };
         switch (rs.selection) {
             case 0: {
-                addHostilityCountryFromListForm(player, countryId);
+                //閉じる
                 return;
             };
             case 1: {
@@ -2187,8 +2194,8 @@ export function HostilityCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: {rawtext:[{translate: `${money}`}]} }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: {rawtext:[{translate: `${resourcePoint}`}]} }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
                 { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -2201,7 +2208,7 @@ export function HostilityCountryFromListForm(player, countryId) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.application` });
         form.show(player).then(rs => {
             if (CheckPermission(player, `hostilityAdmin`)) {
@@ -2214,7 +2221,7 @@ export function HostilityCountryFromListForm(player, countryId) {
             };
             switch (rs.selection) {
                 case 0: {
-                    HostilityListForm(player);
+                    //閉じる
                     return;
                 };
                 case 1: {
@@ -2236,7 +2243,7 @@ export function HostilityCountryFromListForm(player, countryId) {
 export function checkApplicationForPeaceSendForm(player, countryId) {
     const form = new ActionFormData();
     form.title({ translate: `form.check.application.send.title` });
-    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.close` });
     form.button({ translate: `mc.button.send` });
     form.show(player).then((rs) => {
         if (CheckPermission(player, `hostilityAdmin`)) {
@@ -2249,7 +2256,7 @@ export function checkApplicationForPeaceSendForm(player, countryId) {
         };
         switch (rs.selection) {
             case 0: {
-                HostilityCountryFromListForm(player, countryId);
+                //閉じる
                 return;
             };
             case 1: {
@@ -2540,7 +2547,7 @@ export function countryDeleteCheckForm(player) {
         const form = new ActionFormData();
         form.title({ translate: `form.dismantle.check` });
         form.body({ rawtext: [{ translate: `mc.warning` }, { text: `\n` }, { translate: `form.dismantle.body` }] });
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.dismantle` });
         form.show(player).then(rs => {
             if (rs.canceled) {
@@ -2549,7 +2556,7 @@ export function countryDeleteCheckForm(player) {
             };
             switch (rs.selection) {
                 case 0: {
-                    settingCountry(player);
+                    //閉じる
                     break;
                 };
                 case 1: {
@@ -2654,8 +2661,8 @@ export function showCountryInfo(player, countryData) {
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: {rawtext:[{translate: `${money}`}]} }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: {rawtext:[{translate: `${resourcePoint}`}]} }, { text: `\n` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
                 { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
                 { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
@@ -2668,9 +2675,13 @@ export function showCountryInfo(player, countryData) {
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
-        form.button({ translate: `mc.button.back` });
+        form.button({ translate: `mc.button.close` });
         form.show(player).then(rs => {
-            countryList(player);
+            if (rs.canceled) {
+                countryList(player);
+                return;
+            };
+            //閉じる
             return;
         });
     } catch (error) {
@@ -2713,9 +2724,13 @@ export function settingCountryRoleForm(player) {
         if (EnableEditRoleIds.length === 0) {
             form.title({ translate: `form.setting.button.role` });
             form.body({ translate: `not.exsit.can.accessrole` });
-            form.button({ translate: `mc.button.back` });
+            form.button({ translate: `mc.button.close` });
             form.show(player).then(rs => {
-                settingCountry(player);
+                if (rs.canceled) {
+                    settingCountry(player);
+                    return;
+                };
+                //閉じる
                 return;
             });
         } else {
