@@ -47,4 +47,6 @@ export default {
     NonMaintenanceCostAccrualPeriod: 3,
     //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
     maxRoleAmount: 10,
+    //プレイヤーマーケットの1人あたりの最大出品数
+    maxMarketAmount: 10,
 };

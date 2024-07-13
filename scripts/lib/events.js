@@ -99,6 +99,7 @@ try {
         if (dataCheck) {
             const playerData = JSON.parse(dataCheck);
             playerData.name = player.name;
+            if(!playerData?.marketAmount) playerData.marketAmount = 0; 
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         } else {
             let moneyValue = config.initialMoney;
@@ -115,6 +116,7 @@ try {
                 roles: [],
                 chunks: [],
                 days: 0,
+                marketAmount: 0,
                 invite: [],
                 settings: {
                     inviteReceiveMessage: true,
