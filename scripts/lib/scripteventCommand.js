@@ -1,5 +1,6 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { uiManager } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -19,6 +20,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         case `mc:set`: {
             playerData.money = Number(message);
             StringifyAndSavePropertyData(`player_${sourceEntity.id}`, playerData);
+            break;
+        };
+        case `mc:close_form`: {
+            uiManager.closeAllForms(sourceEntity);
             break;
         };
     };

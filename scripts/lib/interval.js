@@ -82,7 +82,7 @@ system.runInterval(() => {
 const lastMoney = new Map();
 system.runInterval(() => {
     if (!config.getMoneyByScoreboard) return;
-    const scoreboard = world.scoreboard.getObjective(`mc_money`) || world.scoreboard.addObjective(`mc_money`);
+    const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
     const players = world.getPlayers();
     for (const player of players) {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);

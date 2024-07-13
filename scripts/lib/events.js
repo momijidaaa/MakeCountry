@@ -101,11 +101,17 @@ try {
             playerData.name = player.name;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         } else {
+            let moneyValue = config.initialMoney;
+            if(config.getMoneyByScoreboard) {
+                const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
+                const scoreValue = scoreboard.getScore(player);
+                if(scoreValue) moneyValue = scoreValue;
+            };
             const newPlayerData = {
                 name: player.name,
                 id: player.id,
                 country: undefined,
-                money: config.initialMoney,
+                money: moneyValue,
                 roles: [],
                 chunks: [],
                 days: 0,
