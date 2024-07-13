@@ -3,8 +3,8 @@ export default {
     prefix: `?`,
     //プレイヤーの初期の所持金
     initialMoney: 1000,
-    //所持金をスコアボードで取得できるようにするか(オンラインのプレイヤーのみ)
-    getMoneyByScoreboard: true,
+    //所持金をスコアボードで変更できるようにするか(オンラインのプレイヤーのみ)
+    getMoneyByScoreboard: false,
     //平和主義切り替えのクールタイム(徴税タイミングごとに-1)
     peaceChangeCooltime: 3,
     //チャットの際にプレイヤー名の左に所属国を表示するか

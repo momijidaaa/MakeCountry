@@ -28,10 +28,10 @@ system.runInterval(() => {
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     let taxTimer = Number(taxTimerString) - 1;
-    world.setDynamicProperty(`taxTimer`,`${taxTimer}`);
+    world.setDynamicProperty(`taxTimer`, `${taxTimer}`);
     taxTimerString = `${taxTimer}`;
     if (taxTimer <= 0) {
-        world.setDynamicProperty(`taxTimer`,`${config.taxTimer}`);
+        world.setDynamicProperty(`taxTimer`, `${config.taxTimer}`);
         taxTimerString = `${config.taxTimer}`;
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
         for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
@@ -58,7 +58,7 @@ system.runInterval(() => {
             if (0 < countryData.peaceChangeCooltime) {
                 countryData.peaceChangeCooltime -= 1;
             };
-            if(!countryData?.days) countryData.days = 0;
+            if (!countryData?.days) countryData.days = 0;
             countryData.days += 1;
             if (countryData.days < config.NonMaintenanceCostAccrualPeriod) {
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
@@ -78,3 +78,34 @@ system.runInterval(() => {
         };
     };
 }, 20 * 60);
+
+const lastMoney = new Map();
+system.runInterval(() => {
+    if (!config.getMoneyByScoreboard) return;
+    const scoreboard = world.scoreboard.getObjective(`mc_money`) || world.scoreboard.addObjective(`mc_money`);
+    const players = world.getPlayers();
+    for (const player of players) {
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        if (!playerData) continue;
+        let finScoreMoney = lastMoney.get(player.id);
+        let thisScoreMoney = scoreboard.getScore(player);
+        if(!thisScoreMoney) {
+            player.runCommand(`scoreboard players add @s mc_money ${playerData.money}`);
+        };
+        if (!finScoreMoney) {
+            lastMoney.set(player.id, playerData.money);
+            scoreboard.setScore(player, playerData.money);
+            continue;
+        };
+        if (thisScoreMoney - finScoreMoney == 0) {
+            playerData.money = thisScoreMoney + (thisScoreMoney - finScoreMoney);
+            lastMoney.set(player.id, playerData.money);
+            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+            continue;
+        } else {
+            lastMoney.set(player.id, playerData.money);
+            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+            continue;
+        };
+    };
+});
