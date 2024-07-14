@@ -1,4 +1,4 @@
-import { Player, world } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { CheckPermission, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
@@ -75,9 +75,9 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         //敵対国
         hostility: [],
         //中立国の権限
-        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`,`publicHomeUse`],
+        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`, `publicHomeUse`],
         //同盟国の権限
-        alliancePermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`,`publicHomeUse`],
+        alliancePermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`, `publicHomeUse`],
         //敵対国の権限
         hostilityPermission: [],
         //加盟している国際組織
@@ -159,30 +159,91 @@ export function DeleteCountry(countryId) {
     const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`)
     ownerData.money = ownerData.money + countryData.money + countryData.resourcePoint;
     StringifyAndSavePropertyData(`player_${ownerData.id}`, ownerData);
-    countryData.members.forEach(m => {
-        const playerData = GetAndParsePropertyData(`player_${m}`);
-        playerData.roles = [];
-        playerData.country = undefined;
-        StringifyAndSavePropertyData(`player_${m}`, playerData);
+    system.runTimeout(() => {
+        countryData.members.forEach(m => {
+            const playerData = GetAndParsePropertyData(`player_${m}`);
+            playerData.roles = [];
+            playerData.country = undefined;
+            StringifyAndSavePropertyData(`player_${m}`, playerData);
+        });
     });
-    countryData.territories.forEach(t => {
-        const chunkData = GetAndParsePropertyData(t);
-        chunkData.countryId = undefined;
-        StringifyAndSavePropertyData(t, chunkData);
-    });
-    countryData.alliance.forEach(a => {
-        RemoveAlliance(countryId, a);
-    });
-    countryData.hostility.forEach(h => {
-        RemoveHostility(countryId, h);
-    });
-    countryData.roles.forEach(r => {
-        DyProp.setDynamicProperty(`role_${r}`);
-    });
-    //ここら辺に国際組織から抜ける処理を追加しておく
-    DyProp.setDynamicProperty(`country_${countryData.id}`);
-    world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `deleted.country`, with: [`${countryData.name}`] }] });
-};
+    system.runTimeout(() => {
+        countryData.territories.forEach(t => {
+            const chunkData = GetAndParsePropertyData(t);
+            chunkData.countryId = undefined;
+            StringifyAndSavePropertyData(t, chunkData);
+        });
+    }, 2);
+    system.runTimeout(() => {
+        countryData.alliance.forEach(a => {
+            RemoveAlliance(countryId, a);
+        });
+    }, 3);
+    system.runTimeout(() => {
+        countryData.hostility.forEach(h => {
+            RemoveHostility(countryId, h);
+        });
+    }, 4);
+    system.runTimeout(() => {
+        countryData.roles.forEach(r => {
+            DyProp.setDynamicProperty(`role_${r}`);
+        });
+    },5);
+    system.runTimeout(() => {
+        countryData.allianceRequestSend.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.allianceRequestReceive.splice(aCountry.allianceRequestReceive.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },6);
+    system.runTimeout(() => {
+        countryData.allianceRequestReceive.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.allianceRequestSend.splice(aCountry.allianceRequestSend.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },7);
+    system.runTimeout(() => {
+        countryData.applicationPeaceRequestSend.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.applicationPeaceRequestReceive.splice(aCountry.applicationPeaceRequestReceive.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },8);
+    system.runTimeout(() => {
+        countryData.applicationPeaceRequestReceive.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.applicationPeaceRequestSend.splice(aCountry.applicationPeaceRequestSend.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },9);
+    system.runTimeout(() => {
+        countryData.declarationSend.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.declarationReceive.splice(aCountry.declarationReceive.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },10);
+    system.runTimeout(() => {
+        countryData.declarationReceive.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.declarationSend.splice(aCountry.declarationSend.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },11);
+    system.runTimeout(() => {
+        countryData.warNowCountries.forEach(a => {
+            const aCountry = GetAndParsePropertyData(`country_${a}`);
+            aCountry.warNowCountries.splice(aCountry.warNowCountries.indexOf(countryData.id), 1);
+            StringifyAndSavePropertyData(`country_${a}`,aCountry);
+        });
+    },12);
+    system.runTimeout(() => {
+        world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `deleted.country`, with: [`${countryData.name}`] }] });
+        //ここら辺に国際組織から抜ける処理を追加しておく
+        DyProp.setDynamicProperty(`country_${countryData.id}`);    
+    },13);
+}
 
 /**
  * 指定した国でロールを作成
@@ -413,6 +474,12 @@ export function playerCountryKick(player) {
         const countryId = playerData.country;
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
+        const playerRoles = playerData.roles;
+        for (const roleId of playerRoles) {
+            const role = GetAndParsePropertyData(`role_${roleId}`);
+            role.members.splice(role.members.indexOf(playerData.id), 1);
+            StringifyAndSavePropertyData(`role_${roleId}`);
+        };
         playerData.roles = [];
         playerData.country = undefined;
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
