@@ -6,6 +6,7 @@ import { MakeCountryForm, countryList, joinTypeSelectForm, playerMainMenu, setti
 import { jobsForm } from "./jobs";
 import jobs_config from "../jobs_config";
 import config from "../config";
+import { PlayerMarketMainMenu } from "./player_market";
 
 class ChatHandler {
     constructor(event) {
@@ -33,11 +34,11 @@ class ChatHandler {
     handleChat() {
         let landId = this.playerData?.country;
         let role = ``;
-        if(landId && config.showRoleChatLeftName) {
+        if (landId && config.showRoleChatLeftName) {
             let playerRoles = this.playerData.roles;
             let countryRoles = this.playerCountryData.roles;
-            for(let i = 0;i < countryRoles.length;i++) {
-                if(playerRoles.includes(countryRoles[i])){
+            for (let i = 0; i < countryRoles.length; i++) {
+                if (playerRoles.includes(countryRoles[i])) {
                     const roleData = GetAndParsePropertyData(`role_${countryRoles[i]}`);
                     role = `${roleData.name}§r|`;
                     break;
@@ -152,6 +153,13 @@ class ChatHandler {
                 case "jobs":
                     this.jobs();
                     break;
+                case "playermarket":
+                    this.playermarket();
+                    break;
+                case "pm":
+                    this.playermarket();
+                    break;
+
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
             }
@@ -394,42 +402,53 @@ class ChatHandler {
         return;
     };
 
+    playermarket() {
+        if (!config.playerMarketValidity) {
+            this.sender.sendMessage({ translate: `command.error.playermarket.novalidity` });
+            return;
+        };
+        PlayerMarketMainMenu(this.sender);
+        return;
+    };
+
     sendHelp() {
         /** 
          * @type {import("@minecraft/server").RawMessage}
          */
         const helpMessage = [{ text: `§a------------------------------------\n` },
-            { translate: `command.help.money` }, { text: `\n` },
-            { translate: `command.help.setup` }, { text: `\n` },
-            { translate: `command.help.msend` }, { text: `\n` },
-            { translate: `command.help.checkchunk` }, { text: `\n` },
-            { translate: `command.help.cc` }, { text: `\n` },
-            { translate: `command.help.sethome` }, { text: `\n` },
-            { translate: `command.help.home` }, { text: `\n` },
-            { translate: `command.help.checkhome` }, { text: `\n` },
-            { translate: `command.help.adminchunk` }, { text: `\n` },
-            { translate: `command.help.adminc` }, { text: `\n` },
-            { translate: `command.help.resetchunk`, with: { rawtext: [{ translate: `special.name` }] } }, { text: `\n` },
-            { translate: `command.help.resetc`, with: { rawtext: [{ translate: `special.name` }] } }, { text: `\n` },
-            { translate: `command.help.buychunk` }, { text: `\n` },
-            { translate: `command.help.buyc` }, { text: `\n` },
-            { translate: `command.help.sellchunk` }, { text: `\n` },
-            { translate: `command.help.sellc` }, { text: `\n` },
-            { translate: `command.help.makecountry` }, { text: `\n` },
-            { translate: `command.help.mc` }, { text: `\n` },
-            { translate: `command.help.settingcountry` }, { text: `\n` },
-            { translate: `command.help.sc` }, { text: `\n` },
-            { translate: `command.help.leavecountry` }, { text: `\n` },
-            { translate: `command.help.lc` }, { text: `\n` },
-            { translate: `command.help.kill` }, { text: `\n` },
-            { translate: `command.help.countrylist` }, { text: `\n` },
-            { translate: `command.help.cl` }, { text: `\n` },
-            { translate: `command.help.joincountry` }, { text: `\n` },
-            { translate: `command.help.jc` }, { text: `\n` },
-            { translate: `command.help.chome` }, { text: `\n` },
-            { translate: `command.help.menu` }, { text: `\n` },
-            { translate: `command.help.jobs` }, { text: `\n` },
-            { text: `§a------------------------------------` }];
+        { translate: `command.help.money` }, { text: `\n` },
+        { translate: `command.help.setup` }, { text: `\n` },
+        { translate: `command.help.msend` }, { text: `\n` },
+        { translate: `command.help.checkchunk` }, { text: `\n` },
+        { translate: `command.help.cc` }, { text: `\n` },
+        { translate: `command.help.sethome` }, { text: `\n` },
+        { translate: `command.help.home` }, { text: `\n` },
+        { translate: `command.help.checkhome` }, { text: `\n` },
+        { translate: `command.help.adminchunk` }, { text: `\n` },
+        { translate: `command.help.adminc` }, { text: `\n` },
+        { translate: `command.help.resetchunk`, with: { rawtext: [{ translate: `special.name` }] } }, { text: `\n` },
+        { translate: `command.help.resetc`, with: { rawtext: [{ translate: `special.name` }] } }, { text: `\n` },
+        { translate: `command.help.buychunk` }, { text: `\n` },
+        { translate: `command.help.buyc` }, { text: `\n` },
+        { translate: `command.help.sellchunk` }, { text: `\n` },
+        { translate: `command.help.sellc` }, { text: `\n` },
+        { translate: `command.help.makecountry` }, { text: `\n` },
+        { translate: `command.help.mc` }, { text: `\n` },
+        { translate: `command.help.settingcountry` }, { text: `\n` },
+        { translate: `command.help.sc` }, { text: `\n` },
+        { translate: `command.help.leavecountry` }, { text: `\n` },
+        { translate: `command.help.lc` }, { text: `\n` },
+        { translate: `command.help.kill` }, { text: `\n` },
+        { translate: `command.help.countrylist` }, { text: `\n` },
+        { translate: `command.help.cl` }, { text: `\n` },
+        { translate: `command.help.joincountry` }, { text: `\n` },
+        { translate: `command.help.jc` }, { text: `\n` },
+        { translate: `command.help.chome` }, { text: `\n` },
+        { translate: `command.help.menu` }, { text: `\n` },
+        { translate: `command.help.jobs` }, { text: `\n` },
+        { translate: `command.help.playermarket` }, { text: `\n` },
+        { translate: `command.help.pm` }, { text: `\n` },
+        { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
 

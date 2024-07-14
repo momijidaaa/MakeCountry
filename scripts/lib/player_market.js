@@ -1,8 +1,8 @@
-import { ItemStack, Player, world } from "@minecraft/server";
+import { ItemStack, Player, system, world } from "@minecraft/server";
 import { ChestFormData } from "./chest-ui";
-import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
-import { ActionFormData } from "@minecraft/server-ui";
+import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
 
 world.afterEvents.worldInitialize.subscribe(() => {
@@ -21,18 +21,25 @@ export function PlayerMarketMainMenu(player) {
     form.button({ translate: `withdrawal.goods` });
     form.show(player).then(rs => {
         if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                PlayerMarketMainMenu(player);
+            };
             //閉じる
             return;
         };
         switch (rs.selection) {
             case 0: {
                 //商品一覧を見る
-                PlayerMarketCommonsMenu(player)
+                PlayerMarketCommonsMenu(player);
                 break;
             };
             case 1: {
                 //出品する
-                PlayerMarketExhibitMainMenu(player)
+                PlayerMarketExhibitMainMenu(player);
+                break;
+            };
+            case 2: {
+                //出品を取り下げる
                 break;
             };
         };
@@ -48,6 +55,97 @@ export function PlayerMarketExhibitMainMenu(player) {
     if (config.maxMarketAmount <= playerData.marketAmount) {
         player.sendMessage({ translate: `error.maxmarketamount`, with: [`${config.maxMarketAmount}`] });
     };
+    let items = [];
+    const container = player.getComponent(`inventory`).container;
+    const form = new ActionFormData();
+    form.button({ translate: `mc.button.back` });
+    for (let i = 0; i < container.size; i++) {
+        const item = container.getItem(i);
+        if (!item) continue;
+        if (item.getComponent(`enchantable`) || item.getComponent(`durability`) || item.typeId.includes(`shulker_box`)) continue;
+        items.push({ slot: i, itemStack: item });
+        form.button(`${item.typeId}\n${item.amount}`);
+    };
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            PlayerMarketMainMenu(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                PlayerMarketMainMenu(player);
+                return;
+            };
+            default: {
+                const newContainer = player.getComponent(`inventory`).container;
+                const item = newContainer.getItem(items[rs.selection - 1].slot);
+                if (item == items[rs.selection - 1].itemStack) {
+                    PlayerMarketExhibitMainMenu(player);
+                    return;
+                };
+                PlayerMarketExhibitSelectItemMenu(player, items[rs.selection - 1]);
+                return;
+            };
+        };
+    });
+};
+
+/**
+ * @param {{ slot: number, itemStack: ItemStack }} itemData 
+ * @param {Player} player 
+ */
+export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
+    const form = new ModalFormData();
+    form.title(`Player Market`);
+    form.slider(``, 1, itemData.itemStack.amount, 1);
+    form.textField({ translate: `input.price` }, { translate: `price.label` });
+    form.toggle({ translate: `form.button.notify` });
+    form.show(player).then(rs => {
+        const newContainer = player.getComponent(`inventory`).container;
+        const item = newContainer.getItem(itemData.slot);
+        if (item == itemData.itemStack) {
+            PlayerMarketExhibitMainMenu(player);
+            return;
+        };
+        const priceValue = Number(rs.formValues[1])
+        if (!isDecimalNumber(priceValue) || rs.formValues[1] === ``) {
+            player.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
+        if (priceValue < 1) {
+            player.sendMessage({ translate: `command.error.canuse.number.more`, with: [`1`] });
+            return;
+        };
+
+        if (rs.formValues[2]) {
+            world.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `exhibited.message`, with: [`${itemData.itemStack.typeId}`] }] });
+        };
+        let id = world.getDynamicProperty(`playermarketId`) ?? "0";
+        world.setDynamicProperty(`playermarketId`, `${Number(id) + 1}`);
+        /**
+         * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
+         */
+        const allCommons = GetAndParsePropertyData(`player_market_commons`);
+        const data = {
+            id: Number(id) + 1,
+            playerName: player.name,
+            playerId: player.id,
+            price: priceValue,
+            item: {
+                name: itemData.itemStack.nameTag,
+                typeId: itemData.itemStack.typeId,
+                amount: itemData.itemStack.amount
+            }
+        };
+        allCommons.unshift(data);
+        newContainer.setItem(itemData.slot);
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        playerData.marketAmount += 1;
+        player.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `success.exhibited.message`, with: [`${itemData.itemStack.typeId}`] }] });
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        StringifyAndSavePropertyData(`player_market_commons`, allCommons);
+        return;
+    });
 };
 
 /**
@@ -117,13 +215,16 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
                 /**
                  * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
                  */
-                const newAllCommons = GetAndParsePropertyData(`player_market_commons`).slice(0 + (36 * page), 35 + (36 * page));
+                const newAllCommons = GetAndParsePropertyData(`player_market_commons`);
                 if (!newAllCommons.find(com => com.id == commons[rs.selection - 9].id)) {
                     PlayerMarketCommonsMenu(player, page);
-                    return;
+                    break;
                 };
-                PlayerMarketSelectCommonForm(player, commons[rs.selection - 9]);
-                return;
+                system.run(() => {
+                    PlayerMarketSelectCommonForm(player, commons[rs.selection - 9]);
+                    return;
+                });
+                break;
             };
         };
     });
@@ -134,8 +235,12 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
  * @param {{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}} common
  */
 export function PlayerMarketSelectCommonForm(player, common) {
+    if (player.id == common.playerId) {
+        player.sendMessage({ translate: `playermarket.error.sameplayer` });
+        return;
+    };
     const form = new ActionFormData();
-    form.title(`${common.id}`);
+    form.title(`Player Market`);
     form.button({ translate: `mc.button.back` });
     form.button({ translate: `mc.button.buy` });
     form.show(player).then(rs => {
@@ -170,7 +275,7 @@ export function PlayerMarketSelectCommonForm(player, common) {
                 StringifyAndSavePropertyData(`player_market_commons`, newAllCommons.filter(com => com.id != common.id));
                 StringifyAndSavePropertyData(`player_${player.id}`, playerData);
                 StringifyAndSavePropertyData(`player_${common.playerId}`, exhibitorData);
-                player.sendMessage({ translate: `finish.bought` })
+                player.sendMessage({ translate: `finish.bought` });
                 const item = new ItemStack(common.item.typeId, common.item.amount);
                 item.nameTag = common.item.name;
                 const container = player.getComponent(`inventory`).container;
