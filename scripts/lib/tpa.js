@@ -128,7 +128,7 @@ function showRequestAcceptMenu(sender) {
                 return;
             };
             default: {
-                const playerName = requests[rs.selection];
+                const playerName = requests[rs.selection - 1];
                 if (teleportRequests.get(sender.name).includes(playerName)) {
                     findPlayerByName(playerName)?.teleport(sender.location);
 
