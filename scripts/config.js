@@ -49,7 +49,6 @@ export default {
     //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
     maxRoleAmount: 10,
 
-    
     //プレイヤーマーケットを有効にするかどうか
     playerMarketValidity: true,
     //プレイヤーマーケットの1人あたりの最大出品数
