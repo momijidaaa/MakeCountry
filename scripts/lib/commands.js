@@ -427,6 +427,12 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.error.tpa.novalidity` });
             return;
         };
+        if (config.combatTagNoTeleportValidity) {
+            if (this.sender.hasTag(`mc_combat`)) {
+                this.sender.sendMessage({ translate: `teleport.error.combattag` });
+                return;
+            };
+        };
         tpaMainForm(this.sender);
         return;
     };
