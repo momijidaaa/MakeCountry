@@ -162,7 +162,8 @@ class ChatHandler {
 
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
-            }
+                    break;
+            };
         }, 0);
     };
 
