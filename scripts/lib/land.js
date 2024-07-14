@@ -75,9 +75,9 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         //敵対国
         hostility: [],
         //中立国の権限
-        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`],
+        neutralityPermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`,`publicHomeUse`],
         //同盟国の権限
-        alliancePermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`],
+        alliancePermission: [`blockUse`, `entityUse`, `noTarget`, `setHome`,`publicHomeUse`],
         //敵対国の権限
         hostilityPermission: [],
         //加盟している国際組織
