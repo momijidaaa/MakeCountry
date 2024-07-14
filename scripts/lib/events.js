@@ -44,7 +44,10 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     if (block.getComponent(`inventory`)) {
         const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
         ev.cancel = cannot2;
-        player.sendMessage({ translate: `cannot.permission.${permission2}` });
+        if (cannot2) {
+            player.sendMessage({ translate: `cannot.permission.${permission2}` });
+            return;
+        };
         return;
     };
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
@@ -99,14 +102,14 @@ try {
         if (dataCheck) {
             const playerData = JSON.parse(dataCheck);
             playerData.name = player.name;
-            if(!playerData?.marketAmount) playerData.marketAmount = 0; 
+            if (!playerData?.marketAmount) playerData.marketAmount = 0;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         } else {
             let moneyValue = config.initialMoney;
-            if(config.getMoneyByScoreboard) {
+            if (config.getMoneyByScoreboard) {
                 const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
                 const scoreValue = scoreboard.getScore(player);
-                if(scoreValue) moneyValue = scoreValue;
+                if (scoreValue) moneyValue = scoreValue;
             };
             const newPlayerData = {
                 name: player.name,

@@ -3,7 +3,7 @@ import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
 import { acceptApplicationRequest, AddAlliance, AddHostilityByPlayer, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace } from "./land";
-import { CheckPermission, GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
 
 /**
  * 国民一覧
@@ -206,7 +206,7 @@ export function playerRoleChangeForm(player, member, countryData) {
         form.body({ translate: `not.exsit.can.accessrole` });
         form.button({ translate: `mc.button.close` });
         form.show(player).then(rs => {
-            if(rs.canceled) {
+            if (rs.canceled) {
                 memberSelectedShowForm(player, member, countryData);
                 return;
             };
@@ -1121,6 +1121,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         form.button({ translate: `form.setting.info.button.invite` });
         form.button({ translate: `form.setting.info.button.tax` });
         form.button({ translate: `form.setting.info.button.external.affairs` });
+        form.button({ translate: `form.setting.info.button.publicspawn` });
 
         form.show(player).then(rs => {
             if (rs.canceled) {
@@ -1172,11 +1173,67 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                     externalAffairsMainForm(player);
                     break;
                 };
+                case 6: {
+                    if (!CheckPermission(player, `publicHomeAdmin`)) {
+                        publicSpawnForm(player);
+                    } else {
+                        player.sendMessage({ translate: `no.permission` });
+                    };
+                    break;
+                };
             };
         });
     } catch (error) {
         console.warn(error);
     };
+};
+
+/**
+ * パブリックホーム設定画面
+ * @param {Player} player 
+ */
+export function publicSpawnForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    let countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const toggleValue = countryData.publicSpawn;
+    const form = new ModalFormData();
+    form.title({ translate: `form.setting.info.button.publicspawn` });
+    form.toggle({ translate: `publicspawn.button.validity` }, toggleValue);
+    form.toggle({ translate: `publicspawn.button.set` });
+    form.submitButton({ translate: `mc.button.update` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            settingCountry(player);
+            return;
+        };
+        if (CheckPermission(player, `publicHomeAdmin`)) {
+            player.sendMessage({ translate: `no.permission` });
+            return;
+        };
+        if (rs.formValues[1]) {
+            const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
+            if(!chunkData) {
+                player.sendMessage({translate: `publichome.set.error.within.country`});
+                return;
+            };
+            if(!chunkData?.countryId) {
+                player.sendMessage({translate: `publichome.set.error.within.country`});
+                return;
+            };
+            if(chunkData?.countryId != playerData?.country ) {
+                player.sendMessage({translate: `publichome.set.error.within.country`});
+                return;
+            };
+            let { x, y, z } = player.location;
+            let { x: rx, y: ry } = player.getRotation();
+            let spawnString = `${Math.ceil(x) - 0.5}_${Math.ceil(y)}_${Math.ceil(z) - 0.5}_${Math.ceil(rx)}_${Math.ceil(ry)}_${player.dimension.id}`;
+            countryData[`spawn`] = spawnString;
+        };
+        countryData.publicSpawn = rs.formValues[0];
+        StringifyAndSavePropertyData(`country_${playerData.country}`, countryData);
+        player.sendMessage({ translate: `updated` });
+        return;
+    });
 };
 
 /**
@@ -2275,6 +2332,7 @@ const landPermissions = [
     `blockUse`,
     `entityUse`,
     `noTarget`,
+    `publicHomeUse`,
 ];
 
 /**
@@ -2525,6 +2583,8 @@ const rolePermissions = [
     `openContainer`,
     `blockUse`,
     `entityUse`,
+    `publicHomeUse`,
+    `publicHomeAdmin`,
     `noTarget`,
     `buyChunk`,
     `sellChunk`,
@@ -2676,13 +2736,35 @@ export function showCountryInfo(player, countryData) {
         form.title(countryData.name);
         form.body(showBody);
         form.button({ translate: `mc.button.close` });
+        if (countryData?.publicSpawn && countryData?.spawn) {
+            form.button({ translate: `button.publichome.tp` });
+        };
         form.show(player).then(rs => {
             if (rs.canceled) {
                 countryList(player);
                 return;
             };
-            //閉じる
-            return;
+            switch (rs.selection) {
+                case 0: {
+                    //閉じる
+                    break;
+                };
+                case 1: {
+                    //パブリックホーム
+                    /**
+                     * @type {Array<string>}
+                     */
+                    let [x, y, z, rx, ry, dimensionId] = countryData?.spawn.split(`_`);
+                    if (CheckPermissionFromLocation(player, Number(x), Number(z), dimensionId, `publicHomeUse`)) {
+                        //権限がない！！
+                        player.sendMessage({ translate: `no.permission` });
+                        return
+                    };
+                    //tp
+                    player.teleport({ x: Number(x), y: Number(y), z: Number(z) }, { dimension: world.getDimension(`${dimensionId.replace(`minecraft:`, ``)}`), rotation: { x: Number(rx), y: Number(ry) } });
+                    break;
+                };
+            };
         });
     } catch (error) {
         console.warn(error);

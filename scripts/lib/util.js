@@ -81,7 +81,8 @@ const checkOnlyRole = [
     `owner`,
     `admin`,
     `withDrawResourcepoint`,
-    `withDrawTreasurybudget`
+    `withDrawTreasurybudget`,
+    `publicHomeAdmin`
 ];
 
 const restrictionPermissions = [
