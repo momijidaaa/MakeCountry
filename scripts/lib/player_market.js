@@ -54,7 +54,7 @@ export function PlayerMarketMainMenu(player) {
 export function PlayerMarketWithdrawalGoodsMainMenu(player) {
     const form = new ActionFormData();
     form.title(`Player Market`)
-    form.button({translate: `mc.button.close`});
+    form.button({ translate: `mc.button.close` });
     /**
      * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
      */
@@ -214,6 +214,7 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
         /**
          * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
          */
+        const itemAmount = rs.formValues[0];
         const allCommons = GetAndParsePropertyData(`player_market_commons`);
         const data = {
             id: Number(id) + 1,
@@ -223,11 +224,17 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
             item: {
                 name: itemData.itemStack.nameTag,
                 typeId: itemData.itemStack.typeId,
-                amount: itemData.itemStack.amount
+                amount: itemAmount
             }
         };
+        const editItem = itemData.itemStack;
+        if (editItem.amount - itemAmount == 0) {
+            newContainer.setItem(itemData.slot);
+        } else {
+            editItem.amount -= itemAmount;
+            newContainer.setItem(itemData.slot, editItem);
+        };
         allCommons.unshift(data);
-        newContainer.setItem(itemData.slot);
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         playerData.marketAmount += 1;
         player.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `success.exhibited.message`, with: [`${itemData.itemStack.typeId}`] }] });
