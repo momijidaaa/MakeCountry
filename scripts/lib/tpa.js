@@ -1,5 +1,5 @@
 import { world, system, Player } from '@minecraft/server';
-import { ActionFormData, ModalFormData, FormCancelationReason, ActionFormData } from '@minecraft/server-ui';
+import { ActionFormData, ModalFormData, FormCancelationReason } from '@minecraft/server-ui';
 import config from '../config.js';
 
 const teleportRequests = new Map();
@@ -7,7 +7,7 @@ const timeoutHandlers = new Map();
 
 world.afterEvents.worldInitialize.subscribe(() => {
     const players = world.getPlayers();
-    for(const player of players) {
+    for (const player of players) {
         teleportRequests.set(player.name, []);
     };
 });
@@ -24,7 +24,7 @@ const getOtherPlayers = (sender) => {
  * @param {string} name
  * @returns {Player}
  */
-function findPlayerByName (name) {
+function findPlayerByName(name) {
     return world.getPlayers({ name: name })[0];
 };
 
@@ -34,19 +34,19 @@ function findPlayerByName (name) {
 export function tpaMainForm(sender) {
 
     const form = new ActionFormData()
-        .title({translate: `form.title.teleport`})
-        .button({translate: `form.teleport.button.send`})
-        .button({translate: `form.teleport.button.receive`});
+        .title({ translate: `form.title.teleport` })
+        .button({ translate: `form.teleport.button.send` })
+        .button({ translate: `form.teleport.button.receive` });
 
     form.show(sender).then((rs) => {
-        if(rs.canceled) {
+        if (rs.canceled) {
             if (rs.cancelationReason == FormCancelationReason.UserBusy) {
                 tpaMainForm(sender);
                 return;
             };
-            return;    
+            return;
         };
-        switch(rs.selection) {
+        switch (rs.selection) {
             case 0: {
                 showRequestSendMenu(sender);
                 break;
@@ -54,7 +54,7 @@ export function tpaMainForm(sender) {
             case 1: {
                 showRequestAcceptMenu(sender);
                 break;
-            }; 
+            };
         };
     });
 };
@@ -66,16 +66,16 @@ const showRequestSendMenu = (sender) => {
     const otherPlayers = getOtherPlayers(sender);
 
     if (otherPlayers.length === 0) {
-        sender.sendMessage({translate: `command.error.notarget.player`});
+        sender.sendMessage({ translate: `command.error.notarget.player` });
         return;
     };
 
     const modalForm = new ModalFormData()
-        .title({translate: `form.teleport.button.send`})
-        .dropdown({translate: `players.list`}, otherPlayers, 0);
+        .title({ translate: `form.teleport.button.send` })
+        .dropdown({ translate: `players.list` }, otherPlayers, 0);
 
     modalForm.show(sender).then((rs) => {
-        if(rs.canceled) {
+        if (rs.canceled) {
             tpaMainForm(sender);
             return;
         };
@@ -83,8 +83,8 @@ const showRequestSendMenu = (sender) => {
         const requests = teleportRequests.get(selectedPlayerName) || [];
 
         if (!requests.includes(sender.name)) {
-            sender.sendMessage({rawtext: [{translate: `teleport.request.send.message`,with: [`${selectedPlayerName}`]}]});
-            findPlayerByName(selectedPlayerName)?.({rawtext: [{translate: `teleport.request.receive.message`,with: [`${sender.name}`]},{text: `\n`},{translate: `teleport.request.limit.message`,with: [`${config.tpaValiditySeconds}`]}]});;
+            sender.sendMessage({ rawtext: [{ translate: `teleport.request.send.message`, with: [`${selectedPlayerName}`] }] });
+            findPlayerByName(selectedPlayerName)?.({ rawtext: [{ translate: `teleport.request.receive.message`, with: [`${sender.name}`] }, { text: `\n` }, { translate: `teleport.request.limit.message`, with: [`${config.tpaValiditySeconds}`] }] });;
 
             requests.push(sender.name);
             teleportRequests.set(selectedPlayerName, requests);
@@ -99,7 +99,7 @@ const showRequestSendMenu = (sender) => {
 
             timeoutHandlers.set(`${sender.name}=>${selectedPlayerName}`, timeoutId);
         } else {
-            sender.sendMessage({translate: `teleport.request.already.send`});
+            sender.sendMessage({ translate: `teleport.request.already.send` });
         };
     });
 };
@@ -111,33 +111,39 @@ function showRequestAcceptMenu(sender) {
     const requests = teleportRequests.get(sender.name) || [];
 
     const form = new ActionFormData()
-        .title({translate: `form.teleport.button.receive`});
-
-    for(const playerName of requests) {
-        form.button({translate: `mc.button.accept.request`,with: [`${playerName}`]});
+        .title({ translate: `form.teleport.button.receive` });
+    form.button({ translate: `mc.button.back` });
+    for (const playerName of requests) {
+        form.button({ translate: `mc.button.accept.request`, with: [`${playerName}`] });
     };
 
     form.show(sender).then((rs) => {
-        if(rs.canceled) {
+        if (rs.canceled) {
             tpaMainForm(sender);
             return;
         };
-        if (rs.selection == undefined) return;
+        switch (rs.selection) {
+            case 0: {
+                tpaMainForm(sender);
+                return;
+            };
+            default: {
+                const playerName = requests[rs.selection];
+                if (teleportRequests.get(sender.name).includes(playerName)) {
+                    findPlayerByName(playerName)?.teleport(sender.location);
 
-        const playerName = requests[rs.selection];
-        if (teleportRequests.get(sender.name).includes(playerName)) {
-            findPlayerByName(playerName)?.teleport(sender.location);
+                    sender.sendMessage({ translate: `accept.request.message` });
 
-            sender.sendMessage({translate: `accept.request.message`});
+                    const updatedRequests = requests.filter((value) => value !== playerName);
+                    teleportRequests.set(sender.name, updatedRequests);
 
-            const updatedRequests = requests.filter((value) => value !== playerName);
-            teleportRequests.set(sender.name, updatedRequests);
-
-            const timeoutId = timeoutHandlers.get(`${playerName}=>${sender.name}`);
-            system.clearRun(timeoutId);
-            timeoutHandlers.delete(`${playerName}=>${sender.name}`);
-        } else {
-            sender.sendMessage({translate: `application.deadline.message`});
+                    const timeoutId = timeoutHandlers.get(`${playerName}=>${sender.name}`);
+                    system.clearRun(timeoutId);
+                    timeoutHandlers.delete(`${playerName}=>${sender.name}`);
+                } else {
+                    sender.sendMessage({ translate: `application.deadline.message` });
+                };
+            };
         };
     });
 };
