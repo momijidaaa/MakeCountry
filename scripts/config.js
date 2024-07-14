@@ -63,4 +63,9 @@ export default {
     combatTagNoTeleportValidity: true,
     //コンバットタグの持続時間
     combatTagSeconds: 30,
+    
+    //tpaを有効にするか
+    tpaValidity: true,
+    //tpaの有効秒数
+    tpaValiditySeconds: 120,
 };

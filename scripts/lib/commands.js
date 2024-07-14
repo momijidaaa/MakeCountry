@@ -159,7 +159,9 @@ class ChatHandler {
                 case "pm":
                     this.playermarket();
                     break;
-
+                case "tpa":
+                    this.tpa();
+                    break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
                     break;
@@ -254,9 +256,9 @@ class ChatHandler {
     };
 
     teleportHome() {
-        if(config.combatTagNoTeleportValidity) {
-            if(this.sender.hasTag(`mc_combat`)) {
-                this.sender.sendMessage({translate: `teleport.error.combattag`});
+        if (config.combatTagNoTeleportValidity) {
+            if (this.sender.hasTag(`mc_combat`)) {
+                this.sender.sendMessage({ translate: `teleport.error.combattag` });
                 return;
             };
         };
@@ -415,6 +417,15 @@ class ChatHandler {
             return;
         };
         PlayerMarketMainMenu(this.sender);
+        return;
+    };
+    
+    tpa() {
+        if (!config.playerMarketValidity) {
+            this.sender.sendMessage({ translate: `command.error.playermarket.novalidity` });
+            return;
+        };
+        (this.sender);
         return;
     };
 
