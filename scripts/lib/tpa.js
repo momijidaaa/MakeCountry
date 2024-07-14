@@ -84,7 +84,7 @@ const showRequestSendMenu = (sender) => {
 
         if (!requests.includes(sender.name)) {
             sender.sendMessage({ rawtext: [{ translate: `teleport.request.send.message`, with: [`${selectedPlayerName}`] }] });
-            findPlayerByName(selectedPlayerName)?.({ rawtext: [{ translate: `teleport.request.receive.message`, with: [`${sender.name}`] }, { text: `\n` }, { translate: `teleport.request.limit.message`, with: [`${config.tpaValiditySeconds}`] }] });;
+            findPlayerByName(selectedPlayerName)?.sendMessage({ rawtext: [{ translate: `teleport.request.receive.message`, with: [`${sender.name}`] }, { text: `\n` }, { translate: `teleport.request.limit.message`, with: [`${config.tpaValiditySeconds}`] }] });;
 
             requests.push(sender.name);
             teleportRequests.set(selectedPlayerName, requests);

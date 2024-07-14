@@ -122,7 +122,7 @@ export function PlayerMarketWithdrawalGoodsSelectMenu(player, common) {
                 StringifyAndSavePropertyData(`player_market_commons`, newAllCommons.filter(com => com.id != common.id));
                 player.sendMessage({ translate: `finish.goods.withdrawal.message` })
                 const item = new ItemStack(common.item.typeId, common.item.amount);
-                item.nameTag = common.item.name;
+                item.nameTag = common.item?.name;
                 const container = player.getComponent(`inventory`).container;
                 if (container.emptySlotsCount < 1) {
                     player.dimension.spawnItem(item, player.location);
@@ -223,7 +223,7 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
             playerId: player.id,
             price: priceValue,
             item: {
-                name: itemData.itemStack.nameTag,
+                name: itemData.itemStack?.nameTag,
                 typeId: itemData.itemStack.typeId,
                 amount: itemAmount
             }
@@ -374,7 +374,7 @@ export function PlayerMarketSelectCommonForm(player, common) {
                 StringifyAndSavePropertyData(`player_${common.playerId}`, exhibitorData);
                 player.sendMessage({ translate: `finish.bought` });
                 const item = new ItemStack(common.item.typeId, common.item.amount);
-                item.nameTag = common.item.name;
+                item.nameTag = common.item?.name;
                 const container = player.getComponent(`inventory`).container;
                 if (container.emptySlotsCount < 1) {
                     player.dimension.spawnItem(item, player.location);
