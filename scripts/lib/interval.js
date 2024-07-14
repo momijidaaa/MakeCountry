@@ -88,22 +88,29 @@ system.runInterval(() => {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         if (!playerData) continue;
         let finScoreMoney = lastMoney.get(player.id);
-        let thisScoreMoney = scoreboard.getScore(player);
-        if(!thisScoreMoney) {
+        let thisScoreMoney = undefined;
+        try {
+            thisScoreMoney = scoreboard.getScore(player);
+        } catch (error) {
+        }
+        if (thisScoreMoney === undefined) {
             player.runCommand(`scoreboard players add @s mc_money ${playerData.money}`);
+            thisScoreMoney = playerData.money;
         };
-        if (!finScoreMoney) {
+        if (finScoreMoney === undefined) {
             lastMoney.set(player.id, playerData.money);
             scoreboard.setScore(player, playerData.money);
             continue;
         };
-        if (thisScoreMoney - finScoreMoney == 0) {
-            playerData.money = thisScoreMoney + (thisScoreMoney - finScoreMoney);
-            lastMoney.set(player.id, playerData.money);
+        if (finScoreMoney === playerData.money && thisScoreMoney !== playerData.money) {
+            lastMoney.set(player.id, thisScoreMoney);
+            scoreboard.setScore(player, thisScoreMoney);
+            playerData.money = thisScoreMoney;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
             continue;
         } else {
             lastMoney.set(player.id, playerData.money);
+            scoreboard.setScore(player, playerData.money);
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
             continue;
         };

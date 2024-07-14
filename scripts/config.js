@@ -10,9 +10,10 @@ export default {
     //平和主義切り替えのクールタイム(徴税タイミングごとに-1)
     peaceChangeCooltime: 3,
     //チャットの際にプレイヤー名の左に所属国を表示するか
-    showRoleChatLeftName: true,
+    showCountryChatLeftName: true,
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
-    showCountryChatLeftName: false,
+    showRoleChatLeftName: false,
+
 
     //デフォルトで平和主義にするか
     defaultPeace: true,

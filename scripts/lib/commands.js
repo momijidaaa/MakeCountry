@@ -41,13 +41,14 @@ class ChatHandler {
             for (let i = 0; i < countryRoles.length; i++) {
                 if (playerRoles.includes(countryRoles[i])) {
                     const roleData = GetAndParsePropertyData(`role_${countryRoles[i]}`);
-                    role = `${roleData.name}§r|`;
+                    role = `${roleData.name} §r| `;
                     break;
                 };
             };
         };
         if (!config.showCountryChatLeftName) {
             world.sendMessage(`<${role}${this.sender.name}> ${this.message}`);
+            this.event.cancel = true;
             return;
         };
         let land = `chat.player.no.join.any.country`;
