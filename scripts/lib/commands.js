@@ -253,6 +253,12 @@ class ChatHandler {
     };
 
     teleportHome() {
+        if(config.combatTagNoTeleportValidity) {
+            if(this.sender.hasTag(`mc_combat`)) {
+                this.sender.sendMessage({translate: `teleport.error.combattag`});
+                return;
+            };
+        };
         const homePoint = this.sender.getDynamicProperty("homePoint");
         if (!homePoint) {
             this.sender.sendMessage({ translate: `command.error.nosethome` });
