@@ -14,12 +14,13 @@ export default {
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
     showRoleChatLeftName: false,
 
+
     //デフォルトで平和主義にするか
     defaultPeace: true,
     //国を作るのに必要な金
-    MakeCountryCost: 20000,
+    MakeCountryCost: 30000,
     //デフォルトのチャンクの値段
-    defaultChunkPrice: 2000,
+    defaultChunkPrice: 10000,
     //国際組織の設立にかかる金
     MakeInternationalOrganizationCost: 100000,
     //共通通貨の単位
@@ -29,7 +30,7 @@ export default {
     //初期のリソースポイント
     initialCountryResourcePoint: 0,
     //徴税間隔(分)
-    taxTimer: 24 * 60,
+    taxTimer: 2 * 60,
     //初期設定で税金をパーセント式にするか(falseの場合,定額制)
     taxInstitutionIsPer: true,
     //初期の税率(税額)
@@ -41,9 +42,9 @@ export default {
     //荒野で許可する権限
     wildernessAllowPermissions: [`entityUse`, `blockUse`, `makeCountry`, `buyChunk`, `place`, `break`, `setHome`, `openContainer`],
     //平和主義国の維持費(1チャンク)
-    MaintenanceFeePacifistCountries: 200,
+    MaintenanceFeePacifistCountries: 500,
     //非平和主義国の維持費(1チャンク)
-    MaintenanceFeeNonPeacefulCountries: 40,
+    MaintenanceFeeNonPeacefulCountries: 50,
     //建国後何回分の徴税をなしにするか
     NonMaintenanceCostAccrualPeriod: 3,
     //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
