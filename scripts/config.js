@@ -13,7 +13,7 @@ export default {
     showRoleChatLeftName: true,
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
     showCountryChatLeftName: false,
-    
+
     //デフォルトで平和主義にするか
     defaultPeace: true,
     //国を作るのに必要な金
@@ -59,7 +59,7 @@ export default {
     combatTagValidity: true,
     //コンバットタグが付くのはPvPのときだけにするか(falseにするとダメージを受けた際に付くようになる)
     combatTagValidityOnlyPvP: true,
-    //コンバットタグが付いてる間、Homeコマンドなどを使えなくするか
+    //コンバットタグが付いてる間、Homeコマンドなどのテレポート機能を使えなくするか
     combatTagNoTeleportValidity: true,
     //コンバットタグの持続時間
     combatTagSeconds: 30,
