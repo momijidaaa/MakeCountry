@@ -8,4 +8,6 @@ import "./lib/jobs";
 
 import "./lib/scripteventCommand";
 
+import "./lib/combattag";
+
 import "./lib/test";

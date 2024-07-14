@@ -7,7 +7,9 @@ world.afterEvents.entityHurt.subscribe(ev => {
     if (!config.combatTagValidity) return;
     const { hurtEntity, damageSource } = ev;
     if (!(hurtEntity instanceof Player)) return;
-    if (!(damageSource.damagingEntity instanceof Player)) return;
+    if (config.combatTagValidityOnlyPvP) {
+        if (!(damageSource.damagingEntity instanceof Player)) return;
+    };
     combatSeconds.set(hurtEntity.id, config.combatTagSeconds);
     hurtEntity.addTag(`mc_combat`);
     return;

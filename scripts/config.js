@@ -54,6 +54,8 @@ export default {
 
     //コンバットタグを有効にするか
     combatTagValidity: true,
+    //コンバットタグが付くのはPvPのときだけにするか(falseにするとダメージを受けた際に付くようになる)
+    combatTagValidityOnlyPvP: true,
     //コンバットタグが付いてる間、Homeコマンドなどを使えなくするか
     combatTagNoTeleportValidity: true,
     //コンバットタグの持続時間
