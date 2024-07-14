@@ -130,7 +130,7 @@ function showRequestAcceptMenu(sender) {
             default: {
                 const playerName = requests[rs.selection - 1];
                 if (teleportRequests.get(sender.name).includes(playerName)) {
-                    findPlayerByName(playerName)?.teleport(sender.location);
+                    findPlayerByName(playerName)?.teleport(sender.location,{dimension: sender.dimension});
 
                     sender.sendMessage({ translate: `accept.request.message` });
 
