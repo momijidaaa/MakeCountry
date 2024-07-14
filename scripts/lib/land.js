@@ -24,7 +24,11 @@ export function MakeCountry(owner, name = `country`, invite = true, peace = conf
         owner.sendMessage({ translate: `already.country.here` });
         return;
     };
-    if (chunkData && chunkData.noTerritory) {
+    if (chunkData && chunkData?.noTerritory) {
+        owner.sendMessage({ translate: `this.chunk.cannot.territory` });
+        return;
+    };
+    if (chunkData && chunkData?.special) {
         owner.sendMessage({ translate: `this.chunk.cannot.territory` });
         return;
     };
