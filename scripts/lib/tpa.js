@@ -16,9 +16,9 @@ world.afterEvents.worldInitialize.subscribe(() => {
  * @param {Player} sender
  * @returns {string[]}
  */
-const getOtherPlayers = (sender) => {
+export function getOtherPlayers(sender) {
     return world.getPlayers().filter(player => player.name !== sender.name).map(player => player.name);
-}
+};
 
 /**
  * @param {string} name
