@@ -7,6 +7,7 @@ import { jobsForm } from "./jobs";
 import jobs_config from "../jobs_config";
 import config from "../config";
 import { PlayerMarketMainMenu } from "./player_market";
+import { tpaMainForm } from "./tpa";
 
 class ChatHandler {
     constructor(event) {
@@ -421,11 +422,11 @@ class ChatHandler {
     };
     
     tpa() {
-        if (!config.playerMarketValidity) {
-            this.sender.sendMessage({ translate: `command.error.playermarket.novalidity` });
+        if (!config.tpaValidity) {
+            this.sender.sendMessage({ translate: `command.error.tpa.novalidity` });
             return;
         };
-        (this.sender);
+        tpaMainForm(this.sender);
         return;
     };
 
@@ -466,6 +467,7 @@ class ChatHandler {
         { translate: `command.help.jobs` }, { text: `\n` },
         { translate: `command.help.playermarket` }, { text: `\n` },
         { translate: `command.help.pm` }, { text: `\n` },
+        { translate: `command.help.tpa` }, { text: `\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
