@@ -13,6 +13,7 @@ export default {
     showRoleChatLeftName: true,
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
     showCountryChatLeftName: false,
+    
     //デフォルトで平和主義にするか
     defaultPeace: true,
     //国を作るのに必要な金
@@ -47,6 +48,8 @@ export default {
     NonMaintenanceCostAccrualPeriod: 3,
     //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
     maxRoleAmount: 10,
+
+    
     //プレイヤーマーケットを有効にするかどうか
     playerMarketValidity: true,
     //プレイヤーマーケットの1人あたりの最大出品数
