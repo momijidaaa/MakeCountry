@@ -40,6 +40,95 @@ export function PlayerMarketMainMenu(player) {
             };
             case 2: {
                 //出品を取り下げる
+                PlayerMarketWithdrawalGoodsMainMenu(player);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 出品したアイテム一覧
+ * @param {Player} player 
+ */
+export function PlayerMarketWithdrawalGoodsMainMenu(player) {
+    const form = new ActionFormData();
+    form.title(`Player Market`)
+    form.button({translate: `mc.button.close`});
+    /**
+     * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
+     */
+    const allCommons = GetAndParsePropertyData(`player_market_commons`).filter(com => com.playerId == player.id);
+    for (let i = 0; i < allCommons.length; i++) {
+        const item = allCommons[i];
+        form.button(`${item.item.typeId} x${item.item.amount}\n${item.price}`);
+    };
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            PlayerMarketMainMenu(player);
+        };
+        switch (rs.selection) {
+            case 0: {
+                //閉じる
+                break;
+            };
+            default: {
+                /**
+                 * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
+                 */
+                const newAllCommons = GetAndParsePropertyData(`player_market_commons`)
+                const result = newAllCommons.find(com => com.id == allCommons[rs.selection - 1].id);
+                if (!newAllCommons) {
+                    PlayerMarketWithdrawalGoodsMainMenu(player);
+                    break;
+                };
+                PlayerMarketWithdrawalGoodsSelectMenu(player, result);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 出品アイテムの取り下げ
+ * @param {Player} player 
+ * @param {{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}} common
+ */
+export function PlayerMarketWithdrawalGoodsSelectMenu(player, common) {
+    const form = new ActionFormData();
+    form.title(`Player Market`);
+    form.button({ translate: `mc.button.back` });
+    form.button({ translate: `mc.button.withdrawal.goods` });
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            //閉じる
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                PlayerMarketWithdrawalGoodsMainMenu(player);
+                break;
+            };
+            case 1: {
+                //商品のチェック
+                /**
+                 * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
+                 */
+                const newAllCommons = GetAndParsePropertyData(`player_market_commons`);
+                if (!newAllCommons.find(com => com.id == common.id)) {
+                    player.sendMessage({ translate: `playermarket.error.already.buy` })
+                    return;
+                };
+                StringifyAndSavePropertyData(`player_market_commons`, newAllCommons.filter(com => com.id != common.id));
+                player.sendMessage({ translate: `finish.goods.withdrawal.message` })
+                const item = new ItemStack(common.item.typeId, common.item.amount);
+                item.nameTag = common.item.name;
+                const container = player.getComponent(`inventory`).container;
+                if (container.emptySlotsCount < 1) {
+                    player.dimension.spawnItem(item, player.location);
+                    break;
+                };
+                container.addItem(item);
                 break;
             };
         };
