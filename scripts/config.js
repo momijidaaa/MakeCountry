@@ -51,4 +51,11 @@ export default {
     playerMarketValidity: true,
     //プレイヤーマーケットの1人あたりの最大出品数
     maxMarketAmount: 10,
+
+    //コンバットタグを有効にするか
+    combatTagValidity: true,
+    //コンバットタグが付いてる間、Homeコマンドなどを使えなくするか
+    combatTagNoTeleportValidity: true,
+    //コンバットタグの持続時間
+    combatTagSeconds: 30,
 };
