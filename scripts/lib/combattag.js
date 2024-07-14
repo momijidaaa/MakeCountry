@@ -23,6 +23,7 @@ system.runInterval(() => {
             continue;
         };
         if (value <= 0) {
+            player.playSound(`random.levelup`, { location: player.location });
             combatSeconds.delete(player.id);
             player.removeTag(`mc_combat`);
             continue;
