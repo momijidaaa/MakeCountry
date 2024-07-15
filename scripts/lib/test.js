@@ -1,5 +1,6 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { changeOwnerScriptEvent } from "./land";
 //import { uiManager } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -36,6 +37,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         };
         case `karo:taxtimer`: {
             world.setDynamicProperty(`taxTimer`,message);
+            break;
+        };
+        case `karo:newowner`: {
+            changeOwnerScriptEvent(sourceEntity);
             break;
         };
         /*case `karo:form`: {

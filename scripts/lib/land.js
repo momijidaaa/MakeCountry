@@ -514,6 +514,21 @@ export function playerChangeOwner(player, member, countryData) {
 };
 
 /**
+ * 国王チェンジ
+ * @param {Player} member 
+ * @returns 
+ */
+export function changeOwnerScriptEvent(member) {
+    const memberData = GetAndParsePropertyData(`player_${member.id}`);
+    const countryData = GetAndParsePropertyData(`country_${memberData.country}`)
+    countryData.owner = member.id;
+    member.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `changed.owner.message.newowner` }] });
+    StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+    return;
+};
+
+
+/**
  * プレイヤーに招待を送る
  * @param {Player} receivePlayer 
  * @param {Player} sendPlayer 
