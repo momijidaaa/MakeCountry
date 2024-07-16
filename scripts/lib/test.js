@@ -1,6 +1,6 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
-import { changeOwnerScriptEvent } from "./land";
+import { changeOwnerScriptEvent, DeleteCountry } from "./land";
 //import { uiManager } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -41,6 +41,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         };
         case `karo:newowner`: {
             changeOwnerScriptEvent(sourceEntity);
+            break;
+        };
+        case `karo:deletecountry`: {
+            DeleteCountry(Number(message));
             break;
         };
         /*case `karo:form`: {
