@@ -14,7 +14,6 @@ export default {
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
     showRoleChatLeftName: false,
 
-
     //デフォルトで平和主義にするか
     defaultPeace: true,
     //国を作るのに必要な金
