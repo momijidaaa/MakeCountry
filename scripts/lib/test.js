@@ -1,6 +1,7 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
-import { changeOwnerScriptEvent, DeleteCountry } from "./land";
+import { changeOwnerScriptEvent, DeleteCountry, playerCountryJoin } from "./land";
+import * as DyProp from "./DyProp";
 //import { uiManager } from "@minecraft/server-ui";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -36,7 +37,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             break;
         };
         case `karo:taxtimer`: {
-            world.setDynamicProperty(`taxTimer`,message);
+            world.setDynamicProperty(`taxTimer`, message);
             break;
         };
         case `karo:newowner`: {
@@ -45,6 +46,45 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         };
         case `karo:deletecountry`: {
             DeleteCountry(Number(message));
+            break;
+        };
+        case `karo:countrydata`: {
+            sourceEntity.sendMessage(`${DyProp.getDynamicProperty(`country_${message}`)}`);
+            break;
+        };
+        case `karo:addcountrydata`: {
+            const [messageSplit1, ...messageSplit2] = message.split(` `, 2);
+            const countryData = GetAndParsePropertyData(`country_${messageSplit1}`);
+            Object.assign(countryData, JSON.parse(messageSplit2.join(``)));
+            StringifyAndSavePropertyData(`country_${messageSplit1}`, countryData);
+            break;
+        };
+        case `karo:roledata`: {
+            sourceEntity.sendMessage(`${DyProp.getDynamicProperty(`role_${message}`)}`);
+            break;
+        };
+        case `karo:addroledata`: {
+            const [messageSplit1, ...messageSplit2] = message.split(` `, 2);
+            const roleData = GetAndParsePropertyData(`role_${messageSplit1}`);
+            Object.assign(roleData, JSON.parse(messageSplit2.join(``)));
+            StringifyAndSavePropertyData(`role_${messageSplit1}`, roleData);
+            break;
+        };
+        case `karo:createroledata`: {
+            const [messageSplit1, ...messageSplit2] = message.split(` `, 2);
+            const roleData = {
+                name: `new Role`,
+                color: `§a`,
+                icon: `textures/blocks/stone`,
+                id: Number(messageSplit1),
+                members: [],
+                permissions: []
+            };
+            StringifyAndSavePropertyData(`role_${messageSplit1}`, roleData);
+            break;
+        };
+        case `karo:countryjoin`: {
+            playerCountryJoin(sourceEntity, Number(message));
             break;
         };
         /*case `karo:form`: {
