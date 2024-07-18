@@ -134,9 +134,6 @@ class ChatHandler {
                 case "leavecountry":
                     this.leaveCountry();
                     break;
-                case "lc":
-                    this.leaveCountry();
-                    break;
                 case "kill":
                     this.kill();
                     break;
@@ -463,7 +460,6 @@ class ChatHandler {
         { translate: `command.help.settingcountry` }, { text: `\n` },
         { translate: `command.help.sc` }, { text: `\n` },
         { translate: `command.help.leavecountry` }, { text: `\n` },
-        { translate: `command.help.lc` }, { text: `\n` },
         { translate: `command.help.kill` }, { text: `\n` },
         { translate: `command.help.countrylist` }, { text: `\n` },
         { translate: `command.help.cl` }, { text: `\n` },
