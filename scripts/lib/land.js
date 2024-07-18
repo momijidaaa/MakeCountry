@@ -482,7 +482,7 @@ export function playerCountryKick(player) {
         for (const roleId of playerRoles) {
             const role = GetAndParsePropertyData(`role_${roleId}`);
             role.members.splice(role.members.indexOf(playerData.id), 1);
-            StringifyAndSavePropertyData(`role_${roleId}`);
+            StringifyAndSavePropertyData(`role_${roleId}`,role);
         };
         playerData.roles = [];
         playerData.country = undefined;
