@@ -83,7 +83,8 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
             if (chestLockData && !block.typeId.includes(`chest`)) {
                 StringifyAndSavePropertyData(chestId);
             };
-            if (player.isSneaking && block.typeId.includes(`chest`)) {
+            const container = player.getComponent(`inventory`).container;
+            if (player.isSneaking && block.typeId.includes(`chest`) && !container.getItem(player.selectedSlotIndex)) {
                 ev.cancel = true;
                 system.runTimeout(() => {
                     chestLockForm(player, chestId);
