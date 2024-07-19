@@ -1,4 +1,4 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import { CheckPermissionFromLocation, GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
@@ -10,13 +10,21 @@ world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const { x, y, z } = block.location;
     const chestId = `chest_${x}_${y}_${z}_${dimension.id}`;
     const chestLockData = GetAndParsePropertyData(chestId);
-    if (chestLockData) {
+    if (chestLockData && block.typeId.includes(`chest`)) {
         if (chestLockData.player === player.id) {
-            StringifyAndSavePropertyData(chestId);
+            system.runTimeout(() => {
+                DyProp.setDynamicProperty(chestId);
+            });
             return;
         };
-        player.sendMessage({ translate: `message.thischest.islocked` });
+        ev.cancel = true;
+        player.sendMessage({ translate: `message.thischest.islocked`, with: [`${GetAndParsePropertyData(`player_${chestLockData.player}`).name}`] });
         return;
+    };
+    if (chestLockData && !block.typeId.includes(`chest`)) {
+        system.runTimeout(() => {
+            DyProp.setDynamicProperty(chestId);
+        });
     };
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
@@ -48,23 +56,37 @@ world.beforeEvents.itemUseOn.subscribe((ev) => {
 });
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
-    const permission2 = `openContainer`
-    const permission = `blockUse`
+    const permission2 = `openContainer`;
+    const permission = `blockUse`;
     const { player, block } = ev;
     const { x, y, z } = block.location;
     if (block.getComponent(`inventory`)) {
         const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
         const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
         const chestLockData = GetAndParsePropertyData(chestId);
-        if (chestLockData) {
+        if (chestLockData && block.typeId.includes(`chest`)) {
             if (chestLockData.player == player.id && !player.isSneaking) {
                 return;
             };
             if (chestLockData.player == player.id && player.isSneaking) {
-                chestLockForm(player, chestId);
+                ev.cancel = true;
+                system.runTimeout(() => {
+                    chestLockForm(player, chestId);
+                });
                 return;
             };
-            player.sendMessage({ translate: `message.thischest.islocked` });
+            ev.cancel = true;
+            player.sendMessage({ translate: `message.thischest.islocked`, with: [`${GetAndParsePropertyData(`player_${chestLockData.player}`).name}`] });
+            return;
+        };
+        if (chestLockData && !block.typeId.includes(`chest`)) {
+            StringifyAndSavePropertyData(chestId);
+        };
+        if (player.isSneaking && block.typeId.includes(`chest`)) {
+            ev.cancel = true;
+            system.runTimeout(() => {
+                chestLockForm(player, chestId);
+            });
             return;
         };
         ev.cancel = cannot2;
