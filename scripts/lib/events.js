@@ -69,7 +69,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                 if (chestLockData.player == player.id && !player.isSneaking) {
                     return;
                 };
-                if (chestLockData.player == player.id && player.isSneaking) {
+                if (chestLockData.player == player.id && player.isSneaking && !container.getItem(player.selectedSlotIndex)) {
                     ev.cancel = true;
                     system.runTimeout(() => {
                         chestLockForm(player, chestId);
