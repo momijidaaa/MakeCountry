@@ -1,12 +1,23 @@
 import { world } from "@minecraft/server";
-import { CheckPermissionFromLocation, StringifyAndSavePropertyData } from "./util";
+import { CheckPermissionFromLocation, GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
+import { chestLockForm } from "./form";
 
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const permission = `break`
-    const { player, block } = ev;
-    const { x, z } = block.location;
+    const { player, block, dimension } = ev;
+    const { x, y, z } = block.location;
+    const chestId = `chest_${x}_${y}_${z}_${dimension.id}`;
+    const chestLockData = GetAndParsePropertyData(chestId);
+    if (chestLockData) {
+        if (chestLockData.player === player.id) {
+            StringifyAndSavePropertyData(chestId);
+            return;
+        };
+        player.sendMessage({ translate: `message.thischest.islocked` });
+        return;
+    };
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;
@@ -40,14 +51,24 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission2 = `openContainer`
     const permission = `blockUse`
     const { player, block } = ev;
-    const { x, z } = block.location;
+    const { x, y, z } = block.location;
+    const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
+    const chestLockData = GetAndParsePropertyData(chestId);
+    if (chestLockData) {
+        if (chestLockData.player == player.id && !player.isSneaking) {
+            return;
+        };
+        if (chestLockData.player == player.id && player.isSneaking) {
+            chestLockForm(player, chestId);
+            return;
+        };
+        player.sendMessage({ translate: `message.thischest.islocked` });
+        return;
+    };
+
     if (block.getComponent(`inventory`)) {
         const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
         ev.cancel = cannot2;
-        if (cannot2) {
-            player.sendMessage({ translate: `cannot.permission.${permission2}` });
-            return;
-        };
         return;
     };
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);

@@ -26,5 +26,11 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             uiManager.closeAllForms(sourceEntity);
             break;
         };
+        case `mc:setup`: {
+            sourceEntity.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `system.setup.complete` }] });
+            sourceEntity.addTag("mc_admin");
+            world.setDynamicProperty(`start`, `true`);
+            break;
+        };
     };
 });

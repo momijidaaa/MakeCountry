@@ -6,6 +6,45 @@ import { acceptApplicationRequest, AddAlliance, AddHostilityByPlayer, CreateRole
 import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
 
 /**
+ * 
+ * @param {Player} player 
+ * @param {string} id 
+ */
+export function chestLockForm(player, id) {
+    const form = new ActionFormData();
+    form.title({translate: `form.chestlock.title`});
+    /**
+     * @type {{id: string,player: id}}
+     */
+    const chestData = GetAndParsePropertyData(id);
+    let lock = true;
+    if (chestData) {
+        form.button({ translate: `form.button.chestlock.disabled` });
+        lock = false;
+    } else {
+        form.button({ translate: `form.button.chestlock.enabled` });
+        chestData = { id: id, player: player.id };
+        lock = true;
+    };
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                if(lock) {
+                    StringifyAndSavePropertyData(id,chestData);
+                } else {
+                    DyProp.setDynamicProperty(id);
+                };
+                player.sendMessage({translate: `updated`});
+                break;
+            };
+        };
+    });
+};
+
+/**
  * 国民一覧
  * @param {Player} player 
  */
@@ -1212,16 +1251,16 @@ export function publicSpawnForm(player) {
         };
         if (rs.formValues[1]) {
             const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(player));
-            if(!chunkData) {
-                player.sendMessage({translate: `publichome.set.error.within.country`});
+            if (!chunkData) {
+                player.sendMessage({ translate: `publichome.set.error.within.country` });
                 return;
             };
-            if(!chunkData?.countryId) {
-                player.sendMessage({translate: `publichome.set.error.within.country`});
+            if (!chunkData?.countryId) {
+                player.sendMessage({ translate: `publichome.set.error.within.country` });
                 return;
             };
-            if(chunkData?.countryId != playerData?.country ) {
-                player.sendMessage({translate: `publichome.set.error.within.country`});
+            if (chunkData?.countryId != playerData?.country) {
+                player.sendMessage({ translate: `publichome.set.error.within.country` });
                 return;
             };
             let { x, y, z } = player.location;
