@@ -52,22 +52,21 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission = `blockUse`
     const { player, block } = ev;
     const { x, y, z } = block.location;
-    const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
-    const chestLockData = GetAndParsePropertyData(chestId);
-    if (chestLockData) {
-        if (chestLockData.player == player.id && !player.isSneaking) {
-            return;
-        };
-        if (chestLockData.player == player.id && player.isSneaking) {
-            chestLockForm(player, chestId);
-            return;
-        };
-        player.sendMessage({ translate: `message.thischest.islocked` });
-        return;
-    };
-
     if (block.getComponent(`inventory`)) {
         const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
+        const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
+        const chestLockData = GetAndParsePropertyData(chestId);
+        if (chestLockData) {
+            if (chestLockData.player == player.id && !player.isSneaking) {
+                return;
+            };
+            if (chestLockData.player == player.id && player.isSneaking) {
+                chestLockForm(player, chestId);
+                return;
+            };
+            player.sendMessage({ translate: `message.thischest.islocked` });
+            return;
+        };
         ev.cancel = cannot2;
         return;
     };
