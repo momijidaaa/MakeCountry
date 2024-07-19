@@ -9,7 +9,7 @@ world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const { player, block, dimension } = ev;
     const { x, y, z } = block.location;
     const chestId = `chest_${x}_${y}_${z}_${dimension.id}`;
-    const chestLockData = GetAndParsePropertyData(chestId);
+    let chestLockData = GetAndParsePropertyData(chestId);
     if (chestLockData && block.typeId.includes(`chest`)) {
         if (chestLockData.player === player.id) {
             system.runTimeout(() => {
@@ -62,32 +62,34 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const { x, y, z } = block.location;
     if (block.getComponent(`inventory`)) {
         const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
-        const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
-        const chestLockData = GetAndParsePropertyData(chestId);
-        if (chestLockData && block.typeId.includes(`chest`)) {
-            if (chestLockData.player == player.id && !player.isSneaking) {
+        if (!cannot2) {
+            const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
+            let chestLockData = GetAndParsePropertyData(chestId);
+            if (chestLockData && block.typeId.includes(`chest`)) {
+                if (chestLockData.player == player.id && !player.isSneaking) {
+                    return;
+                };
+                if (chestLockData.player == player.id && player.isSneaking) {
+                    ev.cancel = true;
+                    system.runTimeout(() => {
+                        chestLockForm(player, chestId);
+                    });
+                    return;
+                };
+                ev.cancel = true;
+                player.sendMessage({ translate: `message.thischest.islocked`, with: [`${GetAndParsePropertyData(`player_${chestLockData.player}`).name}`] });
                 return;
             };
-            if (chestLockData.player == player.id && player.isSneaking) {
+            if (chestLockData && !block.typeId.includes(`chest`)) {
+                StringifyAndSavePropertyData(chestId);
+            };
+            if (player.isSneaking && block.typeId.includes(`chest`)) {
                 ev.cancel = true;
                 system.runTimeout(() => {
                     chestLockForm(player, chestId);
                 });
                 return;
             };
-            ev.cancel = true;
-            player.sendMessage({ translate: `message.thischest.islocked`, with: [`${GetAndParsePropertyData(`player_${chestLockData.player}`).name}`] });
-            return;
-        };
-        if (chestLockData && !block.typeId.includes(`chest`)) {
-            StringifyAndSavePropertyData(chestId);
-        };
-        if (player.isSneaking && block.typeId.includes(`chest`)) {
-            ev.cancel = true;
-            system.runTimeout(() => {
-                chestLockForm(player, chestId);
-            });
-            return;
         };
         ev.cancel = cannot2;
         return;

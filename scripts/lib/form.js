@@ -16,7 +16,7 @@ export function chestLockForm(player, id) {
     /**
      * @type {{id: string,player: id}}
      */
-    const chestData = GetAndParsePropertyData(id);
+    let chestData = GetAndParsePropertyData(id);
     let lock = true;
     if (chestData) {
         form.button({ translate: `form.button.chestlock.disabled` });
