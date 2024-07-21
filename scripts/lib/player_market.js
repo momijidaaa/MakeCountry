@@ -142,7 +142,12 @@ export function PlayerMarketWithdrawalGoodsSelectMenu(player, common) {
  */
 export function PlayerMarketExhibitMainMenu(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    if (config.maxMarketAmount <= playerData.marketAmount) {
+    /**
+ * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
+ */
+    const allCommons = GetAndParsePropertyData(`player_market_commons`).filter(com => com.playerId == player.id);
+
+    if (config.maxMarketAmount <= allCommons.filter(common => common.playerId == player.id).length) {
         player.sendMessage({ translate: `error.maxmarketamount`, with: [`${config.maxMarketAmount}`] });
         return;
     };
