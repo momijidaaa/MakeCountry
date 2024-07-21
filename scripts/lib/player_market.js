@@ -144,6 +144,7 @@ export function PlayerMarketExhibitMainMenu(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     if (config.maxMarketAmount <= playerData.marketAmount) {
         player.sendMessage({ translate: `error.maxmarketamount`, with: [`${config.maxMarketAmount}`] });
+        return;
     };
     let items = [];
     const container = player.getComponent(`inventory`).container;
