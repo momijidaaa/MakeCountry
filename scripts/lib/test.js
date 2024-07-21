@@ -2,7 +2,8 @@ import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import { changeOwnerScriptEvent, DeleteCountry, playerCountryJoin } from "./land";
 import * as DyProp from "./DyProp";
-//import { uiManager } from "@minecraft/server-ui";
+import { ActionFormData, FormCancelationReason, uiManager } from "@minecraft/server-ui";
+import { itemIdToPath } from "../texture_config";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -87,6 +88,15 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             playerCountryJoin(sourceEntity, Number(message));
             break;
         };
+        case `karo:item`: {
+            const container = sourceEntity.getComponent(`inventory`).container;
+            sourceEntity.sendMessage(`${container.getItem(sourceEntity.selectedSlotIndex)?.typeId}`);
+            break;
+        };
+        case `karo:itemtest`: {
+            itemTestForm(sourceEntity);
+            break;
+        };
         /*case `karo:form`: {
             for(const player of world.getAllPlayers()) {
                 uiManager.closeAllForms(player);
@@ -95,6 +105,26 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         };*/
     };
 });
+
+/**
+ * 
+ * @param {Player} player 
+ */
+function itemTestForm (player) {
+    const form = new ActionFormData();
+    const items = Object.keys(itemIdToPath);
+    for(let i = 0;i < items.length;i++) {
+        form.button(items[i],itemIdToPath[items[i]]);
+    };
+    form.show(player).then((rs) => {
+        if(rs.canceled) {
+            if(rs.cancelationReason == FormCancelationReason.UserBusy) {
+                itemTestForm(player);
+            };
+            return;
+        };
+    });
+};
 
 /*
 world.afterEvents.worldInitialize.subscribe(() => {

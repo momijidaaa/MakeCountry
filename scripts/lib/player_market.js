@@ -4,6 +4,7 @@ import { GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData 
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
+import { itemIdToPath } from "../texture_config";
 
 world.afterEvents.worldInitialize.subscribe(() => {
     if (!DyProp.getDynamicProperty(`player_market_commons`)) DyProp.setDynamicProperty(`player_market_commons`, `[]`);
@@ -281,7 +282,7 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
     const commons = allCommons.slice(0 + (36 * page), 35 + (36 * page));
     for (let i = 0; i < commons.length; i++) {
         const common = commons[i];
-        form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount })
+        form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount })
     };
     form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
     if (page + 1 * 36 < allCommons.length) form.setButton(41, { name: ">>", iconPath: "minecraft:arrow", lore: ["Next Page"] });
