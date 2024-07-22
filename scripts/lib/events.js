@@ -63,6 +63,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     if (block.getComponent(`inventory`)) {
         const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
         if (!cannot2) {
+            const container = player.getComponent(`inventory`).container;
             const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
             let chestLockData = GetAndParsePropertyData(chestId);
             if (chestLockData && block.typeId.includes(`chest`)) {
@@ -83,7 +84,6 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
             if (chestLockData && !block.typeId.includes(`chest`)) {
                 StringifyAndSavePropertyData(chestId);
             };
-            const container = player.getComponent(`inventory`).container;
             if (player.isSneaking && block.typeId.includes(`chest`) && !container.getItem(player.selectedSlotIndex)) {
                 ev.cancel = true;
                 system.runTimeout(() => {
