@@ -4,6 +4,21 @@ import * as DyProp from "./DyProp";
 import config from "../config";
 import { chestLockForm } from "./form";
 
+world.afterEvents.worldInitialize.subscribe((ev) => {
+    world.sendMessage({ translate: `world.message.addon` });
+});
+
+world.afterEvents.playerSpawn.subscribe((ev) => {
+    const { player, initialSpawn } = ev;
+    player.sendMessage({
+        rawtext: [
+            { text: `§6------------------------------------------------------------------------------------------\n\n` },
+            { translate: `world.message.addon` },
+            {text: `\n\n§9Support Discord Server\n§ahttps://discord.gg/8S9YhNaHjD\n\n§cYoutube\n§ahttps://youtube.com/@KaronDAAA\n\n§bTwitter\n§ahttps://x.com/KaronDAAA\n\n§6------------------------------------------------------------------------------------------\n`}
+        ]
+    });
+});
+
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
     const permission = `break`
     const { player, block, dimension } = ev;
