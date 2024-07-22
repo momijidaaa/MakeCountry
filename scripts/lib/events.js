@@ -10,6 +10,7 @@ world.afterEvents.worldInitialize.subscribe((ev) => {
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player, initialSpawn } = ev;
+    if(!initialSpawn) return;
     player.sendMessage({
         rawtext: [
             { text: `§6------------------------------------------------------------------------------------------\n\n` },
