@@ -162,7 +162,7 @@ class ChatHandler {
                     this.tpa();
                     break;
                 default:
-                    this.sender.sendMessage({ translate: `command.unknown.error`, with: [command] });
+                    this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
                     break;
             };
         }, 0);
