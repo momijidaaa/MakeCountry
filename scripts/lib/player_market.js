@@ -141,7 +141,6 @@ export function PlayerMarketWithdrawalGoodsSelectMenu(player, common) {
  * @param {Player} player 
  */
 export function PlayerMarketExhibitMainMenu(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
     /**
  * @type {Array<{id: number,playerName: string,playerId: string,price: number, item: {name: undefined|string,typeId: string,amount: number}}>}
  */
