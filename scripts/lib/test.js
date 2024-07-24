@@ -97,6 +97,11 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             itemTestForm(sourceEntity);
             break;
         };
+        case `karo:mobtest`: {
+            const [messageSplit1, ...messageSplit2] = message.split(` `, 2);
+            sourceEntity.sendMessage(`半径${messageSplit1}m以内にいる${messageSplit2}は${sourceEntity.dimension.getEntities({ location: sourceEntity.location, maxDistance: Number(messageSplit1), type: messageSplit2 }).length}`);
+            break;
+        };
         /*case `karo:form`: {
             for(const player of world.getAllPlayers()) {
                 uiManager.closeAllForms(player);
@@ -110,15 +115,15 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
  * 
  * @param {Player} player 
  */
-function itemTestForm (player) {
+function itemTestForm(player) {
     const form = new ActionFormData();
     const items = Object.keys(itemIdToPath);
-    for(let i = 0;i < items.length;i++) {
-        form.button(items[i],itemIdToPath[items[i]]);
+    for (let i = 0; i < items.length; i++) {
+        form.button(items[i], itemIdToPath[items[i]]);
     };
     form.show(player).then((rs) => {
-        if(rs.canceled) {
-            if(rs.cancelationReason == FormCancelationReason.UserBusy) {
+        if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
                 itemTestForm(player);
             };
             return;
