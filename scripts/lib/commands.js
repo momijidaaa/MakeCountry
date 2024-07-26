@@ -530,10 +530,14 @@ class ChatHandler {
             return;
         };
         const countryData = GetAndParsePropertyData(`country_${this.playerData.country}`)
-        if (!countryData.spawn) {
-            return;
+        let [x, y, z, rx, ry, dimensionId] = countryData?.spawn.split(`_`);
+        if (CheckPermissionFromLocation(this.sender, Number(x), Number(z), dimensionId, `publicHomeUse`)) {
+            //権限がない！！
+            this.sender.sendMessage({ translate: `no.permission` });
+            return
         };
-        this.sender.teleport(countryData.spawn.location, { dimension: world.getDimension(countryData.spawn.dimension) });
+        //tp
+        this.sender.teleport({ x: Number(x), y: Number(y), z: Number(z) }, { dimension: world.getDimension(`${dimensionId.replace(`minecraft:`, ``)}`), rotation: { x: Number(rx), y: Number(ry) } });
         this.sender.sendMessage({ translate: `command.chome.result` })
         return;
     };
