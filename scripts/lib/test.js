@@ -111,6 +111,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             sourceEntity.sendMessage(`半径${messageSplit1}m以内にいる${messageSplit2}は${sourceEntity.dimension.getEntities({ location: sourceEntity.location, maxDistance: Number(messageSplit1), type: messageSplit2 }).length}`);
             break;
         };
+        case `karo:keylist`: {
+            sourceEntity.sendMessage(`${world.getDynamicPropertyIds().length}`);
+            break;
+        };
         /*case `karo:form`: {
             for(const player of world.getAllPlayers()) {
                 uiManager.closeAllForms(player);
