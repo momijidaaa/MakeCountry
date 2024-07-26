@@ -284,14 +284,15 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
             };
         };
     };
-    const commons = allCommons.slice(0 + (36 * page), 35 + (36 * page));
+    const commonsAll = allCommons;
+    const commons = allCommons.slice(0 + (45 * page), 45 + (45 * page));
     for (let i = 0; i < commons.length; i++) {
         const common = commons[i];
         form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount })
     };
     form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
-    if (page + 1 * 36 < allCommons.length) form.setButton(41, { name: ">>", iconPath: "minecraft:arrow", lore: ["Next Page"] });
-    if (0 < page) form.setButton(39, { name: "<<", iconPath: "minecraft:arrow", lore: ["Previous Page"] });
+    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
+    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"] });
 
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -303,12 +304,12 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
                 //閉じる
                 break;
             };
-            case 41: {
+            case 5: {
                 //進む
                 PlayerMarketCommonsMenu(player, page + 1);
                 break;
             };
-            case 39: {
+            case 3: {
                 //戻る
                 PlayerMarketCommonsMenu(player, page - 1);
                 break;
