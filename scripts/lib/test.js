@@ -64,6 +64,11 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             sourceEntity.sendMessage(`${DyProp.getDynamicProperty(`role_${message}`)}`);
             break;
         };
+        case `karo:playerdata`: {
+            const player = world.getPlayers({ name: message })[0];
+            sourceEntity.sendMessage(`${DyProp.getDynamicProperty(`player_${player.id}`)}`);
+            break;
+        };
         case `karo:addroledata`: {
             const [messageSplit1, ...messageSplit2] = message.split(` `, 2);
             const roleData = GetAndParsePropertyData(`role_${messageSplit1}`);
