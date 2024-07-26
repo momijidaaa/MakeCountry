@@ -529,7 +529,10 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.chome.error.notjoin.country` });
             return;
         };
-        const countryData = GetAndParsePropertyData(`country_${this.playerData.country}`)
+        const countryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        if (!countryData?.spawn || !countryData?.publicSpawn) {
+            return;
+        };
         let [x, y, z, rx, ry, dimensionId] = countryData?.spawn.split(`_`);
         if (CheckPermissionFromLocation(this.sender, Number(x), Number(z), dimensionId, `publicHomeUse`)) {
             //権限がない！！
