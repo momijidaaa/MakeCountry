@@ -7,9 +7,14 @@ const startId = "DyProp_"
  * @param {String|undefined} value
  */
 export function setDynamicProperty(id, value = undefined) {
-    world.getDynamicPropertyIds().filter(b => b.startsWith(`${startId}${id}_dy`)).forEach(a => {
-        world.setDynamicProperty(a)
-    });
+    const pattern = `DyProp_${id}_dy`;
+    for(let i = 0;i < 10000;i++) {
+        const test = world.getDynamicProperty(`${pattern}${i}`);
+        if(!test) break;
+        if(test) {
+            world.setDynamicProperty(`${pattern}${i}`)
+        };
+    };
     if (!value) return;
     const chunkSize = 20000
     if (typeof value !== 'string') {
@@ -28,20 +33,18 @@ export function setDynamicProperty(id, value = undefined) {
  * @returns {string|undefined}
  */
 export function getDynamicProperty(id) {
-    let inputArray = world.getDynamicPropertyIds();
-    const pattern = new RegExp(`^DyProp_${id}_dy(\\d+)$`);
-    const matches = inputArray
-        .map(item => {
-            const match = item.match(pattern);
-            return match ? { original: item, index: parseInt(match[1], 10) } : null;
-        })
-        .filter(item => item !== null)
-        .sort((a, b) => a.index - b.index);
+    const matches = [];
+    const pattern = `DyProp_${id}_dy`;
+    for(let i = 0;i < 10000;i++) {
+        const test = world.getDynamicProperty(`${pattern}${i}`);
+        if(!test) break;
+        if(test) {
+            matches.push(test);
+        };
+    };
     if(matches.length == 0) return undefined;
     let longString = ``;
-    matches.map(item => item.original).forEach(id => {
-        longString = longString + world.getDynamicProperty(id);
-    });
+    longString = matches.join(``);
     if(longString.length == 0) return undefined;
     return longString;
 };
