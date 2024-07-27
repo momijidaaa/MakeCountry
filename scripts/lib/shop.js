@@ -1,12 +1,10 @@
-import { ItemStack, Player, system, world } from "@minecraft/server";
+import { ItemStack, Player, system } from "@minecraft/server";
 import { ChestFormData } from "./chest-ui";
-import { GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
-import * as DyProp from "./DyProp";
-import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
+import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
 import { itemIdToPath } from "../texture_config";
 import shop_config from "../shop_config";
-
 
 /**
  * 
@@ -43,6 +41,10 @@ export function ShopCommonsMenu(player, page = 0, keyword = ``, type = 0) {
 
     form.show(player).then(rs => {
         if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                ShopCommonsMenu(player);
+                return;
+            };
             return;
         };
         switch (rs.selection) {
@@ -97,20 +99,20 @@ export function ShopSelectCommonForm(player, common) {
             return;
         };
         const container = player.getComponent(`inventory`).container;
-        if (Math.ceil((price / common.price) / 64) <= container.emptySlotsCount) {
+        if (container.emptySlotsCount <= Math.ceil((price / common.price) / 64)) {
             player.sendMessage({ translate: `no.available.slots` });
             return;
         };
-        for (let i = (price / common.price); 0 < i; i -= 64) { 
-            if(i < 64) {
-                container.addItem(new ItemStack(common.id,i));
+        for (let i = (price / common.price); 0 < i; i -= 64) {
+            if (i < 64) {
+                container.addItem(new ItemStack(common.id, i));
                 break;
             };
-            container.addItem(new ItemStack(common.id,64));
+            container.addItem(new ItemStack(common.id, 64));
         };
         playerData.money -= price;
-        player.sendMessage({translate: `finish.bought`});
-        StringifyAndSavePropertyData(`player_${player.id}`,playerData);
+        player.sendMessage({ translate: `finish.bought` });
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         return;
     });
 };

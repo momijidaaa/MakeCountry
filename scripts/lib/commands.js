@@ -8,6 +8,7 @@ import jobs_config from "../jobs_config";
 import config from "../config";
 import { PlayerMarketMainMenu } from "./player_market";
 import { tpaMainForm } from "./tpa";
+import { ShopCommonsMenu } from "./shop";
 
 class ChatHandler {
     constructor(event) {
@@ -160,6 +161,9 @@ class ChatHandler {
                     break;
                 case "tpa":
                     this.tpa();
+                    break;
+                case "shop":
+                    this.shop();
                     break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
@@ -410,6 +414,15 @@ class ChatHandler {
         return;
     };
 
+    shop() {
+        if (!config.shopValidity) {
+            this.sender.sendMessage({ translate: `no.available.shop` });
+            return;
+        };
+        ShopCommonsMenu(this.sender);
+        return;
+    };
+
     playermarket() {
         if (!config.playerMarketValidity) {
             this.sender.sendMessage({ translate: `command.error.playermarket.novalidity` });
@@ -418,7 +431,7 @@ class ChatHandler {
         PlayerMarketMainMenu(this.sender);
         return;
     };
-    
+
     tpa() {
         if (!config.tpaValidity) {
             this.sender.sendMessage({ translate: `command.error.tpa.novalidity` });
@@ -470,6 +483,7 @@ class ChatHandler {
         { translate: `command.help.jobs` }, { text: `\n` },
         { translate: `command.help.playermarket` }, { text: `\n` },
         { translate: `command.help.pm` }, { text: `\n` },
+        { translate: `command.help.shop` }, { text: `\n` },
         { translate: `command.help.tpa` }, { text: `\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });

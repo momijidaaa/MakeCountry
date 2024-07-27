@@ -67,4 +67,7 @@ export default {
     tpaValidity: true,
     //tpaの有効秒数
     tpaValiditySeconds: 120,
+
+    //shopを有効にするか
+    shopValidity: true
 };
