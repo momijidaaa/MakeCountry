@@ -97,7 +97,7 @@ export function ShopSelectCommonForm(player, common) {
             return;
         };
         const container = player.getComponent(`inventory`).container;
-        if (Math.ceil((price / common.price) / 64) < container.emptySlotsCount) {
+        if (Math.ceil((price / common.price) / 64) <= container.emptySlotsCount) {
             player.sendMessage({ translate: `no.available.slots` });
             return;
         };
