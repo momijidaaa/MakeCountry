@@ -62,11 +62,17 @@ export default {
     combatTagNoTeleportValidity: true,
     //コンバットタグの持続時間
     combatTagSeconds: 30,
-    
+
     //tpaを有効にするか
     tpaValidity: true,
     //tpaの有効秒数
     tpaValiditySeconds: 120,
+
+    //cameraコマンド(視点を固定するコマンド)を有効にするか
+    cameraValidity: true,
+
+    //killコマンド(自滅するコマンド)を有効にするか
+    killValidity: true,
 
     //shopを有効にするか
     shopValidity: true

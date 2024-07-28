@@ -165,6 +165,9 @@ class ChatHandler {
                 case "shop":
                     this.shop();
                     break;
+                case "camera":
+                    this.camera();
+                    break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
                     break;
@@ -531,10 +534,14 @@ class ChatHandler {
     };
 
     kill() {
+        if (!config.killValidity) {
+            this.sender.sendMessage({ translate: `command.error.kill.novalidity` });
+            return;
+        };
         this.sender.runCommand(`kill @s`);
         return;
     };
-    
+
     CountryList() {
         countryList(this.sender);
         return;
@@ -560,9 +567,26 @@ class ChatHandler {
         this.sender.sendMessage({ translate: `command.chome.result` })
         return;
     };
-    
+
     mainMenu() {
         playerMainMenu(this.sender);
+        return;
+    };
+
+    camera() {
+        if (!config.cameraValidity) {
+            this.sender.sendMessage({ translate: `command.error.camera.novalidity` });
+            return;
+        };
+        const isCamera = this.sender.hasTag(`mc_camera`);
+        if(isCamera) {
+            this.sender.camera.clear();
+            this.sender.removeTag(`mc_camera`);
+        };
+        if(!isCamera) {
+            this.sender.addTag(`mc_camera`);
+            this.sender.camera.setCamera(`minecraft:free`,{location: this.sender.getHeadLocation(),rotation: this.sender.getRotation()});
+        };
         return;
     };
 };
