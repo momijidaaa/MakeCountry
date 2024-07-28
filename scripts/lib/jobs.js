@@ -18,6 +18,38 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         return;
     };
 
+    //土掘り士
+    if (brokenBlockPermutation.type.id === `minecraft:dirt` && player.hasTag(`mcjobs_dirtdigger`)) {
+        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+    if (brokenBlockPermutation.type.id === `minecraft:grass` && player.hasTag(`mcjobs_dirtdigger`)) {
+        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+    if (brokenBlockPermutation.type.id === `minecraft:grass_block` && player.hasTag(`mcjobs_dirtdigger`)) {
+        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+
+    //砂掘り士
+    if (brokenBlockPermutation.type.id.endsWith(`sand`) && player.hasTag(`mcjobs_sanddigger`)) {
+        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+
     //鉱夫
     if (brokenBlockPermutation.type.id.endsWith(`_ore`) && player.hasTag(`mcjobs_miner`)) {
         const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max);
@@ -54,6 +86,7 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
+
     //農家
     if (brokenBlockPermutation.getTags().includes(`minecraft:crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) == 7) {
         const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
