@@ -635,7 +635,7 @@ export const itemIdToPath = {
   "minecraft:gold_ingot": "textures/items/gold_ingot",
   "minecraft:netherite_scrap": "textures/items/netherite_scrap",
   "minecraft:netherite_ingot": "textures/items/netherite_ingot",
-  "minecraft:stick": "textures/items/warped_fungus_on_a_stick",
+  "minecraft:stick": "textures/items/stick",
   "minecraft:flint": "textures/items/flint",
   "minecraft:wheat": "textures/items/wheat",
   "minecraft:bone": "textures/items/bone",
