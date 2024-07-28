@@ -488,6 +488,7 @@ class ChatHandler {
         { translate: `command.help.pm` }, { text: `\n` },
         { translate: `command.help.shop` }, { text: `\n` },
         { translate: `command.help.tpa` }, { text: `\n` },
+        { translate: `command.help.camera` }, { text: `\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
@@ -582,10 +583,12 @@ class ChatHandler {
         if(isCamera) {
             this.sender.camera.clear();
             this.sender.removeTag(`mc_camera`);
+            return;
         };
         if(!isCamera) {
             this.sender.addTag(`mc_camera`);
             this.sender.camera.setCamera(`minecraft:free`,{location: this.sender.getHeadLocation(),rotation: this.sender.getRotation()});
+            return;
         };
         return;
     };
