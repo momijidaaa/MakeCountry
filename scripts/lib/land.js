@@ -437,6 +437,10 @@ export function playerCountryJoin(player, countryId) {
     try {
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        if(playerData.money < 0) {
+            player.sendMessage({translate: `error.cannnot.in.money.minus`})
+            return;
+        };
         countryData.members.push(playerData.id);
         playerData.roles.push(countryData.peopleRole);
         playerData.country = countryId;
