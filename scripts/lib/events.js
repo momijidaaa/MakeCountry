@@ -1,8 +1,9 @@
 import { system, world } from "@minecraft/server";
-import { CheckPermissionFromLocation, GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { CheckPermissionFromLocation, GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
 import { chestLockForm } from "./form";
+import jobs_config from "../jobs_config";
 
 world.afterEvents.worldInitialize.subscribe((ev) => {
     world.sendMessage({ translate: `world.message.addon` });
@@ -10,12 +11,12 @@ world.afterEvents.worldInitialize.subscribe((ev) => {
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player, initialSpawn } = ev;
-    if(!initialSpawn) return;
+    if (!initialSpawn) return;
     player.sendMessage({
         rawtext: [
             { text: `§6------------------------------------------------------------------------------------------\n\n` },
             { translate: `world.message.addon` },
-            {text: `\n\n§9Support Discord Server\n§ahttps://discord.gg/8S9YhNaHjD\n\n§cYoutube\n§ahttps://youtube.com/@KaronDAAA\n\n§bTwitter\n§ahttps://twitter.com/KaronDAAA\n\n§6------------------------------------------------------------------------------------------\n`}
+            { text: `\n\n§9Support Discord Server\n§ahttps://discord.gg/8S9YhNaHjD\n\n§cYoutube\n§ahttps://youtube.com/@KaronDAAA\n\n§bTwitter\n§ahttps://twitter.com/KaronDAAA\n\n§6------------------------------------------------------------------------------------------\n` }
         ]
     });
 });
@@ -113,7 +114,21 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     };
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
-    if (!cannot) return;
+    if (!cannot) {
+        const growth = block.permutation.getState(`growth`);
+        system.run(() => {
+            //農家
+            if (block.typeId === `minecraft:sweet_berry_bush` && player.hasTag(`mcjobs_farmer`) && 1 < growth) {
+                const playerData = GetAndParsePropertyData(`player_${player.id}`);
+                const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
+                playerData.money += Math.ceil((random / 10 * growth) * 100) / 100;
+                StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+                if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${Math.ceil((random / 10 * growth) * 100) / 100}`);
+                return;
+            };
+        });
+        return;
+    };
     player.sendMessage({ translate: `cannot.permission.${permission}` });
     return;
 });

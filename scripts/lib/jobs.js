@@ -1,4 +1,4 @@
-import { Player, world } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
 import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
@@ -34,14 +34,14 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:deepslate` && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.oreMiningReward.max);
+        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:tuff` && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.oreMiningReward.max);
+        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
@@ -99,13 +99,13 @@ world.afterEvents.entityDie.subscribe((ev) => {
 
 playerFishingAfterEvent.subscribe((event) => {
     if (!jobs_config.validity) return;
-    if(!event.result) return;
+    if (!event.result) return;
     // 漁師
     /**
      * @type {Player}
      */
     const player = event.player;
-    if(!player.hasTag(`mcjobs_fisherman`)) return;
+    if (!player.hasTag(`mcjobs_fisherman`)) return;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const random = getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max)
     if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
@@ -123,11 +123,11 @@ export function jobsForm(player) {
         let isEmploy = player.hasTag(`mcjobs_${job.id}`);
         let employMessage = `not.yet.employed`;
         if (isEmploy) employMessage = `already.found.employment`;
-        form.button({ rawtext: [{text: `§l`},{ translate: job.name }, { text: `\n` }, { translate: employMessage }] });
+        form.button({ rawtext: [{ text: `§l` }, { translate: job.name }, { text: `\n` }, { translate: employMessage }] });
     };
     form.show(player).then((rs) => {
         if (rs.canceled) {
-            if(rs.cancelationReason === FormCancelationReason.UserBusy) {
+            if (rs.cancelationReason === FormCancelationReason.UserBusy) {
                 jobsForm(player);
                 return;
             };
@@ -135,7 +135,7 @@ export function jobsForm(player) {
         };
         const selected = rs.selection;
         let isEmploy = player.hasTag(`mcjobs_${jobs_config.jobsList[selected].id}`);
-        if(isEmploy) {
+        if (isEmploy) {
             player.removeTag(`mcjobs_${jobs_config.jobsList[selected].id}`);
             jobsForm(player);
             return;
