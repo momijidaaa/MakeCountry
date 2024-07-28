@@ -46,8 +46,14 @@ export default {
         //ここに追加可能
     ],
 
-    fishingReward: { min: 20, max: 35 },
+    fishingReward: { min: 20, max: 35 }, //釣りでアイテムを釣ったときにもらえるお金の変域
+
+    sanddiggerReward: { min: 0.1, max: 0.3 }, //砂を掘ったときにもらえるお金の変域
+
+    dirtdiggerReward: { min: 0.1, max: 0.3 }, //土を掘ったときにもらえるお金の変域
+
     woodCutReward: { min: 2, max: 7 }, //木を切ったときにもらえるお金の変域
+    
     cropHarvestReward: { min: 5, max: 25 }, //作物収穫時にもらえるお金の変域
     cocoaHarvestReward: { min: 5, max: 25 }, //ココア収穫時にもらえるお金の変域
 
