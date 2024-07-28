@@ -20,21 +20,21 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
 
     //土掘り士
     if (brokenBlockPermutation.type.id === `minecraft:dirt` && player.hasTag(`mcjobs_dirtdigger`)) {
-        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        const random = getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:grass` && player.hasTag(`mcjobs_dirtdigger`)) {
-        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        const random = getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:grass_block` && player.hasTag(`mcjobs_dirtdigger`)) {
-        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        const random = getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max);
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
