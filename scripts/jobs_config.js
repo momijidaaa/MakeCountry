@@ -32,6 +32,16 @@ export default {
             id: `fisherman`,
             name: `fisherman`,
         },
+        //土掘り士
+        {
+            id: `dirtdigger`,
+            name: `dirtdigger`,
+        },
+        //砂掘り士
+        {
+            id: `sanddigger`,
+            name: `sanddigger`,
+        },
 
         //ここに追加可能
     ],
