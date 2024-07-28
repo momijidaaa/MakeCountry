@@ -529,10 +529,12 @@ class ChatHandler {
         playerCountryLeave(this.sender);
         return;
     };
+
     kill() {
         this.sender.runCommand(`kill @s`);
         return;
     };
+    
     CountryList() {
         countryList(this.sender);
         return;
@@ -558,6 +560,7 @@ class ChatHandler {
         this.sender.sendMessage({ translate: `command.chome.result` })
         return;
     };
+    
     mainMenu() {
         playerMainMenu(this.sender);
         return;

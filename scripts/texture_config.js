@@ -830,5 +830,22 @@ export const itemIdToPath = {
   "minecraft:border_block": "textures/blocks/border",
   "minecraft:tallgrass": "textures/blocks/tallgrass",
   "minecraft:bordure_indented_banner_pattern": "textures/items/flow_banner_pattern",
-  "minecraft:field_masoned_banner_pattern": "textures/items/flow_banner_pattern"
+  "minecraft:field_masoned_banner_pattern": "textures/items/flow_banner_pattern",
+  "minecraft:bolt_armor_trim_smithing_template": "textures/items/bolt_armor_trim_smithing_template",
+  "minecraft:coast_armor_trim_smithing_template": "textures/items/coast_armor_trim_smithing_template",
+  "minecraft:dune_armor_trim_smithing_template": "textures/items/dune_armor_trim_smithing_template",
+  "minecraft:flow_armor_trim_smithing_template": "textures/items/flow_armor_trim_smithing_template",
+  "minecraft:host_armor_trim_smithing_template": "textures/items/host_armor_trim_smithing_template",
+  "minecraft:raiser_armor_trim_smithing_template": "textures/items/raiser_armor_trim_smithing_template",
+  "minecraft:rib_armor_trim_smithing_template": "textures/items/rib_armor_trim_smithing_template",
+  "minecraft:sentry_armor_trim_smithing_template": "textures/items/sentry_armor_trim_smithing_template",
+  "minecraft:shaper_armor_trim_smithing_template": "textures/items/shaper_armor_trim_smithing_template",
+  "minecraft:silence_armor_trim_smithing_template": "textures/items/silence_armor_trim_smithing_template",
+  "minecraft:snout_armor_trim_smithing_template": "textures/items/snout_armor_trim_smithing_template",
+  "minecraft:spire_armor_trim_smithing_template": "textures/items/spire_armor_trim_smithing_template",
+  "minecraft:tide_armor_trim_smithing_template": "textures/items/tide_armor_trim_smithing_template",
+  "minecraft:vex_armor_trim_smithing_template": "textures/items/vex_armor_trim_smithing_template",
+  "minecraft:ward_armor_trim_smithing_template": "textures/items/ward_armor_trim_smithing_template",
+  "minecraft:wayfinder_armor_trim_smithing_template": "textures/items/wayfinder_armor_trim_smithing_template",
+  "minecraft:wild_armor_trim_smithing_template": "textures/items/wild_armor_trim_smithing_template"
 }
