@@ -15,6 +15,12 @@ world.afterEvents.entityHurt.subscribe(ev => {
     return;
 });
 
+world.afterEvents.entityDie.subscribe((ev) => {
+    const player = ev.deadEntity;
+    if(!(player instanceof Player)) return;
+    player.removeTag(`mc_combat`);
+});
+
 system.runInterval(() => {
     if (!config.combatTagValidity) return;
     const players = world.getPlayers({ tags: [`mc_combat`] });
