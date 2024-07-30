@@ -17,7 +17,15 @@ world.afterEvents.entityHurt.subscribe(ev => {
 
 world.afterEvents.entityDie.subscribe((ev) => {
     const player = ev.deadEntity;
-    if(!(player instanceof Player)) return;
+    if (!(player instanceof Player)) return;
+    combatSeconds.set(player.id);
+    player.removeTag(`mc_combat`);
+});
+
+world.afterEvents.playerSpawn.subscribe((ev) => {
+    const { initialSpawn, player } = ev;
+    if(!initialSpawn) return;
+    combatSeconds.set(player.id);
     player.removeTag(`mc_combat`);
 });
 
