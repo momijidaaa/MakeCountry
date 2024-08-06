@@ -22,32 +22,32 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
 });
 
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
-    const permission = `break`
+    const permission = 'break';
     const { player, block, dimension } = ev;
     const { x, y, z } = block.location;
     const chestId = `chest_${x}_${y}_${z}_${dimension.id}`;
-    let chestLockData = GetAndParsePropertyData(chestId);
-    if (chestLockData && block.typeId.includes(`chest`)) {
-        if (chestLockData.player === player.id) {
-            system.runTimeout(() => {
-                DyProp.setDynamicProperty(chestId);
-            });
-            return;
-        };
-        ev.cancel = true;
-        player.sendMessage({ translate: `message.thischest.islocked`, with: [`${GetAndParsePropertyData(`player_${chestLockData.player}`).name}`] });
+    const chestLockData = GetAndParsePropertyData(chestId);
+    const isChest = block.typeId.includes('chest');
+
+    if (chestLockData) {
+        if (isChest && chestLockData.player === player.id) {
+            system.runTimeout(() => DyProp.setDynamicProperty(chestId));
+        } else if (isChest) {
+            ev.cancel = true;
+            const ownerName = GetAndParsePropertyData(`player_${chestLockData.player}`).name;
+            player.sendMessage({ translate: 'message.thischest.islocked', with: [ownerName] });
+        } else {
+            system.runTimeout(() => DyProp.setDynamicProperty(chestId));
+        }
         return;
-    };
-    if (chestLockData && !block.typeId.includes(`chest`)) {
-        system.runTimeout(() => {
-            DyProp.setDynamicProperty(chestId);
-        });
-    };
-    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
+    }
+
+    const cannot = CheckPermissionFromLocation(player, x, z, dimension.id, permission);
     ev.cancel = cannot;
-    if (!cannot) return;
-    player.sendMessage({ translate: `cannot.permission.${permission}` });
-    return;
+
+    if (cannot) {
+        player.sendMessage({ translate: `cannot.permission.${permission}` });
+    }
 });
 
 world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
@@ -73,64 +73,70 @@ world.beforeEvents.itemUseOn.subscribe((ev) => {
 });
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
-    const permission2 = `openContainer`;
-    const permission = `blockUse`;
+    const permission2 = 'openContainer'; // コンテナの開放権限
+    const permission = 'blockUse'; // ブロックの使用権限
     const { player, block } = ev;
     const { x, y, z } = block.location;
-    if (block.getComponent(`inventory`)) {
-        const cannot2 = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission2);
+    const dimensionId = player.dimension.id;
+    const chestId = `chest_${x}_${y}_${z}_${dimensionId}`;
+    const isChest = block.typeId.includes('chest'); // チェストかどうか
+    const playerId = player.id;
+    const isSneaking = player.isSneaking; // スニーク状態かどうか
+    const container = player.getComponent('inventory')?.container;
+    const selectedItem = container?.getItem(player.selectedSlotIndex);
+
+    // インベントリの操作確認
+    if (block.getComponent('inventory')) {
+        const cannot2 = CheckPermissionFromLocation(player, x, z, dimensionId, permission2);
         if (!cannot2) {
-            const container = player.getComponent(`inventory`).container;
-            const chestId = `chest_${x}_${y}_${z}_${player.dimension.id}`;
-            let chestLockData = GetAndParsePropertyData(chestId);
-            if (chestLockData && block.typeId.includes(`chest`)) {
-                if (chestLockData.player == player.id && !player.isSneaking) {
-                    return;
-                };
-                if (chestLockData.player == player.id && player.isSneaking && !container.getItem(player.selectedSlotIndex)) {
+            const chestLockData = GetAndParsePropertyData(chestId);
+            if (chestLockData) {
+                const isOwner = chestLockData.player === playerId; // 所有者かどうか
+                if (isChest) {
+                    if (isOwner && !isSneaking) return;
+                    if (isOwner && isSneaking && !selectedItem) {
+                        ev.cancel = true;
+                        system.runTimeout(() => chestLockForm(player, chestId));
+                        return;
+                    }
                     ev.cancel = true;
-                    system.runTimeout(() => {
-                        chestLockForm(player, chestId);
-                    });
+                    player.sendMessage({ translate: 'message.thischest.islocked', with: [GetAndParsePropertyData(`player_${chestLockData.player}`).name] });
                     return;
-                };
+                }
+                if (!isChest) {
+                    StringifyAndSavePropertyData(chestId); // データの保存
+                }
+            } else if (isSneaking && isChest && !selectedItem) {
                 ev.cancel = true;
-                player.sendMessage({ translate: `message.thischest.islocked`, with: [`${GetAndParsePropertyData(`player_${chestLockData.player}`).name}`] });
+                system.runTimeout(() => chestLockForm(player, chestId));
                 return;
-            };
-            if (chestLockData && !block.typeId.includes(`chest`)) {
-                StringifyAndSavePropertyData(chestId);
-            };
-            if (player.isSneaking && block.typeId.includes(`chest`) && !container.getItem(player.selectedSlotIndex)) {
-                ev.cancel = true;
-                system.runTimeout(() => {
-                    chestLockForm(player, chestId);
-                });
-                return;
-            };
-        };
+            }
+        }
         ev.cancel = cannot2;
         return;
-    };
-    const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
+    }
+
+    // 一般的なブロック操作の権限確認
+    const cannot = CheckPermissionFromLocation(player, x, z, dimensionId, permission);
     ev.cancel = cannot;
     if (!cannot) {
-        const growth = block.permutation.getState(`growth`);
+        const growth = block.permutation.getState('growth');
         system.run(() => {
-            //農家
-            if (block.typeId === `minecraft:sweet_berry_bush` && player.hasTag(`mcjobs_farmer`) && 1 < growth) {
-                const playerData = GetAndParsePropertyData(`player_${player.id}`);
+            // 農家ジョブの報酬
+            if (block.typeId === 'minecraft:sweet_berry_bush' && player.hasTag('mcjobs_farmer') && growth > 1) {
+                const playerData = GetAndParsePropertyData(`player_${playerId}`);
                 const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
-                playerData.money += Math.ceil((random / 10 * growth) * 100) / 100;
-                StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-                if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${Math.ceil((random / 10 * growth) * 100) / 100}`);
+                const reward = Math.ceil((random / 10 * growth) * 100) / 100;
+                playerData.money += reward;
+                StringifyAndSavePropertyData(`player_${playerId}`, playerData);
+                if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${reward}`);
                 return;
-            };
+            }
         });
         return;
-    };
+    }
+
     player.sendMessage({ translate: `cannot.permission.${permission}` });
-    return;
 });
 
 world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
