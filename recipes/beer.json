@@ -2,7 +2,7 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:green_tea_recipe"
+            "identifier": "mc:beer_recipe"
         },
         "tags": [
             "crafting_table"
@@ -16,11 +16,11 @@
                 "data": 0
             },
             "*": {
-                "item": "minecraft:wheat_seeds"
+                "item": "minecraft:wheat"
             }
         },
         "result": {
-            "item": "mc:green_tea",
+            "item": "mc:beer",
             "count": 1
         }
     }
