@@ -220,6 +220,8 @@ class ChatHandler {
         const targetData = GetAndParsePropertyData(`player_${targetPlayer.id}`);
         targetData.money += Math.floor(amount);
         this.playerData.money -= Math.floor(amount);
+        targetData.money = Math.floor(targetData.money * 100) / 100;
+        this.playerData.money = Math.floor(this.playerData.money * 100) / 100;
         StringifyAndSavePropertyData(`player_${targetPlayer.id}`, targetData);
         StringifyAndSavePropertyData(`player_${this.sender.id}`, this.playerData);
         this.sender.sendMessage({ translate: `command.sendmoney.result.sender`, with: [targetName, `${config.MoneyName} ${Math.floor(amount)}`] });

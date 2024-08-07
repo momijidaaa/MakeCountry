@@ -49,6 +49,36 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
+    if (brokenBlockPermutation.type.id === `minecraft:gravel` && player.hasTag(`mcjobs_sanddigger`)) {
+        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+
+    //ネザー掘り士
+    if (brokenBlockPermutation.type.id === `minecraft:netherrack` && player.hasTag(`mcjobs_netherdigger`)) {
+        const random = getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+    if (brokenBlockPermutation.type.id === `minecraft:basalt` && player.hasTag(`mcjobs_netherdigger`)) {
+        const random = getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
+    if (brokenBlockPermutation.type.id === `minecraft:soul_soil` && player.hasTag(`mcjobs_netherdigger`)) {
+        const random = getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
 
     //鉱夫
     if(player.hasTag(`mcjobs_miner`) && player.getComponent(`inventory`).container.getItem(player.selectedSlotIndex)?.getComponent(`enchantable`)?.getEnchantment(`silk_touch`)) {

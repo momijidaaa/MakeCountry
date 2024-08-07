@@ -284,6 +284,6 @@ export function getRandomInteger(min, max) {
  * @returns 
  */
 export function isDecimalNumber(value) {
-    let newValue = Number(value);
-    return typeof newValue === 'number' && isFinite(newValue);
+    const integerRegex = /^[1-9]\d*$/;
+    return integerRegex.test(value);
 };

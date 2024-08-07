@@ -12,7 +12,7 @@ import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, 
  */
 export function chestLockForm(player, id) {
     const form = new ActionFormData();
-    form.title({translate: `form.chestlock.title`});
+    form.title({ translate: `form.chestlock.title` });
     /**
      * @type {{id: string,player: id}}
      */
@@ -32,12 +32,12 @@ export function chestLockForm(player, id) {
         };
         switch (rs.selection) {
             case 0: {
-                if(lock) {
-                    StringifyAndSavePropertyData(id,chestData);
+                if (lock) {
+                    StringifyAndSavePropertyData(id, chestData);
                 } else {
                     DyProp.setDynamicProperty(id);
                 };
-                player.sendMessage({translate: `updated`});
+                player.sendMessage({ translate: `updated` });
                 break;
             };
         };
@@ -396,18 +396,24 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
     const sendPlayerData = GetAndParsePropertyData(`player_${sendPlayer.id}`);
     const form = new ModalFormData();
     form.title({ translate: `form.sendmoney.check.title` });
-    form.slider({ translate: `form.sendmoney.check.label` }, 0, sendPlayerData?.money, 1);
+    form.textField({ rawtext: [{ translate: `form.sendmoney.check.label` }, { text: `: ${sendPlayerData?.money}` }] }, { rawtext: `input.number` });
     form.submitButton({ translate: `mc.button.sendmoney` });
     form.show(sendPlayer).then(rs => {
         if (rs.canceled) {
             sendMoneyForm(sendPlayer);
             return;
         };
+        const value = rs.formValues[0];
+        if (!isDecimalNumber(value)) {
+            sendPlayer.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
         const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
         const sendPlayerData2 = GetAndParsePropertyData(`player_${sendPlayer.id}`);
-        const value = rs.formValues[0];
         receivePlayerData.money += value;
         sendPlayerData2.money -= value;
+        sendPlayerData2.money = Math.floor(sendPlayerData2.money * 100) / 100;
+        receivePlayerData.money = Math.floor(receivePlayerData.money * 100) / 100;
         sendPlayer.sendMessage({ translate: `command.sendmoney.result.sender`, with: [receivePlayer.name, `${config.MoneyName} ${value}`] });
         receivePlayer.sendMessage({ translate: `command.sendmoney.result.receiver`, with: [sendPlayer.name, `${config.MoneyName} ${value}`] });
         StringifyAndSavePropertyData(`player_${receivePlayer.id}`, receivePlayerData);
@@ -879,22 +885,28 @@ export function treasurybudgetDepositForm(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const form = new ModalFormData();
     form.title({ translate: `treasurybudget.deposit` });
-    form.slider({ translate: `deposit` }, 0, playerData.money, 1);
+    form.textField({ rawtext: [{ translate: `deposit` }, { text: `: ${playerData.money}` }] }, { translate: `input.number` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             treasurybudgetSelectForm(player);
             return;
         };
+        let needMoney = rs.formValues[0];
+        if (!isDecimalNumber(needMoney)) {
+            player.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
         const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
         const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
         let hasMoney = playerData2.money;
-        let needMoney = rs.formValues[0];
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.money` });
             return;
         };
         countryData2.money += needMoney;
         playerData2.money -= needMoney;
+        playerData2.money = Math.floor(playerData2.money * 100) / 100;
+        countryData2.money = Math.floor(countryData2.money * 100) / 100;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
         treasurybudgetSelectForm(player);
@@ -912,22 +924,28 @@ export function treasurybudgetWithdrawForm(player) {
     const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const form = new ModalFormData();
     form.title({ translate: `treasurybudget.deposit` });
-    form.slider({ translate: `deposit` }, 0, countryData.money, 1);
+    form.textField({ rawtext: [{ translate: `deposit` }, { text: `: ${countryData.money}` }] }, { translate: `input.number` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             treasurybudgetSelectForm(player);
             return;
         };
+        let needMoney = rs.formValues[0];
+        if (!isDecimalNumber(needMoney)) {
+            player.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
         const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
         const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
         let hasMoney = countryData2.money;
-        let needMoney = rs.formValues[0];
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.treasurybudget` });
             return;
         };
         countryData2.money -= needMoney;
         playerData2.money += needMoney;
+        playerData2.money = Math.floor(playerData2.money * 100) / 100;
+        countryData2.money = Math.floor(countryData2.money * 100) / 100;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
         treasurybudgetSelectForm(player);
@@ -975,15 +993,19 @@ export function resourcepointDepositForm(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const form = new ModalFormData();
     form.title({ translate: `resourcepoint.conversion` });
-    form.slider({ translate: `conversion` }, 0, playerData.money, 1);
+    form.textField({ rawtext: [{ translate: `conversion` }, { text: ` : ${playerData.money}` }] }, { translate: `input.number` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             resourcepointSelectForm(player);
             return;
         };
+        let hasMoney = playerData2.money;
+        if (!isDecimalNumber(needMoney)) {
+            player.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
         const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
         const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
-        let hasMoney = playerData2.money;
         let needMoney = rs.formValues[0];
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.money` });
@@ -991,6 +1013,8 @@ export function resourcepointDepositForm(player) {
         };
         countryData2.resourcePoint += needMoney;
         playerData2.money -= needMoney;
+        playerData2.money = Math.floor(playerData2.money * 100) / 100;
+        countryData2.money = Math.floor(countryData2.money * 100) / 100;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
         resourcepointSelectForm(player);
@@ -1008,22 +1032,28 @@ export function resourcepointWithdrawForm(player) {
     const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const form = new ModalFormData();
     form.title({ translate: `resourcepoint.withdraw` });
-    form.slider({ translate: `withdraw` }, 0, countryData.resourcePoint, 1);
+    form.textField({ rawtext: [{ translate: `withdraw` }, { text: ` : ${countryData.resourcePoint}` }] }, { translate: `input.number` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             resourcepointSelectForm(player);
             return;
         };
+        let needMoney = rs.formValues[0];
+        if (!isDecimalNumber(needMoney)) {
+            player.sendMessage({ translate: `input.error.notnumber` });
+            return;
+        };
         const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
         const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
         let hasMoney = countryData2.resourcePoint;
-        let needMoney = rs.formValues[0];
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.resourcepoint` });
             return;
         };
         countryData2.resourcePoint -= needMoney;
         playerData2.money += needMoney;
+        playerData2.money = Math.floor(playerData2.money * 100) / 100;
+        countryData2.money = Math.floor(countryData2.money * 100) / 100;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
         resourcepointSelectForm(player);
