@@ -1,4 +1,4 @@
-import { Player, system, world } from "@minecraft/server";
+import { EnchantmentType, EnchantmentTypes, Player, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
 import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
@@ -51,6 +51,9 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
     };
 
     //鉱夫
+    if(player.hasTag(`mcjobs_miner`) && player.getComponent(`inventory`).container.getItem(player.selectedSlotIndex)?.getComponent(`enchantable`)?.getEnchantment(`silk_touch`)) {
+        return;
+    };
     if (brokenBlockPermutation.type.id.endsWith(`_ore`) && player.hasTag(`mcjobs_miner`)) {
         const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max);
         playerData.money += random;
