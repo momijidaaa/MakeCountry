@@ -2,7 +2,7 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tuna_sushi_recipe"
+            "identifier": "mc:salmon_sushi_recipe"
         },
         "tags": [
             "crafting_table"
@@ -15,11 +15,11 @@
                 "item": "mc:rice"
             },
             "+": {
-                "item": "mc:tuna"
+                "item": "minecraft:salmon"
             }
         },
         "result": {
-            "item": "mc:tuna_sushi",
+            "item": "mc:salmon_sushi",
             "count": 1
         }
     }

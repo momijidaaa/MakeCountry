@@ -2,18 +2,15 @@
     "format_version": "1.20.30",
     "minecraft:item": {
         "description": {
-            "identifier": "mc:beer"
+            "identifier": "mc:cheese_gyudon"
         },
         "components": {
             "minecraft:icon": {
-                "texture": "beer"
+                "texture": "cheese_gyudon"
             },
             "minecraft:use_duration": 3,
             "minecraft:food": {
-                "nutrition": 4,
-                "using_converts_to": "minecraft:glass_bottle",
-                "can_always_eat": true
-
+                "nutrition": 9
             },
             "minecraft:use_animation": "eat"
         }

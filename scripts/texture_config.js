@@ -862,4 +862,9 @@ export const itemIdToPath = {
   "mc:cheese": "textures/items/cheese",
   "mc:cheese_bucket": "textures/items/cheese_bucket",
   "mc:green_tea": "textures/items/green_tea",
+  "mc:ikura_sushi": "textures/items/ikura_sushi",
+  "mc:tekka_sushi": "textures/items/tekka_sushi",
+  "mc:salmon_sushi": "textures/items/salmon_sushi",
+  "mc:cheese_gyudon": "textures/items/cheese_gyudon",
+  "mc:gyudon": "textures/items/gyudon",
 }

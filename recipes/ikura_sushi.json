@@ -2,24 +2,27 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tuna_sushi_recipe"
+            "identifier": "mc:ikura_sushi_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "*+"
+            "*#+"
         ],
         "key": {
+            "#": {
+                "item": "minecraft:dried_kelp_block"
+            },
             "*": {
                 "item": "mc:rice"
             },
             "+": {
-                "item": "mc:tuna"
+                "item": "minecraft:salmon"
             }
         },
         "result": {
-            "item": "mc:tuna_sushi",
+            "item": "mc:ikura_sushi",
             "count": 1
         }
     }

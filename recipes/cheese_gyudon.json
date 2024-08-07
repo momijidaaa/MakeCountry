@@ -2,24 +2,27 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tuna_sushi_recipe"
+            "identifier": "mc:cheese_gyudon_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "*+"
+            "*+#"
         ],
         "key": {
             "*": {
                 "item": "mc:rice"
             },
             "+": {
-                "item": "mc:tuna"
+                "item": "mc:cheese_bucket"
+            },
+            "#": {
+                "item": "minecraft:beef"
             }
         },
         "result": {
-            "item": "mc:tuna_sushi",
+            "item": "mc:cheese_gyudon",
             "count": 1
         }
     }

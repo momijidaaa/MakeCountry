@@ -62,7 +62,7 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
     switch (ev.itemStack.typeId) {
         case `mc:beer`: {
             source.addEffect(`nausea`, 200,{amplifier: 20});
-            source.addEffect(`regeneration`, 100, { amplifier: 1 });
+            source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         default: {

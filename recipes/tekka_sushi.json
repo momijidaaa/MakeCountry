@@ -2,15 +2,18 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tuna_sushi_recipe"
+            "identifier": "mc:tekka_sushi_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "*+"
+            "*#+"
         ],
         "key": {
+            "#": {
+                "item": "minecraft:dried_kelp_block"
+            },
             "*": {
                 "item": "mc:rice"
             },
@@ -19,7 +22,7 @@
             }
         },
         "result": {
-            "item": "mc:tuna_sushi",
+            "item": "mc:tekka_sushi",
             "count": 1
         }
     }

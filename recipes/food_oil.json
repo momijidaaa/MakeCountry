@@ -2,24 +2,26 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tuna_sushi_recipe"
+            "identifier": "mc:food_oil_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "*+"
+            "***",
+            "*#*",
+            "***"
         ],
         "key": {
-            "*": {
-                "item": "mc:rice"
+            "#": {
+                "item": "minecraft:glass_bottle"
             },
-            "+": {
-                "item": "mc:tuna"
+            "*": {
+                "item": "minecraft:wheat_seeds"
             }
         },
         "result": {
-            "item": "mc:tuna_sushi",
+            "item": "mc:food_oil",
             "count": 1
         }
     }
