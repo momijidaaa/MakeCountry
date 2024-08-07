@@ -60,6 +60,7 @@ world.beforeEvents.entityRemove.subscribe(ev => {
         const isItemEntity = item?.typeId === "minecraft:item";
 
         event.itemStack = isItemEntity ? item.getComponent("item").itemStack : undefined;
+        event.itemEntity = isItemEntity ? item : undefined;
         event.result = isItemEntity;
 
         for (const [playerId, hookId] of playerFishing) {

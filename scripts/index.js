@@ -11,3 +11,5 @@ import "./lib/scripteventCommand";
 import "./lib/combattag";
 
 import "./lib/test";
+
+import "./lib/item";

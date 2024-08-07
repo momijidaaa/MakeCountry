@@ -2,15 +2,16 @@
     "format_version": "1.20.30",
     "minecraft:item": {
         "description": {
-            "identifier": "mc:tuna_sushi"
+            "identifier": "mc:green_tea"
         },
         "components": {
             "minecraft:icon": {
-                "texture": "tuna_sushi"
+                "texture": "green_tea"
             },
             "minecraft:use_duration": 3,
             "minecraft:food": {
-                "nutrition": 15
+                "nutrition": 2,
+                "using_converts_to": "minecraft:glass_bottle"
             },
             "minecraft:use_animation": "eat"
         }

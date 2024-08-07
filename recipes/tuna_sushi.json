@@ -1,0 +1,26 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "mc:tuna_sushi_recipe"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "*#"
+        ],
+        "key": {
+            "#": {
+                "item": "mc:tuna"
+            },
+            "*": {
+                "item": "mc:rice"
+            }
+        },
+        "result": {
+            "item": "mc:tuna_sushi",
+            "count": 1
+        }
+    }
+}
