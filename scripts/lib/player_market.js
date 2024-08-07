@@ -157,7 +157,7 @@ export function PlayerMarketExhibitMainMenu(player) {
     for (let i = 0; i < container.size; i++) {
         const item = container.getItem(i);
         if (!item) continue;
-        if (item.getComponent(`enchantable`) || item.getComponent(`durability`) || item.typeId.includes(`shulker_box`)) continue;
+        if (item.getComponent(`enchantable`) || item.getComponent(`durability`) || item.typeId.includes(`shulker_box`) || item.typeId.includes(`potion`)) continue;
         items.push({ slot: i, itemStack: item });
         form.button(`${item.typeId}\n${item.amount}`);
     };

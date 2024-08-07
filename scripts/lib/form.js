@@ -403,7 +403,7 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
             sendMoneyForm(sendPlayer);
             return;
         };
-        const value = rs.formValues[0];
+        const value = Number(rs.formValues[0]);;
         if (!isDecimalNumber(value)) {
             sendPlayer.sendMessage({ translate: `input.error.notnumber` });
             return;
@@ -891,7 +891,7 @@ export function treasurybudgetDepositForm(player) {
             treasurybudgetSelectForm(player);
             return;
         };
-        let needMoney = rs.formValues[0];
+        let needMoney = Number(rs.formValues[0]);
         if (!isDecimalNumber(needMoney)) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
@@ -903,10 +903,8 @@ export function treasurybudgetDepositForm(player) {
             player.sendMessage({ translate: `error.notenough.money` });
             return;
         };
-        countryData2.money += needMoney;
-        playerData2.money -= needMoney;
-        playerData2.money = Math.floor(playerData2.money * 100) / 100;
-        countryData2.money = Math.floor(countryData2.money * 100) / 100;
+        playerData2.money = (Math.floor(playerData2.money * 100) / 100) - needMoney;
+        countryData2.money = (Math.floor(countryData2.money * 100) / 100) + needMoney;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
         treasurybudgetSelectForm(player);
@@ -916,21 +914,21 @@ export function treasurybudgetDepositForm(player) {
 
 /**
  * 
- * 国家予算の入金フォーム
+ * 国家予算の出金フォーム
  * @param {Player} player 
  */
 export function treasurybudgetWithdrawForm(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const form = new ModalFormData();
-    form.title({ translate: `treasurybudget.deposit` });
-    form.textField({ rawtext: [{ translate: `deposit` }, { text: `: ${countryData.money}` }] }, { translate: `input.number` });
+    form.title({ translate: `treasurybudget.withdraw` });
+    form.textField({ rawtext: [{ translate: `withdraw` }, { text: `: ${countryData.money}` }] }, { translate: `input.number` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             treasurybudgetSelectForm(player);
             return;
         };
-        let needMoney = rs.formValues[0];
+        let needMoney = Number(rs.formValues[0]);;
         if (!isDecimalNumber(needMoney)) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
@@ -942,10 +940,8 @@ export function treasurybudgetWithdrawForm(player) {
             player.sendMessage({ translate: `error.notenough.treasurybudget` });
             return;
         };
-        countryData2.money -= needMoney;
-        playerData2.money += needMoney;
-        playerData2.money = Math.floor(playerData2.money * 100) / 100;
-        countryData2.money = Math.floor(countryData2.money * 100) / 100;
+        playerData2.money = (Math.floor(playerData2.money * 100) / 100) + needMoney;
+        countryData2.money = (Math.floor(countryData2.money * 100) / 100) - needMoney;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
         StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
         treasurybudgetSelectForm(player);
@@ -999,14 +995,14 @@ export function resourcepointDepositForm(player) {
             resourcepointSelectForm(player);
             return;
         };
-        let hasMoney = playerData2.money;
+        let needMoney = Number(rs.formValues[0]);;
         if (!isDecimalNumber(needMoney)) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
-        };
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        };        
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);        
+        let hasMoney = playerData2.money;
         const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
-        let needMoney = rs.formValues[0];
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.money` });
             return;
@@ -1038,7 +1034,7 @@ export function resourcepointWithdrawForm(player) {
             resourcepointSelectForm(player);
             return;
         };
-        let needMoney = rs.formValues[0];
+        let needMoney = Number(rs.formValues[0]);;
         if (!isDecimalNumber(needMoney)) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;

@@ -40,4 +40,11 @@ export default [
     {id: `minecraft:ward_armor_trim_smithing_template`,price: 50000},
     {id: `minecraft:wayfinder_armor_trim_smithing_template`,price: 50000},
     {id: `minecraft:wild_armor_trim_smithing_template`,price: 50000},
+    {id: `minecraft:villager_spawn_egg`,price: 100000},
+    {id: `minecraft:sculk`,price: 500},
+    {id: `minecraft:sculk_catalyst`,price: 5000},
+    {id: `minecraft:mycelium`,price: 300},
+    {id: `minecraft:mace`,price: 300000},
+    {id: `minecraft:elytra`,price: 150000},
+    {id: `minecraft:heart_of_the_sea`,price: 800000},
 ];
