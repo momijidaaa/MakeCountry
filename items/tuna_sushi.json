@@ -1,0 +1,13 @@
+{
+    "format_version": "1.20.20",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:tuna_sushi"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "tuna_sushi"
+            }
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "format_version": "1.20.20",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:sg550"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "sg550"
+            },
+            "minecraft:hand_equipped": true
+        }
+    }
+}
