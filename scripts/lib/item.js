@@ -65,6 +65,11 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
+        case `mc:sake`: {
+            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`regeneration`, 100, { amplifier: 0 });
+            break;
+        };
         default: {
             break;
         };

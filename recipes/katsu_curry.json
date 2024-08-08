@@ -1,0 +1,33 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "mc:katsu_curry_recipe"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "+&",
+            "*#"
+        ],
+        "key": {
+            "*": {
+                "item": "mc:rice"
+            },
+            "+": {
+                "item": "minecraft:porkchop"
+            },
+            "#": {
+                "item": "minecraft:carrot"
+            },
+            "&": {
+                "item": "minecraft:beetroot"
+            }
+        },
+        "result": {
+            "item": "mc:katsu_curry",
+            "count": 1
+        }
+    }
+}
