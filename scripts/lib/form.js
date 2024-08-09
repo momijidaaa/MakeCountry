@@ -999,8 +999,8 @@ export function resourcepointDepositForm(player) {
         if (!isDecimalNumber(needMoney)) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
-        };        
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);        
+        };
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
         let hasMoney = playerData2.money;
         const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
         if (hasMoney < needMoney) {
