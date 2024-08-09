@@ -2,11 +2,11 @@
     "format_version": "1.20.30",
     "minecraft:item": {
         "description": {
-            "identifier": "mc:yakitori"
+            "identifier": "mc:cotton_candy"
         },
         "components": {
             "minecraft:icon": {
-                "texture": "yakitori"
+                "texture": "cotton_candy"
             },
             "minecraft:use_duration": 2,
             "minecraft:food": {
