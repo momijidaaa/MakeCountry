@@ -890,4 +890,9 @@ export const itemIdToPath = {
   "mc:gyudon_egg": "textures/items/gyudon_egg",
   "mc:karaage_curry": "textures/items/karaage_curry",
   "mc:curry": "textures/items/curry",
+  "mc:cotton_candy": "textures/items/cotton_candy",
+  "mc:white_chocolate": "textures/items/white_chocolate",
+  "mc:milk_chocolate": "textures/items/milk_chocolate",
+  "mc:black_chocolate": "textures/items/black_chocolate",
+  "mc:katsudon": "textures/items/katsudon",
 }
