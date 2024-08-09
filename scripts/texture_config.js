@@ -900,4 +900,5 @@ export const itemIdToPath = {
   "mc:kelp_shavedice": "textures/items/kelp_shavedice",
   "mc:bluehawaii_shavedice": "textures/items/bluehawaii_shavedice",
   "mc:frankfurt": "textures/items/frankfurt",
+  "mc:yakisoba": "textures/items/yakisoba",
 }
