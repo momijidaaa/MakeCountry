@@ -2,14 +2,14 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:katsu_curry_recipe"
+            "identifier": "mc:katsudon_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "+&-",
-            "*#"
+            "*+",
+            "-#"
         ],
         "key": {
             "*": {
@@ -22,14 +22,11 @@
                 "item": "minecraft:porkchop"
             },
             "#": {
-                "item": "minecraft:carrot"
-            },
-            "&": {
-                "item": "minecraft:beetroot"
+                "item": "minecraft:egg"
             }
         },
         "result": {
-            "item": "mc:katsu_curry",
+            "item": "mc:katsudon",
             "count": 1
         }
     }

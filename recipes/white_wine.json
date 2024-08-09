@@ -2,29 +2,29 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:softcream_recipe"
+            "identifier": "mc:white_wine_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "  +",
-            "*# ",
-            "** "
+            "#*+"
         ],
         "key": {
             "#": {
-                "item": "minecraft:blue_ice"
+                "item": "minecraft:potion",
+                "data": 0
             },
             "*": {
-                "item": "minecraft:wheat"
+                "item": "minecraft:sweet_berries"
             },
             "+": {
-                "item": "minecraft:milk_bucket"
+                "item": "minecraft:dye",
+                "data": 19
             }
         },
         "result": {
-            "item": "mc:softcream",
+            "item": "mc:white_wine",
             "count": 1
         }
     }

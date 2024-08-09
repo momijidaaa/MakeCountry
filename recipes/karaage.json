@@ -2,29 +2,24 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:softcream_recipe"
+            "identifier": "mc:karaage_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "  +",
-            "*# ",
-            "** "
+            "*+"
         ],
         "key": {
-            "#": {
-                "item": "minecraft:blue_ice"
-            },
             "*": {
-                "item": "minecraft:wheat"
+                "item": "minecraft:chicken"
             },
             "+": {
-                "item": "minecraft:milk_bucket"
+                "item": "mc:food_oil"
             }
         },
         "result": {
-            "item": "mc:softcream",
+            "item": "mc:karaage",
             "count": 1
         }
     }

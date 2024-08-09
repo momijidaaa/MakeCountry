@@ -2,15 +2,15 @@
     "format_version": "1.20.30",
     "minecraft:item": {
         "description": {
-            "identifier": "mc:cheese_gyudon"
+            "identifier": "mc:karaage"
         },
         "components": {
             "minecraft:icon": {
-                "texture": "cheese_gyudon"
+                "texture": "karaage"
             },
             "minecraft:use_duration": 3,
             "minecraft:food": {
-                "nutrition": 9,
+                "nutrition": 6,
                 "can_always_eat": true
             },
             "minecraft:use_animation": "eat"

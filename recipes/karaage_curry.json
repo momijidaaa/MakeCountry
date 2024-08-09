@@ -2,7 +2,7 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:katsu_curry_recipe"
+            "identifier": "mc:karaage_curry_recipe"
         },
         "tags": [
             "crafting_table"
@@ -19,7 +19,7 @@
                 "item": "mc:food_oil"
             },
             "+": {
-                "item": "minecraft:porkchop"
+                "item": "mc:karaage"
             },
             "#": {
                 "item": "minecraft:carrot"
@@ -29,7 +29,7 @@
             }
         },
         "result": {
-            "item": "mc:katsu_curry",
+            "item": "mc:karaage_curry",
             "count": 1
         }
     }

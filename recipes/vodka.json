@@ -2,29 +2,32 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:softcream_recipe"
+            "identifier": "mc:vodka_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "  +",
-            "*# ",
-            "** "
+            "#*",
+            "-+"
         ],
         "key": {
             "#": {
-                "item": "minecraft:blue_ice"
+                "item": "minecraft:potion",
+                "data": 0
             },
             "*": {
                 "item": "minecraft:wheat"
             },
             "+": {
-                "item": "minecraft:milk_bucket"
+                "item": "minecraft:potato"
+            },
+            "-": {
+                "item": "mc:barley"
             }
         },
         "result": {
-            "item": "mc:softcream",
+            "item": "mc:vodka",
             "count": 1
         }
     }

@@ -2,13 +2,13 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:katsu_curry_recipe"
+            "identifier": "mc:curry_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "+&-",
+            "&-",
             "*#"
         ],
         "key": {
@@ -18,9 +18,6 @@
             "-": {
                 "item": "mc:food_oil"
             },
-            "+": {
-                "item": "minecraft:porkchop"
-            },
             "#": {
                 "item": "minecraft:carrot"
             },
@@ -29,7 +26,7 @@
             }
         },
         "result": {
-            "item": "mc:katsu_curry",
+            "item": "mc:curry",
             "count": 1
         }
     }

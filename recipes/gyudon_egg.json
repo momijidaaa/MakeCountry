@@ -2,24 +2,24 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tai_sushi_recipe"
+            "identifier": "mc:gyudon_egg_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "*+"
+            "*#"
         ],
         "key": {
             "*": {
-                "item": "mc:rice"
+                "item": "mc:gyudon"
             },
-            "+": {
-                "item": "mc:tai"
+            "#": {
+                "item": "minecraft:egg"
             }
         },
         "result": {
-            "item": "mc:tai_sushi",
+            "item": "mc:gyudon_egg",
             "count": 1
         }
     }

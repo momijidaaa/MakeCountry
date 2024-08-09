@@ -2,24 +2,25 @@
     "format_version": "1.12",
     "minecraft:recipe_shaped": {
         "description": {
-            "identifier": "mc:tai_sushi_recipe"
+            "identifier": "mc:whiskey_recipe"
         },
         "tags": [
             "crafting_table"
         ],
         "pattern": [
-            "*+"
+            "#-"
         ],
         "key": {
-            "*": {
-                "item": "mc:rice"
+            "#": {
+                "item": "minecraft:potion",
+                "data": 0
             },
-            "+": {
-                "item": "mc:tai"
+            "-": {
+                "item": "mc:barley"
             }
         },
         "result": {
-            "item": "mc:tai_sushi",
+            "item": "mc:whiskey",
             "count": 1
         }
     }
