@@ -871,4 +871,11 @@ export const itemIdToPath = {
   "mc:tai_sushi": "textures/items/tai_sushi",
   "mc:katsu_curry": "textures/items/katsu_curry",
   "mc:hamburger": "textures/items/hamburger",
+  "mc:softcream": "textures/items/softcream",
+  "mc:octopus": "textures/items/octopus",
+  "mc:octopus_dumplings": "textures/items/octopus_dumplings",
+  "mc:shrimp": "textures/items/shrimp",
+  "mc:shrimp_tempra": "textures/items/shrimp_tempra",
+  "mc:fried_potato": "textures/items/fried_potato",
+  "mc:red_wine": "textures/items/red_wine",
 }

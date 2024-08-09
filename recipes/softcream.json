@@ -1,0 +1,31 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "mc:softcream_recipe"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            " *+",
+            "*#*",
+            "** "
+        ],
+        "key": {
+            "#": {
+                "item": "minecraft:blue_ice"
+            },
+            "*": {
+                "item": "minecraft:wheat"
+            },
+            "+": {
+                "item": "minecraft:milk_bucket"
+            }
+        },
+        "result": {
+            "item": "mc:softcream",
+            "count": 1
+        }
+    }
+}
