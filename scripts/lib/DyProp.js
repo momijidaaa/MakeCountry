@@ -8,8 +8,7 @@ const startId = "DyProp_"
  */
 export function setDynamicProperty(id, value = undefined) {
     const pattern = `DyProp_${id}_dy`;
-    if (typeof value !== 'string') {
-        console.warn("Input must be a string");
+    if (typeof value !== 'string' && value) {
         return;
     }
 
