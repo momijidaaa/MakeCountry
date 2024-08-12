@@ -104,7 +104,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     return;
                 }
                 if (!isChest) {
-                    StringifyAndSavePropertyData(chestId); // データの保存
+                    DyProp.setDynamicProperty(chestId);
                 }
             } else if (isSneaking && isChest && !selectedItem) {
                 ev.cancel = true;

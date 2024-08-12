@@ -7,24 +7,26 @@ import config from "../config";
 let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
 world.setDynamicProperty(`taxTimer`, taxTimerString);
 
+const nowCountryId = new Map();
+
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     for (const p of world.getPlayers()) {
-        let playerLastInCountryIdString = p.getDynamicProperty(`nowCountryId`) ?? "0";
-        const playerLastInCountryId = Number(playerLastInCountryIdString);
+        p.getDynamicProperty(`nowCountryId`);
+        const playerLastInCountryId = nowCountryId.get(p.id) ?? 0;
         const nowChunkCountryData = GetAndParsePropertyData(`country_${GetAndParsePropertyData(GetPlayerChunkPropertyId(p))?.countryId}`) ?? { "id": 0, "name": "wilderness.name" };
-        if (nowChunkCountryData.id !== playerLastInCountryId) {
-            if (nowChunkCountryData.id == 0) {
+        const countryChunkDataId = nowChunkCountryData?.id;
+        if (countryChunkDataId !== playerLastInCountryId) {
+            if (countryChunkDataId == 0) {
                 p.onScreenDisplay.setActionBar({ translate: `wilderness.name` });
             } else {
                 p.onScreenDisplay.setTitle({ translate: nowChunkCountryData.name });
                 p.onScreenDisplay.updateSubtitle(`${nowChunkCountryData.lore ?? ``}`);
             };
         };
-        p.setDynamicProperty(`nowCountryId`, nowChunkCountryData.id);
+        nowCountryId.set(p.id, countryChunkDataId);
     };
-}, 20);
-
+}, 30);
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     let taxTimer = Number(taxTimerString) - 1;
@@ -48,12 +50,12 @@ system.runInterval(() => {
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
             } else {
                 if (playerData.money < countryData.taxPer) {
-                    if(playerData.money < 0) {
+                    if (playerData.money < 0) {
                         continue;
                     } else {
                         let addmoney = playerData.money;
                         playerData.money -= addmoney;
-                        countryData.money += addmoney;    
+                        countryData.money += addmoney;
                     };
                 } else {
                     playerData.money -= countryData.taxPer;
