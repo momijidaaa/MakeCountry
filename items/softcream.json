@@ -1,0 +1,18 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:softcream"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "softcream"
+            },
+            "minecraft:use_duration": 2,
+            "minecraft:food": {
+                "nutrition": 6
+            },
+            "minecraft:use_animation": "eat"
+        }
+    }
+}

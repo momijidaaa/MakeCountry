@@ -42,7 +42,7 @@ export default {
             id: `sanddigger`,
             name: `sanddigger`,
         },
-        //砂掘り士
+        //ネザー掘り士
         {
             id: `netherdigger`,
             name: `netherdigger`,

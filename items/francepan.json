@@ -1,0 +1,18 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:francepan"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "francepan"
+            },
+            "minecraft:use_duration": 3,
+            "minecraft:food": {
+                "nutrition": 15
+            },
+            "minecraft:use_animation": "eat"
+        }
+    }
+}

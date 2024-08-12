@@ -47,8 +47,19 @@ system.runInterval(() => {
                 StringifyAndSavePropertyData(pId, playerData);
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
             } else {
-                playerData.money -= countryData.taxPer;
-                countryData.money += countryData.taxPer;
+                if (playerData.money < countryData.taxPer) {
+                    if(playerData.money < 0) {
+                        continue;
+                    } else {
+                        let addmoney = playerData.money;
+                        playerData.money -= addmoney;
+                        countryData.money += addmoney;    
+                    };
+                } else {
+                    playerData.money -= countryData.taxPer;
+                    countryData.money += countryData.taxPer;
+
+                };
                 StringifyAndSavePropertyData(pId, playerData);
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
             };

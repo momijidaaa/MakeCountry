@@ -1,0 +1,26 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "mc:karaagedon_recipe"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "*+-"
+        ],
+        "key": {
+            "*": {
+                "item": "mc:rice"
+            },
+            "+": {
+                "item": "mc:karaage"
+            }
+        },
+        "result": {
+            "item": "mc:karaagedon",
+            "count": 1
+        }
+    }
+}

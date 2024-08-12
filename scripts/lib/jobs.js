@@ -176,6 +176,7 @@ playerFishingAfterEvent.subscribe((event) => {
     const random = getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max)
     if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
     playerData.money += random;
+    StringifyAndSavePropertyData(`player_${player.id}`, playerData);
 });
 
 /**

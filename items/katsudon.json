@@ -1,0 +1,18 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:katsudon"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "katsudon"
+            },
+            "minecraft:use_duration": 3,
+            "minecraft:food": {
+                "nutrition": 10
+            },
+            "minecraft:use_animation": "eat"
+        }
+    }
+}

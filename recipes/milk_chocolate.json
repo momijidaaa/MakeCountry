@@ -1,0 +1,27 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "mc:milk_chocolate_recipe"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "##",
+            "**"
+        ],
+        "key": {
+            "*": {
+                "item": "minecraft:cocoa_beans"
+            },
+            "#": {
+                "item": "minecraft:milk_bucket"
+            }
+        },
+        "result": {
+            "item": "mc:milk_chocolate",
+            "count": 1
+        }
+    }
+}
