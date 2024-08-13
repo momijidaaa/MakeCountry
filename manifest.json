@@ -2,7 +2,7 @@
 	"format_version": 2,
 	"header": {
 		"description": "建国鯖に必要な要素が大量に詰まっているアドオン\nMade by かろん",
-		"name": "Make Country v.1.21.2.α.7",
+		"name": "Make Country v.1.21.20.α.7",
 		"uuid": "95738e96-76ca-47f1-8c50-8929b4bf447d",
 		"version": [
 			1,
@@ -31,11 +31,11 @@
 	"dependencies": [
 		{
 			"module_name": "@minecraft/server",
-			"version": "1.12.0-beta"
+			"version": "2.0.0-alpha"
 		},
 		{
 			"module_name": "@minecraft/server-ui",
-			"version": "1.2.0-beta"
+			"version": "2.0.0-alpha"
 		}
 	]
 }
