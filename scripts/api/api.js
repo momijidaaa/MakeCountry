@@ -1,10 +1,17 @@
 import { world, system } from "@minecraft/server";
 
-export function sendData(eventId, type, data) {
+/**
+ * 
+ * @param {string} eventId 
+ * @param {string} type 
+ * @param {any} data 
+ * @param {string} id 
+ */
+export function sendData(eventId, type, data, id = undefined) {
     let sendDatas = [];
     let residueData = JSON.stringify(data);
     for (let i = 0; residueData.length < 1; i++) {
-        const id = GenerateRandomId();
+        if(typeof id == "undefined") id = GenerateRandomId();
         let byte = 200 - `{"id":${id},"type":"${type}","data":""}`.length;
         let sendingData = {}
         if (residueData.length - byte < -10) {
@@ -25,7 +32,7 @@ export function sendData(eventId, type, data) {
         };
         sendDatas.push(JSON.stringify(sendingData));
     };
-    for(const message of sendDatas) {
+    for (const message of sendDatas) {
         world.getDimension("overworld").runCommandAsync(`scriptevent ${eventId} ${message}`);
     };
 };

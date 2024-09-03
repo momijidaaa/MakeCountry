@@ -1,7 +1,7 @@
 import { system } from "@minecraft/server";
 import * as DyProp from "../lib/DyProp";
 import { sendData } from "./api";
-import { playerCountryJoin, playerCountryLeave } from "../lib/land";
+import { DeleteCountry, playerCountryJoin, playerCountryLeave } from "../lib/land";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     const { id, sourceEntity, message } = ev;
@@ -15,10 +15,14 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             break;
         };
         case `mcapi:getcountrydata`: {
-            const countryData = DyProp.getDynamicProperty(`country_${message}`);
+            const splitMessage = message.split(/(?<=^[^ ]+) /);
+            const countryData = DyProp.getDynamicProperty(`country_${splitMessage[0]})}`);
             if (!countryData) return;
-            sendData(`mcapi:getcountrydataresult`, `result`, JSON.parse(countryData));
+            sendData(`mcapi:getcountrydataresult`, `result`, JSON.parse(countryData), splitMessage[1]);
             break;
+        };
+        case `mcapi:deletecountry`: {
+            DeleteCountry(message);
         };
     };
 });
