@@ -28,7 +28,7 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         case `mcapi:moneyget`: {
             const playerData = GetAndParsePropertyData(`player_${sourceEntity.id}`);
             playerData.money;
-            sourceEntity.runCommand(`scriptevent mcapi:moneygetresult ${playerData.money}`);
+            sendData(`mcapi:moneygetresult`, `result`, playerData.money, message);
             break;
         };
     };
