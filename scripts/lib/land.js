@@ -466,6 +466,12 @@ export function playerCountryLeave(player) {
         const countryId = playerData.country;
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
         countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
+        const playerRoles = playerData.roles;
+        for (const roleId of playerRoles) {
+            const role = GetAndParsePropertyData(`role_${roleId}`);
+            role.members.splice(role.members.indexOf(playerData.id), 1);
+            StringifyAndSavePropertyData(`role_${roleId}`,role);
+        };
         playerData.roles = [];
         playerData.country = undefined;
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
