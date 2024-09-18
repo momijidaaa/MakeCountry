@@ -13,3 +13,5 @@ import "./lib/combattag";
 import "./lib/test";
 
 import "./lib/item";
+
+import "./lib/chest_shop"
