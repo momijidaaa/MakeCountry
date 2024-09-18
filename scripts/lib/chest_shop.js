@@ -1,14 +1,6 @@
 import { EntityComponentTypes, system, world, BlockComponentTypes, SignSide, Direction } from '@minecraft/server';
-import { chestShopConfig } from './chest_shop_chestShopConfig.js';
-import { getShopData } from './shop/get_shop_data.js';
-import { getPlayerMoney } from './player/get_player_money.js';
-import { getItemStock } from './shop/get_item_stock.js';
-import { setPlayerMoney } from './player/set_player_money.js';
-import { removeItems } from './shop/remove_items.js';
-import { addItems } from './shop/add_items.js';
-import { setShopData } from './shop/set_shop_data.js';
-import { canAddItems } from './shop/can_add_items.js';
-import { StringifyAndSavePropertyData } from './util.js';
+import { chestShopConfig } from 'chest_shop_config.js';
+import { GetAndParsePropertyData, StringifyAndSavePropertyData } from './util.js';
 
 /**
  *
@@ -16,10 +8,10 @@ import { StringifyAndSavePropertyData } from './util.js';
  * @returns {number | undefined}
  */
 function getPlayerMoney(playerName) {
-    const playerData = GetAndParsePropertyData(`player_${playerName}`);
+    let playerData = GetAndParsePropertyData(`player_${playerName}`);
 
-    if(playerData ===undefined) return;
-    if(playerData.money ===undefined) return;
+    if (playerData === undefined) return;
+    if (playerData.money === undefined) return;
     return playerData.money;
 }
 
@@ -30,7 +22,7 @@ function getPlayerMoney(playerName) {
  */
 function setPlayerMoney(playerName, money) {
     const playerData = GetAndParsePropertyData(`player_${playerName}`);
-    playerData.money += money;
+    playerData.money = money;
     StringifyAndSavePropertyData(`player_${playerName}`, playerData);
     return;
 }
@@ -399,8 +391,12 @@ world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
 
     addItems(playerContainer, itemStacks);
 
+    // if(shopData.player === ev.player.name) return
+
     shopMoney += shopData.buyPrice;
     setPlayerMoney(shopData.player, shopMoney);
+
+    money = getPlayerMoney(ev.player.name);
 
     money -= shopData.buyPrice;
     setPlayerMoney(ev.player.name, money);
@@ -445,9 +441,12 @@ world.afterEvents.entityHitBlock.subscribe(async (ev) => {
 
     addItems(shopData.container, itemStacks);
 
+    // if(shopData.player === ev.player.name) return
+
     shopMoney -= shopData.sellPrice;
     setPlayerMoney(shopData.player, shopMoney);
 
+    money = getPlayerMoney(ev.damagingEntity.nameTag);
     money += shopData.sellPrice;
     setPlayerMoney(ev.damagingEntity.nameTag, money);
 });
