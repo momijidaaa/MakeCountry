@@ -1,7 +1,5 @@
 import { system } from "@minecraft/server";
-import * as DyProp from "../lib/DyProp";
 import { sendData } from "./api";
-import { playerCountryJoin, playerCountryLeave } from "../lib/land";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "../lib/util";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
@@ -9,19 +7,19 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
     switch (id) {
         case `mcapi:moneyadd`: {
             const playerData = GetAndParsePropertyData(`player_${sourceEntity.id}`);
-            playerData.money += Number(message);
+            playerData.money += parseInt(message);
             StringifyAndSavePropertyData(`player_${sourceEntity.id}`, playerData);
             break;
         };
         case `mcapi:moneyremove`: {
             const playerData = GetAndParsePropertyData(`player_${sourceEntity.id}`);
-            playerData.money += Number(message);
+            playerData.money -= parseInt(message);
             StringifyAndSavePropertyData(`player_${sourceEntity.id}`, playerData);
             break;
         };
         case `mcapi:moneyset`: {
             const playerData = GetAndParsePropertyData(`player_${sourceEntity.id}`);
-            playerData.money += Number(message);
+            playerData.money = parseInt(message);
             StringifyAndSavePropertyData(`player_${sourceEntity.id}`, playerData);
             break;
         };
