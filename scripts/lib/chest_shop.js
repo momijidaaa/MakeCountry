@@ -177,22 +177,6 @@ function getItemStock(container, itemId) {
 
 /**
  *
- * @param {Array<import('@minecraft/server').ItemStack>} itemStacks
- * @returns {Array}
- */
-function getItemsData(itemStacks) {
-    if (itemStacks.length <= 0) return undefined;
-    const typeId = itemStacks[0].typeId;
-    let allAmount = 0;
-    for (const itemStack of itemStacks) {
-        allAmount += itemStack.amount;
-    }
-
-    return [typeId];
-}
-
-/**
- *
  * @typedef  {Object} ShopData
  * @property {string} player
  * @property {string} item
@@ -343,6 +327,7 @@ function setShopData(shopData, itemStack, playerName) {
     shopData.item = itemStack.typeId.replace('minecraft:', '');
 }
 
+// buy
 world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
     const signTexts = getSignTexts(ev.block);
     if (signTexts === undefined) return;
@@ -402,6 +387,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
     setPlayerMoney(ev.player.name, money);
 });
 
+// sell
 world.afterEvents.entityHitBlock.subscribe(async (ev) => {
     if (ev.damagingEntity.typeId !== 'minecraft:player') return;
 
@@ -450,3 +436,6 @@ world.afterEvents.entityHitBlock.subscribe(async (ev) => {
     money += shopData.sellPrice;
     setPlayerMoney(ev.damagingEntity.nameTag, money);
 });
+
+world.afterEvents.pistonActivate.subscribe((ev) => {
+})
