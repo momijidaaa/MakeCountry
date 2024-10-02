@@ -51,7 +51,7 @@ world.beforeEvents.playerBreakBlock.subscribe((ev) => {
 });
 
 world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
-    const permission = `place`
+    const permission = `place`;
     const { player, block } = ev;
     const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
@@ -62,7 +62,7 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
 });
 
 world.beforeEvents.itemUseOn.subscribe((ev) => {
-    const permission = `place`
+    const permission = `place`;
     const { source: player, block } = ev;
     const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
