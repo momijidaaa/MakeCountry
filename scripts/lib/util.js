@@ -1,4 +1,4 @@
-import { Player } from "@minecraft/server";
+import { Block, Entity, Player, world } from "@minecraft/server";
 import * as Dyprop from "./DyProp";
 import config from "../config";
 
@@ -17,7 +17,7 @@ export function GetChunkPropertyId(rawX, rawZ, dimension = `overworld`) {
 
 /**
  * プレイヤーがいるチャンクのダイプロのidを取得
- * @param {Player} player
+ * @param {Player|Entity|Block} player
  * @returns {string}
  */
 export function GetPlayerChunkPropertyId(player) {
@@ -344,4 +344,65 @@ export function getRandomInteger(min, max) {
 export function isDecimalNumber(value) {
     const integerRegex = /^[1-9]\d*$/;
     return integerRegex.test(value);
+};
+
+export function isDecimalNumberZeroOK(value) {
+    if(value == 0) {
+        return true;
+    };
+    const integerRegex = /^[1-9]\d*$/;
+    return integerRegex.test(value);
+};
+
+export function isWithinTimeRange(startTime, endTime) {
+    const date = new Date(Date.now() + (((config.timeDifference * 60)) * 60 * 1000));
+    world.sendMessage(`${new Date(date).toISOString()}`)
+
+    const currentHour = date.getHours();
+    const currentMinute = date.getMinutes();
+    const currentTime = currentHour * 60 + currentMinute;
+    const startMinutes = startTime.hour * 60 + startTime.min;
+    const endMinutes = endTime.hour * 60 + endTime.min;
+
+    if (startMinutes <= endMinutes) {
+        // 同じ日内の範囲
+        return currentTime >= startMinutes && currentTime <= endMinutes;
+    } else {
+        // 日付をまたぐ範囲
+        return currentTime >= startMinutes || currentTime <= endMinutes;
+    };
+};
+
+export function getTimeBefore(time, minutesBefore) {
+    // 与えられた時間と分から、合計分を計算
+    let totalMinutes = time.hour * 60 + time.min;
+
+    // 指定された時間よりも前に戻す
+    totalMinutes -= minutesBefore;
+
+    // 時間が0よりも小さい場合、日付を巻き戻す
+    if (totalMinutes < 0) {
+        totalMinutes += 24 * 60; // 24時間分の分数を加算
+    };
+
+    // 時間と分に変換し直す
+    const newHour = Math.floor(totalMinutes / 60);
+    const newMin = totalMinutes % 60;
+
+    // 新しい時間を返す
+    return { hour: newHour, min: newMin };
+};
+
+/**
+ * プレイヤー名からIDを取得
+ * @param {string} playerName 
+ * @returns {string}
+ */
+export function playerNameToId(playerName) {
+    const playerIds = Dyprop.DynamicPropertyIds().filter(id => id.startsWith(`player_`));
+    for(const id of playerIds) {
+        let pData = GetAndParsePropertyData(id);
+        if(pData.name == playerName) return pData.id;
+    };
+    return undefined;
 };

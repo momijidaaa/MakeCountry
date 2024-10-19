@@ -1,6 +1,10 @@
 export default {
     //コマンドのプレフィックス
     prefix: `?`,
+
+    //UTC(世界標準時)からの時差(日本の場合は9)
+    timeDifference: 9,
+
     //プレイヤーの初期の所持金
     initialMoney: 1000,
     //所持金をスコアボードで変更できるようにするか(オンラインのプレイヤーのみ)
@@ -29,7 +33,7 @@ export default {
     //初期のリソースポイント
     initialCountryResourcePoint: 0,
     //徴税間隔(分)
-    taxTimer: 2 * 60,
+    taxTimer: 10,
     //初期設定で税金をパーセント式にするか(falseの場合,定額制)
     taxInstitutionIsPer: true,
     //初期の税率(税額)
@@ -40,12 +44,30 @@ export default {
     specialAllowPermissions: [`entityUse`, `blockUse`],
     //荒野で許可する権限
     wildernessAllowPermissions: [`entityUse`, `blockUse`, `makeCountry`, `buyChunk`, `place`, `break`, `setHome`, `openContainer`],
-    //平和主義国の維持費(1チャンク)
-    MaintenanceFeePacifistCountries: 500,
-    //非平和主義国の維持費(1チャンク)
-    MaintenanceFeeNonPeacefulCountries: 50,
+
+    //徴税＆維持費回収を有効化
+    taxValidity: true,
+    //徴税＆維持費回収を時間指定制にするか(falseの場合 時間間隔制になる)
+    //24時間サーバーの場合は時間指定制がおすすめです
+    //ローカルワールドの場合は時間間隔制がおすすめです
+    taxTypeIsTimeSet: true,
+    //徴税時間(時間指定制の場合)
+    taxTime: { hour: 21, min: 0 },
+    //徴税間隔(分) (時間間隔制の場合)
+    taxTimer: 2 * 60,
+    //徴税の何分前にメッセージを表示するか
+    taxMessageBeforeTime: 10,
+    //初期設定で税金をパーセント式にするか(falseの場合,定額制)
+    taxInstitutionIsPer: true,
+    //初期の税率(税額)
+    taxPer: 10,
     //建国後何回分の徴税をなしにするか
     NonMaintenanceCostAccrualPeriod: 3,
+    //平和主義国の維持費(1チャンク)
+    MaintenanceFeePacifistCountries: 50,
+    //非平和主義国の維持費(1チャンク)
+    MaintenanceFeeNonPeacefulCountries: 5,
+
     //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
     maxRoleAmount: 10,
 
@@ -75,5 +97,31 @@ export default {
     killValidity: true,
 
     //shopを有効にするか
-    shopValidity: true
+    shopValidity: true,
+
+    //侵略(invade)を有効にするか
+    invadeValidity: true,
+    //侵略の制限時間(秒)
+    invadeTimelimit: 60 * 20,
+    //侵略のクールタイム(秒)
+    invadeCooltime: 60 * 30,
+    //侵略したあとの平和主義にできない期間
+    invadePeaceChangeCooltime: 2,
+    //建国後の侵略ができない、されない期間
+    invadeProtectionDuration: 1,
+    //隅からしか攻められないようにするか
+    isAttackCorner: true,
+    //指定した時間帯でないと戦争をできないようにするか
+    isSettingCanInvadeDuration: true,
+    //戦争が可能な時間帯
+    canInvadeDuration: {
+        //期間開始時刻(24時間制)
+        startTime: { hour: 11, min: 0 },
+        //期間終了時刻(24時間制)
+        endTime: { hour: 23, min: 0 }
+    },
+
+    //荒野でピストンを置けないようにするか
+    isNoPiston: true,
+
 };

@@ -9,6 +9,9 @@ import config from "../config";
 import { PlayerMarketMainMenu } from "./player_market";
 import { tpaMainForm } from "./tpa";
 import { ShopCommonsMenu } from "./shop";
+import { Invade } from "./war";
+
+import { version } from "../index"; 
 
 class ChatHandler {
     constructor(event) {
@@ -168,6 +171,15 @@ class ChatHandler {
                 case "camera":
                     this.camera();
                     break;
+                case "map":
+                    this.map();
+                    break;
+                case "invade":
+                    this.invade();
+                    break;
+                case "cr":
+                    this.copyright();
+                    break;
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
                     break;
@@ -185,7 +197,7 @@ class ChatHandler {
                 this.sender.sendMessage({ translate: `command.permission.error` });
                 return;
             }
-            this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `system.setup.complete` }] });
+            this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `system.setup.complete`, with: [version] }] });
             this.sender.addTag("mc_admin");
             world.setDynamicProperty(`start`, `true`)
             return;
@@ -220,8 +232,6 @@ class ChatHandler {
         const targetData = GetAndParsePropertyData(`player_${targetPlayer.id}`);
         targetData.money += Math.floor(amount);
         this.playerData.money -= Math.floor(amount);
-        targetData.money = Math.floor(targetData.money * 100) / 100;
-        this.playerData.money = Math.floor(this.playerData.money * 100) / 100;
         StringifyAndSavePropertyData(`player_${targetPlayer.id}`, targetData);
         StringifyAndSavePropertyData(`player_${this.sender.id}`, this.playerData);
         this.sender.sendMessage({ translate: `command.sendmoney.result.sender`, with: [targetName, `${config.MoneyName} ${Math.floor(amount)}`] });
@@ -314,9 +324,22 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
-        DyProp.setDynamicProperty(GetPlayerChunkPropertyId(this.sender));
+        const chunkId = GetPlayerChunkPropertyId(this.sender);
+        const chunkData = GetAndParsePropertyData(chunkId);
+        if (chunkData) {
+            if (chunkData?.countryId) {
+                const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`);
+                if (countryData) {
+                    countryData.territories.splice(countryData.territories.indexOf(chunkId), 1);
+                    let chunkPrice = config.defaultChunkPrice / 2;
+                    if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
+                    countryData.money += chunkPrice;
+                    StringifyAndSavePropertyData(`country_${chunkData?.countryId}`, countryData);
+                };
+            };
+        };
+        DyProp.setDynamicProperty(chunkId);
         this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { rawtext: [{ translate: `wilderness.name` }] } });
-
     };
 
     buyChunk() {
@@ -491,6 +514,9 @@ class ChatHandler {
         { translate: `command.help.shop` }, { text: `\n` },
         { translate: `command.help.tpa` }, { text: `\n` },
         { translate: `command.help.camera` }, { text: `\n` },
+        { translate: `command.help.map` }, { text: `\n` },
+        { translate: `command.help.invade` }, { text: `\n` },
+        { translate: `command.help.copyright` }, { text: `\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
@@ -582,25 +608,94 @@ class ChatHandler {
             return;
         };
         const isCamera = this.sender.hasTag(`mc_camera`);
-        if(isCamera) {
+        if (isCamera) {
             this.sender.camera.clear();
             this.sender.removeTag(`mc_camera`);
             return;
         };
-        if(!isCamera) {
+        if (!isCamera) {
             this.sender.addTag(`mc_camera`);
-            this.sender.camera.setCamera(`minecraft:free`,{location: this.sender.getHeadLocation(),rotation: this.sender.getRotation()});
+            this.sender.camera.setCamera(`minecraft:free`, { location: this.sender.getHeadLocation(), rotation: this.sender.getRotation() });
             return;
+        };
+        return;
+    };
+    map() {
+        const playerCurrentChunk = GetPlayerChunkPropertyId(this.sender);
+        let [chunk, currentX, currentZ, dimension] = playerCurrentChunk.split(`_`);
+        let currentXNum = Number(currentX);
+        let currentZNum = Number(currentZ);
+        let playerCountryId = this.playerData?.country ?? -10;
+        let result = [];
+        for (let i = 10; i > -11; i--) {
+            let jResult = [];
+            for (let j = -10; j < 11; j++) {
+                let chunkX = currentXNum + i;
+                let chunkZ = currentZNum + j;
+                let chunkId = `${chunk}_${chunkX}_${chunkZ}_${dimension}`;
+                let chunkData = GetAndParsePropertyData(`${chunkId}`);
+                let colorCode = "f"
+                if (chunkData?.countryId) {
+                    colorCode = "e";
+                    if (chunkData?.countryId === playerCountryId && playerCountryId != 0) {
+                        colorCode = "a";
+                    };
+                };
+                if (i === 0 && j === 0) {
+                    colorCode = "4"
+                };
+                jResult.push(`§${colorCode}O`);
+            };
+            result.push(jResult.join(``));
+        };
+        this.sender.sendMessage(`§c----------------------------------------------------\n${result.join(`\n`)}\n§c----------------------------------------------------`);
+        return;
+    };
+    invade() {
+        if (!config.invadeValidity) {
+            this.sender.sendMessage({ translate: `command.error.invade.novalidity` });
+            return;
+        };
+        if (!this.playerData?.country) {
+            this.sender.sendMessage({ translate: `command.sellchunk.error.notjoin.country` });
+            return;
+        };
+        const cancel = CheckPermission(this.sender, `warAdmin`);
+        if (cancel) {
+            this.sender.sendMessage({ translate: `command.error.permission` });
+            return;
+        };
+        Invade(this.sender);
+        return;
+    };
+    copyright() {
+        const container = this.sender.getComponent(`inventory`).container;
+        const item = container.getItem(this.sender.selectedSlotIndex);
+        if (item) {
+            const loreArray = item.getLore();
+            if (loreArray.includes(`§c§r§d${this.sender.name}(${this.sender.id})`)) {
+                item.setLore(loreArray.splice(loreArray.indexOf(`§c§r§d${this.sender.name}(${this.sender.id})`), 1));
+                container.setItem(this.sender.selectedSlotIndex);
+                return;
+            };
+            if (loreArray[0].startsWith(`§c§r§d`)) {
+                return;
+            };
+            loreArray.unshift(`§c§r§d${this.sender.name}(${this.sender.id})`);
+            item.setLore(loreArray);
+            container.setItem(this.sender.selectedSlotIndex);
         };
         return;
     };
 };
 
 world.beforeEvents.chatSend.subscribe(event => {
+    if (event.sender.hasTag(`moderator`) && event.message.startsWith(`!`)) return;
     const chatHandler = new ChatHandler(event);
     if (chatHandler.isCommand()) {
         chatHandler.handleCommand();
     } else {
+        if (event.sender.getDynamicProperty(`isMute`) && !event.sender.hasTag(`moderator`)) return;
         chatHandler.handleChat();
     };
 });
