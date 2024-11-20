@@ -194,6 +194,7 @@ function getItemStock(container, itemId) {
  * @returns {ShopData | undefined}
  */
 function getShopData(signTexts, block) {
+    if (signTexts == undefined) return;
     const data = signTexts[0].split('\n');
 
     if (data.length !== 4 && data.length !== 5) return;
@@ -328,10 +329,35 @@ function setShopData(shopData, itemStack, playerName) {
 }
 
 /**
- * @param {import('@minecraft/server').Vector3} location
- * @returns {boolean}
+ * @param {import('@minecraft/server').Block} block
+ * @param {string} playerName
+ * @returns {boolean | undefined}
  */
-function isShopBlock() {}
+function isShopOwner(block, playerName) {
+    let shopData;
+    switch (true) {
+        case getSignTexts(block.east()) != undefined:
+            shopData = getShopData(getSignTexts(block.east()), block.east());
+            if (shopData != undefined)
+                if (shopData.location.x == block.location.x && shopData.location.z == block.location.z) return shopData.player == playerName;
+
+        case getSignTexts(block.north()) != undefined:
+            shopData = getShopData(getSignTexts(block.north()), block.north());
+            if (shopData != undefined)
+                if (shopData.location.x == block.location.x && shopData.location.z == block.location.z) return shopData.player == playerName;
+
+        case getSignTexts(block.south()) != undefined:
+            shopData = getShopData(getSignTexts(block.south()), block.south());
+            if (shopData != undefined)
+                if (shopData.location.x == block.location.x && shopData.location.z == block.location.z) return shopData.player == playerName;
+        case getSignTexts(block.west()) != undefined:
+            shopData = getShopData(getSignTexts(block.west()), block.west());
+            if (shopData != undefined)
+                if (shopData.location.x == block.location.x && shopData.location.z == block.location.z) return shopData.player == playerName;
+        default:
+            return undefined;
+    }
+}
 
 // buy
 world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
@@ -443,9 +469,20 @@ world.afterEvents.entityHitBlock.subscribe(async (ev) => {
     setPlayerMoney(ev.damagingEntity.nameTag, money);
 });
 
+// 保護
 world.beforeEvents.playerBreakBlock.subscribe(
     (ev) => {
-        ev.player.sendMessage('test');
+        const isOwner = isShopOwner(ev.block, ev.player.name);
+        if (isOwner == undefined) return;
+        if (!isOwner) ev.cancel = true;
     },
     { blockTypes: chestShopConfig.shopBlockIds }
 );
+
+world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
+    if (!chestShopConfig.shopBlockIds.includes(ev.block.typeId)) return;
+
+    const isOwner = isShopOwner(ev.block, ev.player.name);
+    if (isOwner == undefined) return;
+    if (!isOwner) ev.cancel = true;
+});
