@@ -469,9 +469,10 @@ world.afterEvents.entityHitBlock.subscribe(async (ev) => {
     setPlayerMoney(ev.damagingEntity.nameTag, money);
 });
 
-// 保護
+// チェスト保護
 world.beforeEvents.playerBreakBlock.subscribe(
     (ev) => {
+        if (ev.player.hasTag('mc_admin')) return;
         const isOwner = isShopOwner(ev.block, ev.player.name);
         if (isOwner == undefined) return;
         if (!isOwner) ev.cancel = true;
@@ -480,9 +481,29 @@ world.beforeEvents.playerBreakBlock.subscribe(
 );
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
+    if (ev.player.hasTag('mc_admin')) return;
     if (!chestShopConfig.shopBlockIds.includes(ev.block.typeId)) return;
 
     const isOwner = isShopOwner(ev.block, ev.player.name);
     if (isOwner == undefined) return;
     if (!isOwner) ev.cancel = true;
+});
+
+// 看板保護
+world.beforeEvents.playerBreakBlock.subscribe((ev) => {
+    if (ev.player.hasTag('mc_admin')) return;
+    if (!ev.block.typeId.startsWith('minecraft:')) return;
+    if (!ev.block.typeId.endsWith('wall_sign')) return;
+
+    const signTexts = getSignTexts(ev.block);
+    if (signTexts === undefined) return;
+
+    if (signTexts[1] !== chestShopConfig.shopId) return;
+
+    const shopData = getShopData(signTexts, ev.block);
+    if (shopData === undefined) return;
+
+    if (shopData.player === ev.player.name) return;
+
+    ev.cancel = true;
 });
