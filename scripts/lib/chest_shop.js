@@ -327,6 +327,12 @@ function setShopData(shopData, itemStack, playerName) {
     shopData.item = itemStack.typeId.replace('minecraft:', '');
 }
 
+/**
+ * @param {import('@minecraft/server').Vector3} location
+ * @returns {boolean}
+ */
+function isShopBlock() {}
+
 // buy
 world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
     const signTexts = getSignTexts(ev.block);
@@ -437,5 +443,9 @@ world.afterEvents.entityHitBlock.subscribe(async (ev) => {
     setPlayerMoney(ev.damagingEntity.nameTag, money);
 });
 
-world.afterEvents.pistonActivate.subscribe((ev) => {
-})
+world.beforeEvents.playerBreakBlock.subscribe(
+    (ev) => {
+        ev.player.sendMessage('test');
+    },
+    { blockTypes: chestShopConfig.shopBlockIds }
+);
