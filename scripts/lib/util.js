@@ -356,7 +356,6 @@ export function isDecimalNumberZeroOK(value) {
 
 export function isWithinTimeRange(startTime, endTime) {
     const date = new Date(Date.now() + (((config.timeDifference * 60)) * 60 * 1000));
-    world.sendMessage(`${new Date(date).toISOString()}`)
 
     const currentHour = date.getHours();
     const currentMinute = date.getMinutes();
