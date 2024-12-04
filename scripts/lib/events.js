@@ -4,9 +4,10 @@ import * as DyProp from "./DyProp";
 import config from "../config";
 import { chestLockForm } from "./form";
 import jobs_config from "../jobs_config";
+import { version } from "../index"
 
 world.afterEvents.worldInitialize.subscribe((ev) => {
-    world.sendMessage({ translate: `world.message.addon` });
+    world.sendMessage({ translate: `world.message.addon`, with: [version] });
 });
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
@@ -15,7 +16,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     player.sendMessage({
         rawtext: [
             { text: `§6------------------------------------------------------------------------------------------\n\n` },
-            { translate: `world.message.addon` },
+            { translate: `world.message.addon`, with: [version] },
             { text: `\n\n§9Support Discord Server\n§ahttps://discord.gg/8S9YhNaHjD\n\n§cYoutube\n§ahttps://youtube.com/@KaronDAAA\n\n§bTwitter\n§ahttps://twitter.com/KaronDAAA\n\n§6------------------------------------------------------------------------------------------\n` }
         ]
     });
