@@ -24,7 +24,7 @@ export function Invade(player) {
         let start = config.canInvadeDuration.startTime;
         let end = config.canInvadeDuration.endTime;
         if (!isWithinTimeRange(start, end)) {
-            player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.notimerange` , with: [`${start.hour}:${start.min}～${end.hour}:${end.min}`]}] });
+            player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.notimerange`, with: [`${start.hour}:${start.min}～${end.hour}:${end.min}`] }] });
             return;
         };
     };
@@ -65,6 +65,15 @@ export function Invade(player) {
 
     if (cooltime - date > 0) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.cooltime`, with: [`${Math.ceil((cooltime - date) / 100) / 10}`] }] });
+        return;
+    };
+    const cores = player.dimension.getEntities({ type: `mc:core` });
+    let coresChunks = [];
+    for (let i = 0; i < cores.length; i++) {
+        coresChunks[coresChunks.length] = GetPlayerChunkPropertyId(cores[i]);
+    };
+    if (coresChunks.includes(GetPlayerChunkPropertyId(player))) {
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.already` }] });
         return;
     };
     if (config.isAttackCorner) {
