@@ -16,6 +16,4 @@ import './lib/item';
 
 import './lib/chest_shop';
 
-export const version = `1.0.0 β`;
-
-import './lib/chest_shop';
+export const version = `v.1.21.50.β.1.0.0`

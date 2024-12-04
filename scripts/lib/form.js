@@ -2,8 +2,8 @@ import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { acceptApplicationRequest, AddAlliance, AddHostilityByPlayer, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace } from "./land";
-import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
+import { acceptAlliance, acceptApplicationRequest, AddHostilityByPlayer, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace } from "./land";
+import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isDecimalNumber, isDecimalNumberZeroOK, StringifyAndSavePropertyData } from "./util";
 
 /**
  * 
@@ -396,7 +396,7 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
     const sendPlayerData = GetAndParsePropertyData(`player_${sendPlayer.id}`);
     const form = new ModalFormData();
     form.title({ translate: `form.sendmoney.check.title` });
-    form.textField({ rawtext: [{ translate: `form.sendmoney.check.label` }, { text: `: ${sendPlayerData?.money}` }] }, { rawtext: `input.number` });
+    form.textField({ rawtext: [{ translate: `form.sendmoney.check.label` }, { text: `: ${sendPlayerData?.money}` }] }, { translate: `input.number` });
     form.submitButton({ translate: `mc.button.sendmoney` });
     form.show(sendPlayer).then(rs => {
         if (rs.canceled) {
@@ -410,6 +410,10 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
         };
         const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
         const sendPlayerData2 = GetAndParsePropertyData(`player_${sendPlayer.id}`);
+        if (sendPlayerData2.money < value) {
+            sendPlayer.sendMessage({ translate: `command.error.trysend.moremoney.youhave`, with: [`${sendPlayerData2.money}`] });
+            return;
+        };
         receivePlayerData.money += value;
         sendPlayerData2.money -= value;
         sendPlayerData2.money = Math.floor(sendPlayerData2.money * 100) / 100;
@@ -612,22 +616,21 @@ export function joinCheckFromInviteForm(player, countryData) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
@@ -700,22 +703,21 @@ export function joinCheckFromListForm(player, countryData) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1158,22 +1160,21 @@ export function settingCountryInfoForm(player, countryData = undefined) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
 
@@ -1319,8 +1320,6 @@ export function externalAffairsMainForm(player) {
     //受信した講和申請
     form.button({ translate: `received.application.request` });
 
-    //戦争
-    form.button({ translate: `war` });
     form.show(player).then((rs) => {
         if (rs.canceled) {
             settingCountryInfoForm(player);
@@ -1374,18 +1373,6 @@ export function externalAffairsMainForm(player) {
                 //受信した講和申請
                 if (!CheckPermission(player, `hostilityAdmin`)) {
                     ReceivedApplicationRequestForm(player);
-                    return;
-                } else {
-                    player.sendMessage({ translate: `no.permission` });
-                };
-                break;
-            };
-            case 5: {
-                //宣戦布告
-                if (!CheckPermission(player, `warAdmin`)) {
-                    //form
-                    //かみんぐすーん
-                    player.sendMessage({ translate: `comingsoon.message` });
                     return;
                 } else {
                     player.sendMessage({ translate: `no.permission` });
@@ -1473,22 +1460,21 @@ export function allianceRequestCountryForm(player, countryId) {
         });
         const showBody = {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${config.MoneyName} ${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${config.MoneyName} ${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1512,8 +1498,7 @@ export function allianceRequestCountryForm(player, countryId) {
                     break;
                 };
                 case 1: {
-                    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-                    AddAlliance(playerData.country, countryId);
+                    acceptAlliance(player, countryId);
                     break;
                 };
                 case 2: {
@@ -1605,22 +1590,21 @@ export function applicationRequestCountryForm(player, countryId) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1820,22 +1804,21 @@ export function addAllianceCountryFromListForm(player, countryId) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1942,22 +1925,21 @@ export function AllianceCountryFromListForm(player, countryId) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2187,22 +2169,21 @@ export function addHostilityCountryFromListForm(player, countryId) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2309,22 +2290,21 @@ export function HostilityCountryFromListForm(player, countryId) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2520,7 +2500,7 @@ export function editTaxMainForm(player) {
             return;
         };
         let value = rs.formValues[1];
-        if (!isDecimalNumber(value)) {
+        if (!isDecimalNumberZeroOK(value)) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
         };
@@ -2671,7 +2651,7 @@ export function countryDeleteCheckForm(player) {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const form = new ActionFormData();
         form.title({ translate: `form.dismantle.check` });
-        form.body({ rawtext: [{ translate: `mc.warning` }, { text: `\n` }, { translate: `form.dismantle.body` }] });
+        form.body({ rawtext: [{ translate: `mc.warning` }, { text: `\n§r` }, { translate: `form.dismantle.body` }] });
         form.button({ translate: `mc.button.close` });
         form.button({ translate: `mc.button.dismantle` });
         form.show(player).then(rs => {
@@ -2779,22 +2759,21 @@ export function showCountryInfo(player, countryData) {
         const showBody =
         {
             rawtext: [
-                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n` },
-                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n` },
-                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n` },
-                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n` },
-                { translate: `form.showcountry.option.warnow`, with: [`${warNowCountryName.join(`§r , `)}`] }
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.owner`, with: [ownerData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.members`, with: [`${membersName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
