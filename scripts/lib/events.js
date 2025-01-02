@@ -120,23 +120,6 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     // 一般的なブロック操作の権限確認
     const cannot = CheckPermissionFromLocation(player, x, z, dimensionId, permission);
     ev.cancel = cannot;
-    if (!cannot) {
-        const growth = block.permutation.getState('growth');
-        system.run(() => {
-            // 農家ジョブの報酬
-            if (block.typeId === 'minecraft:sweet_berry_bush' && player.hasTag('mcjobs_farmer') && growth > 1) {
-                const playerData = GetAndParsePropertyData(`player_${playerId}`);
-                const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
-                const reward = Math.ceil((random / 10 * growth) * 100) / 100;
-                playerData.money += reward;
-                StringifyAndSavePropertyData(`player_${playerId}`, playerData);
-                if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${reward}`);
-                return;
-            }
-        });
-        return;
-    }
-
     player.sendMessage({ translate: `cannot.permission.${permission}` });
 });
 
