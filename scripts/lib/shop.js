@@ -68,7 +68,7 @@ export function ShopCommonsMenuCategory(player, categoryCommons, page = 0, keywo
      */
     const allCommons = categoryCommons;
     if (allCommons.length < page * 36 + 1) {
-        ShopCommonsMenuCategory(player, categoryCommons , page - 1);
+        ShopCommonsMenuCategory(player, categoryCommons, page - 1);
         return;
     };
     if (keyword != ``) {
@@ -96,6 +96,7 @@ export function ShopCommonsMenuCategory(player, categoryCommons, page = 0, keywo
                 ShopCommonsMenuCategory(player, categoryCommons);
                 return;
             };
+            ShopCommonsMenu(player);
             return;
         };
         switch (rs.selection) {
@@ -115,7 +116,7 @@ export function ShopCommonsMenuCategory(player, categoryCommons, page = 0, keywo
             };
             default: {
                 system.run(() => {
-                    ShopSelectCommonForm(player, commons[rs.selection - 9], categoryCommons);
+                    ShopSelectCommonForm(player, commons[rs.selection - 9], categoryCommons, page);
                     return;
                 });
                 break;
@@ -129,7 +130,7 @@ export function ShopCommonsMenuCategory(player, categoryCommons, page = 0, keywo
  * @param {Player} player 
  * @param {{id: string,price: number}} common 
  */
-export function ShopSelectCommonForm(player, common, categoryCommons) {
+export function ShopSelectCommonForm(player, common, categoryCommons, page) {
     const form = new ModalFormData();
     form.title({ translate: `mc.button.buy` });
     form.toggle({ translate: `stack.buy` });
@@ -163,6 +164,7 @@ export function ShopSelectCommonForm(player, common, categoryCommons) {
         };
         playerData.money -= price;
         player.sendMessage({ translate: `finish.bought` });
+        ShopCommonsMenuCategory(player, categoryCommons, page);
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         return;
     });
