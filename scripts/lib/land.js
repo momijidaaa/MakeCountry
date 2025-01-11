@@ -542,17 +542,20 @@ export function playerCountryLeave(player) {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const countryId = playerData.country;
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
-        countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
+        if (countryData) {
+            countryData?.members.splice(countryData.members.indexOf(playerData.id), 1);
+            StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+        };
         playerData.roles = [];
         playerData.country = undefined;
         StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
-        StringifyAndSavePropertyData(`country_${countryId}`, countryData);
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `left.country` }] });
         system.runTimeout(() => {
             if (config.countryNameDisplayOnPlayerNameTag) {
                 nameSet(player);
             };
         }, 2);
+
     } catch (error) {
         console.warn(error);
     };

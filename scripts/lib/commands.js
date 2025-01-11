@@ -641,7 +641,7 @@ class ChatHandler {
             return;
         };
         const countryData = GetAndParsePropertyData(`country_${this.playerData?.country}`);
-        if (this.playerData.id === countryData.owner) {
+        if (this.playerData.id === countryData?.owner) {
             this.sender.sendMessage({ translate: `command.leavecountry.error.your.owner` })
             return;
         };
