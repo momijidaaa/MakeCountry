@@ -1,6 +1,7 @@
-import { Block, Entity, Player, world } from "@minecraft/server";
+import { Block, Entity, Player } from "@minecraft/server";
 import * as Dyprop from "./DyProp";
 import config from "../config";
+import jobs_config from "../jobs_config";
 
 /**
  * 指定した座標、ディメンションのチャンクのダイプロのプロパティを取得
@@ -153,40 +154,108 @@ export function CheckPermission(player, permission) {
             return true;
         };
     };
+    /**
+     * @type {{group: string|undefined,country: number|undefined,name: string|undefined,owner: string|undefined,permissions: [string],roles: [{id: number,permissions: [string]}],countries: [{id: number,permissions: [string]}],players: [{id: string,permissions: [string]}],type: "public"|"private"|"embassy",price: number|0, } | undefined}
+     */
+    const plot = chunkData?.plot?.group ? GetAndParsePropertyData(`plotgroup_${chunkData?.plot?.group}`) : chunkData?.plot ?? undefined;
+
     //個人所有の土地 → 規制がなければ許可 → 規制があってもallowListにいれば許可 → 自分の国かつownerがあるとき許可 また、戦争中なら許可 → なければキャンセル
-    if (chunkData?.owner) {
-        if (chunkData?.owner === playerData?.id) {
-            if (!restrictionPermissions.includes(permission)) {
-                return false;
-            }
+    if (plot?.enable && plot?.type == "private") {
+        if (plot?.owner === playerData?.id) {
+            return false;
         } else {
-            if (chunkData[`${permission}Restriction`]) {
-                const allow = chunkData[`${permission}Allow`].includes(player.id);
-                if (allow) {
+            if (plot.permissions.includes(permission)) {
+                return false;
+            };
+            if (plot.players.find(p => p.id == playerData.id)) {
+                if (plot.players.find(p => p.id == playerData.id).permissions.includes(permission)) {
                     return false;
-                } else {
-                    if (chunkData?.countryId) {
-                        const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-                        if (!playerData?.country) {
-                            return true;
-                        }
-                        if (countryData?.warNowCountries.includes(playerData.country)) {
-                            return false;
-                        }
-                        if (countryData?.id === playerData?.country) {
-                            if (countryData?.owner === playerData?.id) return false;
-                            for (const role of playerData.roles) {
-                                if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
-                                    return false;
-                                };
-                            };
-                            return true;
-                        };
+                };
+            };
+            if (playerData?.country == chunkData?.countryId) {
+                const playerCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+                if (playerCountryData?.owner === playerData?.id) return false;
+                for (const role of playerData.roles) {
+                    const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                    if (perms.includes(permission)) {
+                        return false;
+                    } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                        return false;
+                    };
+                };
+            };
+        };
+        return true;
+    };
+    //大使館(外国向けプロット) → その国かどうか確認
+    if (plot?.enable && plot?.type == "embassy") {
+        //その国が存在
+        if (plot?.owner) {
+            const ownerData = GetAndParsePropertyData(`player_${plot.owner}`);
+            const plotCountryData = GetAndParsePropertyData(`country_${ownerData?.country}`);
+            //その国だった場合
+            if (playerData?.country == plotCountryData.id) {
+                if (plot.permissions.includes(permission)) {
+                    return false;
+                };
+                if (plotCountryData?.owner === playerData?.id) return false;
+                for (const role of playerData.roles) {
+                    const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                    if (perms.includes(permission)) {
+                        return false;
+                    } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                        return false;
                     };
                 };
             } else {
+                if (chunkData?.countryId == playerData?.country) {
+                    const playerCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+                    if (playerCountryData?.owner === playerData?.id) return false;
+                    for (const role of playerData.roles) {
+                        const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                        if (perms.includes(permission)) {
+                            return false;
+                        } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                            return false;
+                        };
+                    };
+                };
+                if (plot.countries.find(c => c.id == playerData?.country && c.permissions.includes(permission))) {
+                    return false;
+                };
+                return true;
+            };
+        };
+    };
+    if (plot?.enable && plot?.type == "public") {
+        if (plot.players.find(p => p.id == playerData?.id && p.permissions.includes(permission))) {
+            return false;
+        };
+        if (playerData?.country == chunkData.countryId) {
+            if (plot.permissions.includes(permission)) {
                 return false;
             };
+            if (plot?.roles) {
+                if (plot?.roles.find(role => role.permissions.includes(permission) && playerData.roles.includes(role.id))) {
+                    return false;
+                };
+            };
+            const playerCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+            if (playerCountryData?.owner === playerData?.id) return false;
+            for (const role of playerData.roles) {
+                const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                if (perms.includes(permission)) {
+                    return false;
+                } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                    return false;
+                };
+            };
+            return true;
+        } else {
+            if (plot.countries.find(c => c.id == playerData?.country && c.permissions.includes(permission))) {
+                return false;
+            };
+            return true;
         };
     };
     if (chunkData?.countryId) {
@@ -251,40 +320,108 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
             return true;
         };
     };
+    /**
+     * @type {{group: string|undefined,country: number|undefined,name: string|undefined,owner: string|undefined,permissions: [string],roles: [{id: number,permissions: [string]}],countries: [{id: number,permissions: [string]}],players: [{id: string,permissions: [string]}],type: "public"|"private"|"embassy",price: number|0, } | undefined}
+     */
+    const plot = chunkData?.plot?.group ? GetAndParsePropertyData(`plotgroup_${chunkData?.plot?.group}`) : chunkData?.plot ?? undefined;
+
     //個人所有の土地 → 規制がなければ許可 → 規制があってもallowListにいれば許可 → 自分の国かつownerがあるとき許可 また、戦争中なら許可 → なければキャンセル
-    if (chunkData?.owner) {
-        if (chunkData?.owner === playerData?.id) {
-            if (!restrictionPermissions.includes(permission)) {
+    if (plot?.enable && plot?.type == "private") {
+        if (plot?.owner === playerData?.id) {
+            return false;
+        } else {
+            if (plot.permissions.includes(permission)) {
                 return false;
             };
-        } else {
-            if (chunkData[`${permission}Restriction`]) {
-                const allow = chunkData[`${permission}Allow`].includes(player.id);
-                if (allow) {
+            if (plot.players.find(p => p.id == playerData.id)) {
+                if (plot.players.find(p => p.id == playerData.id).permissions.includes(permission)) {
                     return false;
-                } else {
-                    if (chunkData?.countryId) {
-                        const countryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
-                        if (!playerData?.country) {
-                            return true;
-                        };
-                        if (countryData?.warNowCountries.includes(playerData.country)) {
-                            return false;
-                        };
-                        if (countryData?.id === playerData?.country) {
-                            if (countryData?.owner === playerData?.id) return false;
-                            for (const role of playerData.roles) {
-                                if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(`admin`)) {
-                                    return false;
-                                };
-                            };
-                            return true;
-                        };
+                };
+            };
+            if (playerData?.country == chunkData?.countryId) {
+                const playerCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+                if (playerCountryData?.owner === playerData?.id) return false;
+                for (const role of playerData.roles) {
+                    const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                    if (perms.includes(permission)) {
+                        return false;
+                    } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                        return false;
+                    };
+                };
+            };
+        };
+        return true;
+    };
+    //大使館(外国向けプロット) → その国かどうか確認
+    if (plot?.enable && plot?.type == "embassy") {
+        //その国が存在
+        if (plot?.owner) {
+            const ownerData = GetAndParsePropertyData(`player_${plot.owner}`);
+            const plotCountryData = GetAndParsePropertyData(`country_${ownerData?.country}`);
+            //その国だった場合
+            if (playerData?.country == plotCountryData.id) {
+                if (plot.permissions.includes(permission)) {
+                    return false;
+                };
+                if (plotCountryData?.owner === playerData?.id) return false;
+                for (const role of playerData.roles) {
+                    const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                    if (perms.includes(permission)) {
+                        return false;
+                    } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                        return false;
                     };
                 };
             } else {
+                if (chunkData?.countryId == playerData?.country) {
+                    const playerCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+                    if (playerCountryData?.owner === playerData?.id) return false;
+                    for (const role of playerData.roles) {
+                        const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                        if (perms.includes(permission)) {
+                            return false;
+                        } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                            return false;
+                        };
+                    };
+                };
+                if (plot.countries.find(c => c.id == playerData?.country && c.permissions.includes(permission))) {
+                    return false;
+                };
+                return true;
+            };
+        };
+    };
+    if (plot?.enable && plot?.type == "public") {
+        if (plot.players.find(p => p.id == playerData?.id && p.permissions.includes(permission))) {
+            return false;
+        };
+        if (playerData?.country == chunkData.countryId) {
+            if (plot.permissions.includes(permission)) {
                 return false;
             };
+            if (plot?.roles) {
+                if (plot?.roles.find(role => role.permissions.includes(permission) && playerData.roles.includes(role.id))) {
+                    return false;
+                };
+            };
+            const playerCountryData = GetAndParsePropertyData(`country_${chunkData.countryId}`);
+            if (playerCountryData?.owner === playerData?.id) return false;
+            for (const role of playerData.roles) {
+                const perms = GetAndParsePropertyData(`role_${role}`).permissions;
+                if (perms.includes(permission)) {
+                    return false;
+                } else if (perms.includes(`admin`) || perms.includes(`owner`)) {
+                    return false;
+                };
+            };
+            return true;
+        } else {
+            if (plot.countries.find(c => c.id == playerData?.country && c.permissions.includes(permission))) {
+                return false;
+            };
+            return true;
         };
     };
     if (chunkData?.countryId) {
@@ -325,15 +462,15 @@ export function HasPermission(player, permission) {
     if (player.hasTag(`adminmode`)) return true;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
-    if (countryData?.owner === playerData?.id) return true;
+    if (countryData?.owner == player.id) return true;
     for (const role of playerData.roles) {
-        if (GetAndParsePropertyData(`role_${role}`).permissions.includes(`owner`) || GetAndParsePropertyData(`role_${role}`).permissions.includes(permission)) return true;
+        if (GetAndParsePropertyData(`role_${role}`)?.permissions.includes(`admin`) || GetAndParsePropertyData(`role_${role}`)?.permissions.includes(permission)) return true;
     };
     return false;
 };
 
 export function getRandomInteger(min, max) {
-    return Math.floor((Math.random() * (max - min) + min) * 100) / 100;
+    return Math.floor((Math.random() * (max - min) + min) * 100 * jobs_config.jobRewardMagnification) / 100;
 };
 
 /**
@@ -347,7 +484,7 @@ export function isDecimalNumber(value) {
 };
 
 export function isDecimalNumberZeroOK(value) {
-    if(value == 0) {
+    if (value == 0) {
         return true;
     };
     const integerRegex = /^[1-9]\d*$/;
@@ -355,8 +492,7 @@ export function isDecimalNumberZeroOK(value) {
 };
 
 export function isWithinTimeRange(startTime, endTime) {
-    const date = new Date(Date.now() + (((config.timeDifference * 60)) * 60 * 1000));
-
+    const date = new Date();
     const currentHour = date.getHours();
     const currentMinute = date.getMinutes();
     const currentTime = currentHour * 60 + currentMinute;
@@ -399,9 +535,9 @@ export function getTimeBefore(time, minutesBefore) {
  */
 export function playerNameToId(playerName) {
     const playerIds = Dyprop.DynamicPropertyIds().filter(id => id.startsWith(`player_`));
-    for(const id of playerIds) {
+    for (const id of playerIds) {
         let pData = GetAndParsePropertyData(id);
-        if(pData.name == playerName) return pData.id;
+        if (pData.name == playerName) return pData.id;
     };
     return undefined;
 };

@@ -1,6 +1,7 @@
 import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import { uiManager } from "@minecraft/server-ui";
+import { tax } from "./interval";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -30,6 +31,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             sourceEntity.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `system.setup.complete` }] });
             sourceEntity.addTag("mc_admin");
             world.setDynamicProperty(`start`, `true`);
+            break;
+        };
+        case `mc:tax_time`: {
+            tax();
             break;
         };
     };

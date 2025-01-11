@@ -8,7 +8,7 @@ import { itemIdToPath } from "../texture_config";
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
     const { sourceEntity, message } = ev;
-    const playerData = GetAndParsePropertyData(`player_${sourceEntity.id}`);
+    const playerData = GetAndParsePropertyData(`player_${sourceEntity?.id}`);
     switch (ev.id) {
         case `karo:add`: {
             playerData.money += Number(message);
@@ -107,14 +107,60 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             break;
         };
         case `karo:mobtest`: {
+            if (message.length === 0) {
+                sourceEntity.sendMessage(`読み込まれているエンティティ数は${sourceEntity.dimension.getEntities().length}体です`);
+                break;
+            };
             const [messageSplit1, ...messageSplit2] = message.split(` `, 2);
-            sourceEntity.sendMessage(`半径${messageSplit1}m以内にいる${messageSplit2}は${sourceEntity.dimension.getEntities({ location: sourceEntity.location, maxDistance: Number(messageSplit1), type: messageSplit2 }).length}`);
+            if (messageSplit2.length === 0) {
+                sourceEntity.sendMessage(`半径${messageSplit1}m以内にいるエンティティは${sourceEntity.dimension.getEntities({ location: sourceEntity.location, maxDistance: Number(messageSplit1) }).length}体です`);
+                break;
+            };
+            sourceEntity.sendMessage(`半径${messageSplit1}m以内にいる${messageSplit2}は${sourceEntity.dimension.getEntities({ location: sourceEntity.location, maxDistance: Number(messageSplit1), type: messageSplit2.join(``) }).length}`);
             break;
         };
-        case `karo:keylist`: {
+        case `karo:keylistnum`: {
             sourceEntity.sendMessage(`${world.getDynamicPropertyIds().length}`);
             break;
         };
+        case `karo:keylist`: {
+            sourceEntity.sendMessage(`${world.getDynamicPropertyIds()}`);
+            break;
+        };
+        case `karo:get`: {
+            sourceEntity.sendMessage(`${world.getDynamicProperty(message)}`);
+            break;
+        };
+        case `karo:getdyprop`: {
+            sourceEntity.sendMessage(`${DyProp.getDynamicProperty(message)}`);
+            break;
+        };
+        case `karo:delete`: {
+            sourceEntity.sendMessage(`${world.setDynamicProperty(message)}`);
+            break;
+        };
+        case `karo:deletedyprop`: {
+            sourceEntity.sendMessage(`${DyProp.setDynamicProperty(message)}`);
+            break;
+        };
+        case `karo:byte`: {
+            sourceEntity.sendMessage(`${world.getDynamicPropertyTotalByteCount()}`);
+            break;
+        };
+        case `karo:playercount`: {
+            const count = DyProp.DynamicPropertyIds().filter(d => d.startsWith(`player_`)).length;
+            console.log(`${count}`);
+            sourceEntity?.sendMessage(`${count}`);
+            break;
+        };
+        case `karo:account`: {
+            sourceEntity.sendMessage(`${world.getPlayers({ name: message })[0]?.getDynamicProperty(`accountData`)}`);
+            break;
+        }
+        case `karo:deletedyp`: {
+            DyProp.setDynamicProperty(`${message}`);
+            break;
+        }
         /*case `karo:form`: {
             for(const player of world.getAllPlayers()) {
                 uiManager.closeAllForms(player);

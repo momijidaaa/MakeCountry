@@ -1,6 +1,6 @@
 import { EntityComponentTypes, system, world, BlockComponentTypes, SignSide, Direction } from '@minecraft/server';
-import { chestShopConfig } from 'chest_shop_config.js';
-import { GetAndParsePropertyData, StringifyAndSavePropertyData } from './util.js';
+import { chestShopConfig } from '../chest_shop_config.js';
+import { GetAndParsePropertyData, StringifyAndSavePropertyData, playerNameToId } from './util.js';
 
 /**
  *
@@ -8,7 +8,8 @@ import { GetAndParsePropertyData, StringifyAndSavePropertyData } from './util.js
  * @returns {number | undefined}
  */
 function getPlayerMoney(playerName) {
-    let playerData = GetAndParsePropertyData(`player_${playerName}`);
+    const id = playerNameToId(playerName);
+    let playerData = GetAndParsePropertyData(`player_${id}`);
 
     if (playerData === undefined) return;
     if (playerData.money === undefined) return;
@@ -21,9 +22,10 @@ function getPlayerMoney(playerName) {
  * @param {number} money
  */
 function setPlayerMoney(playerName, money) {
-    const playerData = GetAndParsePropertyData(`player_${playerName}`);
+    const id = playerNameToId(playerName);
+    const playerData = GetAndParsePropertyData(`player_${id}`);
     playerData.money = money;
-    StringifyAndSavePropertyData(`player_${playerName}`, playerData);
+    StringifyAndSavePropertyData(`player_${id}`, playerData);
     return;
 }
 
@@ -32,7 +34,7 @@ function setPlayerMoney(playerName, money) {
  * @param {import('@minecraft/server').Block} block
  * @returns {Array<string> | undefined}
  */
-function getSignTexts(block) {
+export function getSignTexts(block) {
     if (!block.typeId.startsWith('minecraft:')) return;
     if (!block.typeId.endsWith('wall_sign')) return;
 
@@ -193,7 +195,7 @@ function getItemStock(container, itemId) {
  * @param {import('@minecraft/server').Block} block
  * @returns {ShopData | undefined}
  */
-function getShopData(signTexts, block) {
+export function getShopData(signTexts, block) {
     if (signTexts == undefined) return;
     const data = signTexts[0].split('\n');
 
@@ -333,7 +335,7 @@ function setShopData(shopData, itemStack, playerName) {
  * @param {string} playerName
  * @returns {boolean | undefined}
  */
-function isShopOwner(block, playerName) {
+export function isShopOwner(block, playerName) {
     let shopData;
     switch (true) {
         case getSignTexts(block.east()) != undefined:
@@ -367,7 +369,6 @@ world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
     if (signTexts[0].split('\n')[0] === chestShopConfig.shopId) ev.cancel = true;
     if (signTexts[0].split('\n')[4] === chestShopConfig.shopId) ev.cancel = true;
     if (signTexts[1] === chestShopConfig.shopId) ev.cancel = true;
-
     const shopData = getShopData(signTexts, ev.block);
     if (shopData === undefined) return;
 
@@ -385,38 +386,37 @@ world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
 
     if (shopData.buyPrice <= 0) return;
 
-    let money = getPlayerMoney(ev.player.name);
+    let money = getPlayerMoney(ev.player.nameTag);
     if (money === undefined) return;
     let shopMoney = getPlayerMoney(shopData.player);
     if (shopMoney === undefined) return;
 
-    if (shopData.buyPrice > money) return;
-    if (shopData.amount > getItemStock(shopData.container, shopData.item)) return;
+    if (shopData.buyPrice > shopMoney) return;
 
     const playerInventory = ev.player.getComponent(EntityComponentTypes.Inventory);
     if (playerInventory === undefined) return;
 
     const playerContainer = playerInventory.container;
     if (playerContainer === undefined) return;
+    if (shopData.amount > getItemStock(playerContainer, shopData.item)) return;
 
-    const itemStacks = removeItems(shopData.container, shopData.item, shopData.amount);
+    const itemStacks = removeItems(playerContainer, shopData.item, shopData.amount);
 
-    if (!canAddItems(playerContainer, itemStacks)) {
-        addItems(shopData.container, itemStacks);
+    if (!canAddItems(shopData.container, itemStacks)) {
+        addItems(playerContainer, itemStacks);
         return;
     }
 
-    addItems(playerContainer, itemStacks);
+    addItems(shopData.container, itemStacks);
 
     // if(shopData.player === ev.player.name) return
 
-    shopMoney += shopData.buyPrice;
+    shopMoney -= shopData.buyPrice;
     setPlayerMoney(shopData.player, shopMoney);
 
-    money = getPlayerMoney(ev.player.name);
-
-    money -= shopData.buyPrice;
-    setPlayerMoney(ev.player.name, money);
+    money = getPlayerMoney(ev.player.nameTag);
+    money += shopData.buyPrice;
+    setPlayerMoney(ev.player.nameTag, money);
 });
 
 // sell
@@ -436,49 +436,40 @@ world.afterEvents.entityHitBlock.subscribe(async (ev) => {
 
     await system.waitTicks(1);
 
-    let money = getPlayerMoney(ev.damagingEntity.nameTag);
+    let money = getPlayerMoney(ev.damagingEntity.name);
     if (money === undefined) return;
     let shopMoney = getPlayerMoney(shopData.player);
     if (shopMoney === undefined) return;
 
-    if (shopData.sellPrice > shopMoney) return;
+    if (shopData.sellPrice > money) return;
+    if (shopData.amount > getItemStock(shopData.container, shopData.item)) return;
 
     const playerInventory = ev.damagingEntity.getComponent(EntityComponentTypes.Inventory);
     if (playerInventory === undefined) return;
 
     const playerContainer = playerInventory.container;
     if (playerContainer === undefined) return;
-    if (shopData.amount > getItemStock(playerContainer, shopData.item)) return;
 
-    const itemStacks = removeItems(playerContainer, shopData.item, shopData.amount);
+    const itemStacks = removeItems(shopData.container, shopData.item, shopData.amount);
 
-    if (!canAddItems(shopData.container, itemStacks)) {
-        addItems(playerContainer, itemStacks);
+    if (!canAddItems(playerContainer, itemStacks)) {
+        addItems(shopData.container, itemStacks);
         return;
     }
 
-    addItems(shopData.container, itemStacks);
+    addItems(playerContainer, itemStacks);
 
     // if(shopData.player === ev.player.name) return
 
-    shopMoney -= shopData.sellPrice;
+    shopMoney += shopData.sellPrice;
     setPlayerMoney(shopData.player, shopMoney);
 
-    money = getPlayerMoney(ev.damagingEntity.nameTag);
-    money += shopData.sellPrice;
-    setPlayerMoney(ev.damagingEntity.nameTag, money);
-});
+    money = getPlayerMoney(ev.damagingEntity.name);
 
-// チェスト保護
-world.beforeEvents.playerBreakBlock.subscribe(
-    (ev) => {
-        if (ev.player.hasTag('mc_admin')) return;
-        const isOwner = isShopOwner(ev.block, ev.player.name);
-        if (isOwner == undefined) return;
-        if (!isOwner) ev.cancel = true;
-    },
-    { blockTypes: chestShopConfig.shopBlockIds }
-);
+    money -= shopData.sellPrice;
+    setPlayerMoney(ev.damagingEntity.name, money);
+
+});
 
 world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     if (ev.player.hasTag('mc_admin')) return;
@@ -487,23 +478,4 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const isOwner = isShopOwner(ev.block, ev.player.name);
     if (isOwner == undefined) return;
     if (!isOwner) ev.cancel = true;
-});
-
-// 看板保護
-world.beforeEvents.playerBreakBlock.subscribe((ev) => {
-    if (ev.player.hasTag('mc_admin')) return;
-    if (!ev.block.typeId.startsWith('minecraft:')) return;
-    if (!ev.block.typeId.endsWith('wall_sign')) return;
-
-    const signTexts = getSignTexts(ev.block);
-    if (signTexts === undefined) return;
-
-    if (signTexts[1] !== chestShopConfig.shopId) return;
-
-    const shopData = getShopData(signTexts, ev.block);
-    if (shopData === undefined) return;
-
-    if (shopData.player === ev.player.name) return;
-
-    ev.cancel = true;
 });

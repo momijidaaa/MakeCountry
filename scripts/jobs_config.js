@@ -51,6 +51,9 @@ export default {
         //ここに追加可能
     ],
 
+    //職業報酬の全体倍率
+    jobRewardMagnification: 1.5,
+
     fishingReward: { min: 20, max: 35 }, //釣りでアイテムを釣ったときにもらえるお金の変域
 
     sanddiggerReward: { min: 0.1, max: 0.3 }, //砂を掘ったときにもらえるお金の変域
@@ -59,20 +62,21 @@ export default {
 
     dirtdiggerReward: { min: 0.1, max: 0.3 }, //土を掘ったときにもらえるお金の変域
 
-    woodCutReward: { min: 2, max: 7 }, //木を切ったときにもらえるお金の変域
+    woodCutReward: { min: 2, max: 5 }, //木を切ったときにもらえるお金の変域
 
-    cropHarvestReward: { min: 5, max: 25 }, //作物収穫時にもらえるお金の変域
-    cocoaHarvestReward: { min: 5, max: 25 }, //ココア収穫時にもらえるお金の変域
+    cropHarvestReward: { min: 5, max: 20 }, //作物収穫時にもらえるお金の変域
+    cocoaHarvestReward: { min: 5, max: 15 }, //ココア収穫時にもらえるお金の変域
 
     oreMiningReward: { min: 5, max: 20 }, //鉱石系ブロックを掘ったときにもらえるお金の変域
-    stoneMiningReward: { min: 1, max: 10 }, //石系ブロックを掘ったときにもらえるお金の変域
+    stoneMiningReward: { min: 1, max: 2 }, //石系ブロックを掘ったときにもらえるお金の変域
+    normalStoneMiningReward: {min: 1, max: 2}, //minecraft:stoneを掘ったときにもらえるお金の変域 
 
     skeletonKillReward: { min: 10, max: 25 }, //スケルトンを倒したときにもらえるお金の変域
     strayKillReward: { min: 10, max: 25 }, //ストレイを倒したときにもらえるお金の変域
     zombieKillReward: { min: 10, max: 25 }, //ゾンビを倒したときにもらえるお金の変域
     huskKillReward: { min: 10, max: 30 }, //ハスクを倒したときにもらえるお金の変域
     zombieKillReward: { min: 10, max: 25 }, //ゾンビを倒したときにもらえるお金の変域
-    slimeKillReward: { min: 10, max: 15 }, //スライムを倒したときにもらえるお金の変域
+    slimeKillReward: { min: 1, max: 5 }, //スライムを倒したときにもらえるお金の変域
     spiderKillReward: { min: 10, max: 30 }, //クモを倒したときにもらえるお金の変域
     cave_spiderKillReward: { min: 10, max: 30 }, //洞窟クモを倒したときにもらえるお金の変域
     creeper_spiderKillReward: { min: 15, max: 30 }, //クリーパーを倒したときにもらえるお金の変域
@@ -82,7 +86,7 @@ export default {
     guardianKillReward: { min: 15, max: 30 }, //ガーディアンを倒したときにもらえるお金の変域
     pillagerKillReward: { min: 15, max: 30 }, //ピリジャーを倒したときにもらえるお金の変域
     shulkerKillReward: { min: 15, max: 30 }, //シュルカーを倒したときにもらえるお金の変域
-    silverfishKillReward: { min: 15, max: 20 }, //シルバーフィッシュを倒したときにもらえるお金の変域
+    silverfishKillReward: { min: 1, max: 5 }, //シルバーフィッシュを倒したときにもらえるお金の変域
     phantomKillReward: { min: 10, max: 30 }, //ファントムを倒したときにもらえるお金の変域
     ravagerKillReward: { min: 10, max: 40 }, //ラヴェジャーを倒したときにもらえるお金の変域
     vexKillReward: { min: 10, max: 30 }, //ヴェックスを倒したときにもらえるお金の変域
@@ -97,10 +101,10 @@ export default {
     ghastKillReward: { min: 20, max: 30 }, //ガストを倒したときにもらえるお金の変域
     hoglinKillReward: { min: 10, max: 35 }, //ホグリンを倒したときにもらえるお金の変域
     zoglinKillReward: { min: 10, max: 30 }, //ゾグリンを倒したときにもらえるお金の変域
-    magma_cubeKillReward: { min: 10, max: 25 }, //マグマキューブを倒したときにもらえるお金の変域
-    zombie_pigmanKillReward: { min: 20, max: 40 }, //ゾンビピッグマンを倒したときにもらえるお金の変域
+    magma_cubeKillReward: { min: 1, max: 5 }, //マグマキューブを倒したときにもらえるお金の変域
+    zombie_pigmanKillReward: { min: 10, max: 25 }, //ゾンビピッグマンを倒したときにもらえるお金の変域
     piglinKillReward: { min: 20, max: 40 }, //ピグリンを倒したときにもらえるお金の変域
-    piglin_bruteKillReward: { min: 20, max: 50 }, //ピグリンブルートを倒したときにもらえるお金の変域
+    piglin_bruteKillReward: { min: 15, max: 35 }, //ピグリンブルートを倒したときにもらえるお金の変域
     striderKillReward: { min: 20, max: 30 }, //ストライダーを倒したときにもらえるお金の変域
     striderKillReward: { min: 20, max: 40 }, //ウィザースケルトンを倒したときにもらえるお金の変域
 
@@ -109,8 +113,8 @@ export default {
     batKillReward: { min: 1, max: 20 }, //コウモリを倒したときにもらえるお金の変域
     axolotlKillReward: { min: 1, max: 30 }, //ウーパールーパーを倒したときにもらえるお金の変域
     camelKillReward: { min: 1, max: 35 }, //ラクダを倒したときにもらえるお金の変域
-    catKillReward: { min: 1, max: 35 }, //猫を倒したときにもらえるお金の変域
-    ocelotKillReward: { min: 1, max: 30 }, //ヤマネコを倒したときにもらえるお金の変域
+    catKillReward: { min: 1, max: 1 }, //猫を倒したときにもらえるお金の変域
+    ocelotKillReward: { min: 1, max: 1 }, //ヤマネコを倒したときにもらえるお金の変域
     pandaKillReward: { min: 1, max: 30 }, //パンダを倒したときにもらえるお金の変域
     parrotKillReward: { min: 1, max: 20 }, //オウムを倒したときにもらえるお金の変域
     snifferKillReward: { min: 1, max: 40 }, //スニッファーを倒したときにもらえるお金の変域
@@ -162,5 +166,5 @@ export default {
     tnt_minecartKillReward: { min: 0, max: 0 }, //TNT付きトロッコをこわしたときにもらえるお金の変域
     armor_standKillReward: { min: 0, max: 0 }, //防具立てをこわしたときにもらえるお金の変域
 
-    otherMobkillReward: { min: 1, max: 10 }, //その他のエンティティを倒したときにもらえるお金の変域
+    otherMobkillReward: { min: 0, max: 0 }, //その他のエンティティを倒したときにもらえるお金の変域
 };

@@ -6,34 +6,18 @@ import config from "../config";
 import { itemIdToPath } from "../texture_config";
 import shop_config from "../shop_config";
 
-/**
- * 
- * @param {Player} player 
- */
-export function ShopCommonsMenu(player, page = 0, keyword = ``, type = 0) {
+export function ShopCommonsMenu(player, page = 0) {
     const form = new ChestFormData("large").setTitle(`Admin Shop`);
-    /**
-     * @type {Array<{id: string,price: number}>}
-     */
     const allCommons = shop_config;
     if (allCommons.length < page * 36 + 1) {
         ShopCommonsMenu(player, page - 1);
         return;
     };
-    if (keyword != ``) {
-        switch (type) {
-            //アイテムのIDで絞り込み
-            case 0: {
-                allCommons.filter(com => com.item.typeId.includes(keyword));
-                break;
-            };
-        };
-    };
     const commonsAll = allCommons;
     const commons = allCommons.slice(0 + (45 * page), 45 + (45 * page));
     for (let i = 0; i < commons.length; i++) {
         const common = commons[i];
-        form.setButton(i + 9, { name: common.id, iconPath: itemIdToPath[common.id] ?? common.id, lore: [`${config.MoneyName}${common.price}`] });
+        form.setButton(i + 9, { name: common.name, iconPath: itemIdToPath[common.icon] ?? common.icon, lore: [`${common.lore}`] });
     };
     form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
     if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
@@ -64,7 +48,74 @@ export function ShopCommonsMenu(player, page = 0, keyword = ``, type = 0) {
             };
             default: {
                 system.run(() => {
-                    ShopSelectCommonForm(player, commons[rs.selection - 9]);
+                    ShopCommonsMenuCategory(player, commons[rs.selection - 9].items, 0, ``, 0);
+                    return;
+                });
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 
+ * @param {Player} player 
+ */
+export function ShopCommonsMenuCategory(player, categoryCommons, page = 0, keyword = ``, type = 0) {
+    const form = new ChestFormData("large").setTitle(`Admin Shop`);
+    /**
+     * @type {Array<{id: string,price: number}>}
+     */
+    const allCommons = categoryCommons;
+    if (allCommons.length < page * 36 + 1) {
+        ShopCommonsMenuCategory(player, categoryCommons , page - 1);
+        return;
+    };
+    if (keyword != ``) {
+        switch (type) {
+            //アイテムのIDで絞り込み
+            case 0: {
+                allCommons.filter(com => com.item.typeId.includes(keyword));
+                break;
+            };
+        };
+    };
+    const commonsAll = allCommons;
+    const commons = allCommons.slice(0 + (45 * page), 45 + (45 * page));
+    for (let i = 0; i < commons.length; i++) {
+        const common = commons[i];
+        form.setButton(i + 9, { name: common.id, iconPath: itemIdToPath[common.id] ?? common.id, lore: [`${config.MoneyName}${common.price}`] });
+    };
+    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
+    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
+    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"] });
+
+    form.show(player).then(rs => {
+        if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                ShopCommonsMenuCategory(player, categoryCommons);
+                return;
+            };
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //閉じる
+                break;
+            };
+            case 5: {
+                //進む
+                ShopCommonsMenuCategory(player, categoryCommons, page + 1);
+                break;
+            };
+            case 3: {
+                //戻る
+                ShopCommonsMenuCategory(player, categoryCommons, page - 1);
+                break;
+            };
+            default: {
+                system.run(() => {
+                    ShopSelectCommonForm(player, commons[rs.selection - 9], categoryCommons);
                     return;
                 });
                 break;
@@ -78,7 +129,7 @@ export function ShopCommonsMenu(player, page = 0, keyword = ``, type = 0) {
  * @param {Player} player 
  * @param {{id: string,price: number}} common 
  */
-export function ShopSelectCommonForm(player, common) {
+export function ShopSelectCommonForm(player, common, categoryCommons) {
     const form = new ModalFormData();
     form.title({ translate: `mc.button.buy` });
     form.toggle({ translate: `stack.buy` });
@@ -86,7 +137,7 @@ export function ShopSelectCommonForm(player, common) {
     form.submitButton({ translate: `mc.button.buy` });
     form.show(player).then(rs => {
         if (rs.canceled) {
-            ShopCommonsMenu(player);
+            ShopCommonsMenuCategory(player, categoryCommons);
             return;
         };
         const playerData = GetAndParsePropertyData(`player_${player.id}`);

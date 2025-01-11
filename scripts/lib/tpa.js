@@ -130,7 +130,7 @@ function showRequestAcceptMenu(sender) {
             default: {
                 const playerName = requests[rs.selection - 1];
                 if (teleportRequests.get(sender.name).includes(playerName)) {
-                    findPlayerByName(playerName)?.teleport(sender.location,{dimension: sender.dimension});
+                    findPlayerByName(playerName)?.teleport(sender.location, { dimension: sender.dimension });
 
                     sender.sendMessage({ translate: `accept.request.message` });
 
@@ -146,6 +146,41 @@ function showRequestAcceptMenu(sender) {
             };
         };
     });
+};
+
+/**
+ * 
+ * @param {Player} player 
+ * @param {string} name 
+ */
+export function teleportRequest(player, name) {
+    const players = world.getPlayers({ name: name });
+    if (players.length == 0) {
+        player.sendMessage({ rawtext: [{ translate: `command.error.notarget.player` }] });
+        return;
+    };
+    const selectedPlayerName = players[0].name;
+    const requests = teleportRequests.get(selectedPlayerName) || [];
+
+    if (!requests.includes(player.name)) {
+        player.sendMessage({ rawtext: [{ translate: `teleport.request.send.message`, with: [`${selectedPlayerName}`] }] });
+        findPlayerByName(selectedPlayerName)?.sendMessage({ rawtext: [{ translate: `teleport.request.receive.message`, with: [`${player.name}`] }, { text: `\n` }, { translate: `teleport.request.limit.message`, with: [`${config.tpaValiditySeconds}`] }] });;
+
+        requests.push(player.name);
+        teleportRequests.set(selectedPlayerName, requests);
+
+        const timeoutId = system.runTimeout(() => {
+            const requests = teleportRequests.get(selectedPlayerName) || [];
+            const updatedRequests = requests.filter((value) => value !== player.name);
+
+            teleportRequests.set(selectedPlayerName, updatedRequests);
+            timeoutHandlers.delete(`${player.name}=>${selectedPlayerName}`);
+        }, config.tpaValiditySeconds * 20);
+
+        timeoutHandlers.set(`${player.name}=>${selectedPlayerName}`, timeoutId);
+    } else {
+        player.sendMessage({ translate: `teleport.request.already.send` });
+    };
 };
 
 world.afterEvents.playerJoin.subscribe((ev) => {

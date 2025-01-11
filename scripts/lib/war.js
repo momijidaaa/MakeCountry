@@ -1,4 +1,4 @@
-import { Container, EntityEquippableComponent, Player, system, world } from "@minecraft/server";
+import { Container, EntityEquippableComponent, EquipmentSlot, Player, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, isWithinTimeRange, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
 
@@ -9,7 +9,7 @@ const wars = new Map();
  * 
  * @param {Player} player 
  */
-export function Invade(player) {
+export async function Invade(player) {
     let key = 0;
     for (let i = 1; i < 16; i++) {
         if (wars.has(`${i}`)) continue;
@@ -60,6 +60,10 @@ export function Invade(player) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.target.peace` }] });
         return;
     };
+    if (targetCountryData?.days <= config.invadeProtectionDuration) {
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.target.protectionduration` }] });
+        return;
+    };
     const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
     const cooltime = playerCountryData?.invadeCooltime ?? date - 1000;
 
@@ -86,14 +90,14 @@ export function Invade(player) {
             const adjacentChunk = `${c}_${numCx}_${numCz + i}_${d}`;
             const adjacentChunkData = GetAndParsePropertyData(`${adjacentChunk}`);
             if (adjacentChunkData) {
-                if (adjacentChunkData?.countryId) {
+                if (adjacentChunkData?.countryId == chunk?.countryId) {
                     adjacentTerritoriesLength++;
                 };
             };
             const adjacentChunk2 = `${c}_${numCx + i}_${numCz}_${d}`;
             const adjacentChunkData2 = GetAndParsePropertyData(`${adjacentChunk2}`);
             if (adjacentChunkData2) {
-                if (adjacentChunkData2?.countryId) {
+                if (adjacentChunkData2?.countryId == chunk?.countryId) {
                     adjacentTerritoriesLength++;
                 };
             };
@@ -107,7 +111,7 @@ export function Invade(player) {
     playerCountryData.invadeCooltime = date + (config.invadeCooltime * 1000);
     playerCountryData.peaceChangeCooltime = config.invadePeaceChangeCooltime;
 
-    const coreEntity = player.dimension.spawnEntity(`mc:core`, player.getHeadLocation());
+    const coreEntity = player.dimension.spawnEntity(`mc:core`, player.getHeadLocation(), { initialPersistence: true });
     warCountry.set(`${playerCountryData.id}`, { country: targetCountryData.id, core: coreEntity.id, time: date + 1000 * config.invadeTimelimit, key: key });
     coreEntity.nameTag = `${targetCountryData.name}§r Core`;
     const { x, y, z } = coreEntity.location;
@@ -116,6 +120,7 @@ export function Invade(player) {
     coreEntity.addTag(`war${key}`);
     wars.set(`${key}`, true);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n§f` }, { translate: `invade.success`, with: [`${player.name}§r(${playerCountryData.name}§r)`, `${msg}§r(${targetCountryData.name})§r`] }] });
+
     StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
 };
 
@@ -171,17 +176,18 @@ world.afterEvents.entityDie.subscribe((ev) => {
     if (deadEntity?.typeId !== `mc:core`) return;
     let isWar = false;
     let key = ``;
-    warCountry.forEach((value, mapKey, map) => {
+    for (const mapKey of Array.from(warCountry.keys())) {
+        const value = warCountry.get(mapKey);
         if (deadEntity.id == value.core) {
             isWar = true;
             key = mapKey;
         };
-    });
+    };
     if (!isWar) {
         return;
     };
     /**
-     * @type {{ country: number, core: string }}
+     * @type {{ country: number, core: string, key: number }}
      */
     const data = warCountry.get(key);
     const playerCountryData = GetAndParsePropertyData(`country_${key}`);
@@ -198,7 +204,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
     if (ev.damageSource?.damagingEntity) {
         ev.damageSource.damagingEntity.removeTag(ev.damageSource.damagingEntity.getTags().find(tag => tag.startsWith(`war`)));
     };
-    wars.delete(data.key);
+    wars.delete(`${data.key}`);
     warCountry.delete(key);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.won`, with: [`§r${playerCountryData.name}§r`, `${invadeCountryData.name}§r`] }] });
 });
@@ -218,6 +224,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
     const warData = warCountry.get(`${playerData.country}`);
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const warCountryData = GetAndParsePropertyData(`country_${warData.country}`);
+    const coreArray = ev.deadEntity.dimension.getEntities({ location: ev.deadEntity.location, maxDistance: config.maxDropDistance, type: `mc:core` });
     const core = world.getEntity(warData.core);
     if (core) {
         core.remove();
@@ -226,6 +233,26 @@ world.afterEvents.entityDie.subscribe((ev) => {
     wars.delete(key);
     warCountry.delete(`${playerData.country}`);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.guard`, with: [`§r${warCountryData.name}§r`, `${playerCountryData.name}§r`] }] });
+
+    if (coreArray.length == 0) return;
+    /** 
+    * @type { Container } 
+    */
+    let playerContainer = ev.deadEntity.getComponent(`inventory`).container;
+    for (let i = 0; i < 36; i++) {
+        if (typeof playerContainer.getItem(i) === 'undefined') continue;
+        world.getDimension(ev.deadEntity.dimension.id).spawnItem(playerContainer.getItem(i), ev.deadEntity.location);
+    };
+    /** 
+    * @type { EntityEquippableComponent } 
+    */
+    let playerEquipment = ev.deadEntity.getComponent(`minecraft:equippable`);
+    const slotNames = ["Chest", "Head", "Feet", "Legs", "Offhand"];
+    for (let i = 0; i < 5; i++) {
+        if (typeof playerEquipment.getEquipment(slotNames[i]) === 'undefined') continue;
+        world.getDimension(ev.deadEntity.dimension.id).spawnItem(playerEquipment.getEquipment(slotNames[i]), ev.deadEntity.location);
+    };
+    ev.deadEntity.runCommandAsync(`clear @s`);
 });
 
 world.beforeEvents.playerLeave.subscribe((ev) => {
@@ -258,15 +285,9 @@ world.beforeEvents.playerLeave.subscribe((ev) => {
 world.afterEvents.entityDie.subscribe((ev) => {
     if (!ev.deadEntity.isValid()) return;
     if (ev.deadEntity.typeId != `minecraft:player`) return;
-    const playerData = GetAndParsePropertyData(`player_${ev.deadEntity.id}`);
-    if (!playerData?.country) return;
-    const values = [];
-    for (const key of warCountry.keys()) {
-        const data = warCountry.get(key);
-        values.push(data.country);
-        if (data.country == playerData.country) break;
-    };
-    if (!values.includes(playerData.country) && !warCountry.has(`${playerData.country}`)) return;
+    if (!config.invadeItemDrop) return;
+    const coreArray = ev.deadEntity.dimension.getEntities({ location: ev.deadEntity.location, maxDistance: config.maxDropDistance, type: `mc:core` });
+    if (coreArray.length == 0) return;
     /** 
     * @type { Container } 
     */
@@ -306,15 +327,51 @@ system.runInterval(() => {
 }, 20);
 
 system.runInterval(() => {
-    for (const player of world.getPlayers()) {
-        const tags = player.getTags().filter(tag => tag.startsWith(`war`));
-        if (tags.length == 0) continue;
-        const container = player.getComponent(`inventory`).container;
-        const selectItem = container.getItem(player.selectedSlotIndex);
-        if (selectItem) {
-            const selectItemStackTypeId = selectItem.typeId;
-            if (selectItemStackTypeId != `minecraft:mace`) continue;
-            player.addEffect(`weakness`, 10, { amplifier: 250, showParticles: false });
+    const cores = world.getDimension("overworld").getEntities({ type: `mc:core` });
+    for (const core of cores) {
+        for (const player of core.dimension.getPlayers({ maxDistance: config.maxDropDistance, location: core.location })) {
+            const tags = player.getTags().filter(tag => tag.startsWith(`war`));
+            if (tags.length == 0) continue;
+            const container = player.getComponent(`inventory`).container;
+            const selectItem = container.getItem(player.selectedSlotIndex);
+            const equippable = player.getComponent(`equippable`);
+            const chestItem = equippable.getEquipment(EquipmentSlot.Chest);
+            if (selectItem) {
+                const selectItemStackTypeId = selectItem.typeId;
+                let cleared = false;
+                if (selectItemStackTypeId != `minecraft:mace`) continue;
+                for (let i = 9; i < container.size; i++) {
+                    if (!container.getItem(i)) {
+                        container.setItem(player.selectedSlotIndex);
+                        container.setItem(i, selectItem);
+                        cleared = true;
+                        break;
+                    };
+                };
+                if (!cleared) {
+                    container.setItem(player.selectedSlotIndex);
+                    const { x, y, z } = player.location;
+                    player.dimension.spawnItem(selectItem, { x, y: y + 5, z });
+                };
+            };
+            if(chestItem) {
+                const equippableItemStackTypeId = chestItem.typeId;
+                let cleared = false;
+                if (equippableItemStackTypeId != `minecraft:elytra`) continue;
+                for (let i = 9; i < container.size; i++) {
+                    if (!container.getItem(i)) {
+                        equippable.setEquipment(EquipmentSlot.Chest);
+                        container.setItem(i, chestItem);
+                        cleared = true;
+                        break;
+                    };
+                };
+                if (!cleared) {
+                    equippable.setEquipment(EquipmentSlot.Chest);
+                    const { x, y, z } = player.location;
+                    player.dimension.spawnItem(chestItem, { x, y: y + 5, z });
+                };
+            };
         };
     };
 });

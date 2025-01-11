@@ -172,6 +172,13 @@ export function PlayerMarketExhibitMainMenu(player) {
                 return;
             };
             default: {
+                const playerData = GetAndParsePropertyData(`player_${player.id}`);
+                if (playerData.money < config.playerMarketCommission) {
+                    player.sendMessage({ translate: `error.notenough.money` });
+                    return;
+                };
+                playerData.money = playerData.money - config.playerMarketCommission;
+                StringifyAndSavePropertyData(`player_${player.id}`, playerData);
                 const newContainer = player.getComponent(`inventory`).container;
                 const item = newContainer.getItem(items[rs.selection - 1].slot);
                 if (item == items[rs.selection - 1].itemStack) {

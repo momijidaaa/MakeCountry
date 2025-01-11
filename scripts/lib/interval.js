@@ -8,13 +8,14 @@ let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}
 world.setDynamicProperty(`taxTimer`, taxTimerString);
 
 const nowCountryId = new Map();
+const nowChunkPlotName = new Map();
 
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     for (const p of world.getPlayers()) {
-        p.getDynamicProperty(`nowCountryId`);
         const playerLastInCountryId = nowCountryId.get(p.id) ?? 0;
-        const nowChunkCountryData = GetAndParsePropertyData(`country_${GetAndParsePropertyData(GetPlayerChunkPropertyId(p))?.countryId}`) ?? { "id": 0, "name": "wilderness.name" };
+        const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(p));
+        const nowChunkCountryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`) ?? { "id": 0, "name": "wilderness.name", plot: { name: `` } };
         const countryChunkDataId = nowChunkCountryData?.id;
         if (countryChunkDataId !== playerLastInCountryId) {
             if (countryChunkDataId == 0) {
@@ -22,6 +23,31 @@ system.runInterval(() => {
             } else {
                 p.onScreenDisplay.setTitle({ translate: nowChunkCountryData.name });
                 p.onScreenDisplay.updateSubtitle(`${nowChunkCountryData.lore ?? ``}`);
+            };
+        };
+        if (chunkData?.plot) {
+            const plot = chunkData?.plot?.group ? GetAndParsePropertyData(`plotgroup_${chunkData?.plot?.group}`) : chunkData?.plot
+            if (countryChunkDataId != 0 && plot?.enable) {
+                const plotName = plot?.name ?? ``;
+                switch (plot?.type ?? `public`) {
+                    case `public`: {
+                        p.onScreenDisplay.setActionBar({ rawtext: [{ text: `§6~§b${plotName} §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
+                        nowChunkPlotName.set(p.id, plotName);
+                        break;
+                    };
+                    case `private`: {
+                        p.onScreenDisplay.setActionBar({ rawtext: [{ text: `§6~§a${plotName}` }] });
+                        nowChunkPlotName.set(p.id, plotName);
+                        break;
+                    };
+                    case `embassy`: {
+                        p.onScreenDisplay.setActionBar({ rawtext: [{ text: `§6~§e${plotName} §r§7- §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
+                        nowChunkPlotName.set(p.id, plotName);
+                        break;
+                    };
+                };
+                //if(nowChunkPlotName.get(p.id) != plotName && plotName != ``) {
+                //};
             };
         };
         nowCountryId.set(p.id, countryChunkDataId);
@@ -32,7 +58,7 @@ system.runInterval(() => {
     if (!config.taxValidity) return;
     if (!world.getDynamicProperty(`start`)) return;
     if (config.taxTypeIsTimeSet) {
-        const zikan = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000));
+        const zikan = new Date();
         const msgTime = getTimeBefore(config.taxTime, config.taxMessageBeforeTime);
         if (zikan.getHours() == msgTime.hour && zikan.getMinutes() == msgTime.min) {
             world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n§r税回収&維持費徴収まで残り10分です\n建国から3日が経過した国は維持費が徴収されます\n平和主義は50$/1チャンク\n非平和主義国は5$/1チャンク\n維持費は国庫の国家予算から引かれるため予め入金しておいてください` }] });
@@ -56,7 +82,7 @@ system.runInterval(() => {
     };
 }, 20 * 60);
 
-function tax() {
+export function tax() {
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
     for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
         const playerData = GetAndParsePropertyData(pId);
@@ -114,42 +140,3 @@ function tax() {
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
     };
 };
-
-const lastMoney = new Map();
-
-system.runInterval(() => {
-    if (!config.getMoneyByScoreboard) return;
-    const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
-    const players = world.getPlayers();
-    for (const player of players) {
-        const playerData = GetAndParsePropertyData(`player_${player.id}`);
-        if (!playerData) continue;
-        let finScoreMoney = lastMoney.get(player.id);
-        let thisScoreMoney = undefined;
-        try {
-            thisScoreMoney = scoreboard.getScore(player);
-        } catch (error) {
-        }
-        if (thisScoreMoney === undefined) {
-            player.runCommand(`scoreboard players add @s mc_money ${playerData.money}`);
-            thisScoreMoney = playerData.money;
-        };
-        if (finScoreMoney === undefined) {
-            lastMoney.set(player.id, playerData.money);
-            scoreboard.setScore(player, playerData.money);
-            continue;
-        };
-        if (finScoreMoney === playerData.money && thisScoreMoney !== playerData.money) {
-            lastMoney.set(player.id, thisScoreMoney);
-            scoreboard.setScore(player, thisScoreMoney);
-            playerData.money = thisScoreMoney;
-            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-            continue;
-        } else {
-            lastMoney.set(player.id, playerData.money);
-            scoreboard.setScore(player, playerData.money);
-            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-            continue;
-        };
-    };
-});

@@ -81,7 +81,14 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
     };
 
     //鉱夫
-    if(player.hasTag(`mcjobs_miner`) && player.getComponent(`inventory`).container.getItem(player.selectedSlotIndex)?.getComponent(`enchantable`)?.getEnchantment(`silk_touch`)) {
+    if (player.hasTag(`mcjobs_miner`) && player.getComponent(`inventory`).container.getItem(player.selectedSlotIndex)?.getComponent(`enchantable`)?.getEnchantment(`silk_touch`)) {
+        return;
+    };
+    if (brokenBlockPermutation.type.id == `minecraft:stone` && player.hasTag(`mcjobs_miner`)) {
+        const random = getRandomInteger(jobs_config.normalStoneMiningReward.min, jobs_config.normalStoneMiningReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
     if (brokenBlockPermutation.type.id.endsWith(`_ore`) && player.hasTag(`mcjobs_miner`)) {
@@ -135,6 +142,13 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
         return;
     };
+    if (brokenBlockPermutation.type.id === `mc:rice_crop` && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`mc:growth_stage`) === 3) {
+        const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        return;
+    };
 });
 
 world.afterEvents.entityDie.subscribe((ev) => {
@@ -164,19 +178,21 @@ world.afterEvents.entityDie.subscribe((ev) => {
 });
 
 playerFishingAfterEvent.subscribe((event) => {
-    if (!jobs_config.validity) return;
-    if (!event.result) return;
-    // 漁師
-    /**
-     * @type {Player}
-     */
-    const player = event.player;
-    if (!player.hasTag(`mcjobs_fisherman`)) return;
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const random = getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max)
-    if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
-    playerData.money += random;
-    StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+    system.runTimeout(() => {
+        if (!jobs_config.validity) return;
+        if (!event.result) return;
+        // 漁師
+        /**
+         * @type {Player}
+         */
+        const player = event.player;
+        if (!player.hasTag(`mcjobs_fisherman`)) return;
+        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const random = getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max)
+        if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+    });
 });
 
 /**

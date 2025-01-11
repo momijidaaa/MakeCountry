@@ -61,37 +61,48 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
     const { source } = ev;
     switch (ev.itemStack.typeId) {
         case `mc:beer`: {
-            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`nausea`, 200, { amplifier: 20 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         case `mc:white_wine`: {
-            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`nausea`, 200, { amplifier: 20 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         case `mc:red_wine`: {
-            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`nausea`, 200, { amplifier: 20 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         case `mc:whiskey`: {
-            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`nausea`, 200, { amplifier: 20 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         case `mc:vodka`: {
-            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`nausea`, 200, { amplifier: 20 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         case `mc:sake`: {
-            source.addEffect(`nausea`, 200,{amplifier: 20});
+            source.addEffect(`nausea`, 200, { amplifier: 20 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };
         default: {
             break;
+        };
+    };
+});
+
+world.afterEvents.playerBreakBlock.subscribe((ev) => {
+    const { brokenBlockPermutation, player } = ev;
+    if (brokenBlockPermutation.type.id === `minecraft:cocoa` && brokenBlockPermutation.getState(`age`) === 2) {
+        const randomNum = getWeight(1, 10000);
+        if (randomNum < 10) {
+            const coffee_beans = new ItemStack(`mc:coffee_beans`);
+            player.dimension.spawnItem(coffee_beans, player.location);
         };
     };
 });

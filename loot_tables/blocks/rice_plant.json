@@ -1,0 +1,21 @@
+{
+    "pools": [
+        {
+            "rolls": 1,
+            "entries": [
+                {
+                    "type": "item",
+                    "name": "mc:rice_plant",
+                    "quantity": 1,
+                    "functions": [
+                        {
+                            "function": "looting_enchant",
+                            "count": 1
+                        }
+                    ],
+                    "weight": 1
+                }
+            ]
+        }
+    ]
+}

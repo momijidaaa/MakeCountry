@@ -1,6 +1,6 @@
 import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData, playerCountryLeave } from "./land";
 import { MakeCountryForm, countryList, joinTypeSelectForm, playerMainMenu, settingCountry } from "./form";
 import { jobsForm } from "./jobs";
@@ -13,13 +13,18 @@ import { Invade } from "./war";
 import { plotMainForm } from "./plot_from";
 
 
-class ChatHandler {
+class ScriptCommandHandler {
     constructor(event) {
         this.event = event;
         /**
          * @type {string}
          */
         this.message = event.message;
+        /**
+         * @type {string}
+         */
+        this.id = event.id;
+
         /**
          * @type {Player}
          */
@@ -32,67 +37,10 @@ class ChatHandler {
         this.playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
     }
 
-    isCommand() {
-        return this.message.startsWith(this.prefix);
-    }
-
-    handleChat() {
-        const chatType = this.sender.getDynamicProperty(`chatType`) || `general`;
-        let landId = this.playerData?.country;
-        let land = `chat.player.no.join.any.country`;
-        if (landId) land = this.playerCountryData?.name;
-        /*if (!/^[a-z]$/.test(this.message.charAt(0))) {
-            this.event.cancel = true;
-            world.sendMessage([{ text: `<§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
-        };*/
-        this.event.cancel = true;
-        switch (chatType) {
-            case `general`: {
-                world.sendMessage([{ text: `[§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: `§r] §7${this.sender.name}§f: ${this.message}` }]);
-                break;
-            };
-            case `country`: {
-                if (!land || land.country < 1) {
-                    this.sender.sendMessage({ rawtext: [{ rawtext: `cannnot.use.nojoin.country` }] });
-                    return;
-                };
-                const players = world.getPlayers();
-                for (const player of players) {
-                    const pData = GetAndParsePropertyData(`player_${player.id}`);
-                    if (pData?.country == this.playerData?.country) {
-                        player.sendMessage([{ text: `[§aCC§r] §7${this.sender.name}§f: §a${this.message}` }]);
-                    };
-                };
-                break;
-            };
-            case `alliance`: {
-                if (!land || land.country < 1) {
-                    this.sender.sendMessage({ rawtext: [{ rawtext: `cannnot.use.nojoin.country` }] })
-                    return;
-                };
-                const players = world.getPlayers();
-                for (const player of players) {
-                    const pData = GetAndParsePropertyData(`player_${player.id}`);
-                    const alliance = this.playerCountryData.alliance;
-                    if (alliance.includes(pData?.country ?? 0) || pData?.country == this.playerData.country) {
-                        player.sendMessage([{ text: `[§2AC§r] §7${this.sender.name}§f: §a${this.message}` }]);
-                    };
-                };
-                break;
-            };
-            case `local`: {
-                const players = this.sender.dimension.getPlayers({ location: this.sender.location, maxDistance: 100 });
-                for (const player of players) {
-                    player.sendMessage([{ text: `[§sLC§r] §7${this.sender.name}§f: ${this.message}` }]);
-                };
-                break;
-            };
-        };
-    };
-
     handleCommand() {
         this.event.cancel = true;
-        const [commandName, ...args] = this.message.slice(this.prefix.length).trim().split(/ +/);
+        const commandName = this.id.replace(`mc_cmd:`, ``);
+        const args = this.message.split(/ +/);
         system.runTimeout(() => {
             switch (commandName) {
                 case "money":
@@ -168,6 +116,9 @@ class ChatHandler {
                     this.leaveCountry();
                     break;
                 case "kill":
+                    this.kill();
+                    break;
+                case "selfkill":
                     this.kill();
                     break;
                 case "countrylist":
@@ -546,7 +497,7 @@ class ChatHandler {
                 return;
             };
         };
-        if (args.length !== 0) {
+        if (args.length !== 0 && args.join(` `) != ``) {
             teleportRequest(this.sender, args.join(` `));
             return;
         };
@@ -816,14 +767,12 @@ class ChatHandler {
     };
 };
 
-world.beforeEvents.chatSend.subscribe(event => {
-    if (event.sender.hasTag(`moderator`) && event.message.startsWith(`!`)) return;
-    if (event.message === `?tp` || event.message === `?lobby` || event.message === `?vote` || event.message === `?login`) return;
-    const chatHandler = new ChatHandler(event);
-    if (chatHandler.isCommand()) {
-        chatHandler.handleCommand();
-    } else {
-        if (event.sender.getDynamicProperty(`isMute`) && !event.sender.hasTag(`moderator`)) return;
-        chatHandler.handleChat();
-    };
+system.afterEvents.scriptEventReceive.subscribe(event => {
+    if (!event?.sourceEntity) return;
+    if (!(event?.sourceEntity instanceof Player)) return;
+    if (!event.id.startsWith(`mc_cmd`)) return;
+    event.sender = event.sourceEntity;
+    if (event.id === `mc_cmd:tp` || event.id === `mc_cmd:tpmenu` || event.id === `mc_cmd:lobby` || event.id === `mc_cmd:vote` || event.id === `mc_cmd:login`) return;
+    const scriptCommandHandler = new ScriptCommandHandler(event);
+    scriptCommandHandler.handleCommand();
 });
