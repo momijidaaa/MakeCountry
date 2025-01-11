@@ -286,6 +286,8 @@ world.afterEvents.entityDie.subscribe((ev) => {
     if (!ev.deadEntity.isValid()) return;
     if (ev.deadEntity.typeId != `minecraft:player`) return;
     if (!config.invadeItemDrop) return;
+    const tags = ev.deadEntity.getTags().find(a => a.startsWith(`war`));
+    if (tags) return;
     const coreArray = ev.deadEntity.dimension.getEntities({ location: ev.deadEntity.location, maxDistance: config.maxDropDistance, type: `mc:core` });
     if (coreArray.length == 0) return;
     /** 
