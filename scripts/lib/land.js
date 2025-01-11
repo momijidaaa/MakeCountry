@@ -176,118 +176,151 @@ export function DeleteCountry(countryId) {
     };
     system.runTimeout(() => {
         if (countryData?.members) {
-            countryData?.members?.forEach(m => {
-                try {
-                    const playerData = GetAndParsePropertyData(`player_${m}`);
-                    playerData.roles = [];
-                    playerData.country = undefined;
-                    StringifyAndSavePropertyData(`player_${m}`, playerData);
-                } catch (error) {
+            try {
+                for (const m of countryData?.members ?? []) {
+                    try {
+                        const playerData = GetAndParsePropertyData(`player_${m}`);
+                        if (playerData) {
+                            playerData.roles = [];
+                            playerData.country = undefined;
+                            StringifyAndSavePropertyData(`player_${m}`, playerData);
+                        };
+                    } catch (error) {
+                    };
                 };
-            });
+            } catch (error) {
+            }
         };
     });
     system.runTimeout(() => {
         if (countryData?.territories) {
-            countryData.territories.forEach(t => {
-                try {
-                    const chunkData = GetAndParsePropertyData(t);
-                    chunkData.countryId = undefined;
-                    StringifyAndSavePropertyData(t, chunkData);
-                } catch (error) {
-
-                }
-            });
+            try {
+                for (const t of countryData?.territories ?? []) {
+                    try {
+                        const chunkData = GetAndParsePropertyData(t);
+                        if (chunkData) {
+                            chunkData.countryId = undefined;
+                            chunkData.plot = undefined;
+                            StringifyAndSavePropertyData(t, chunkData);
+                        };
+                    } catch (error) {
+                    };
+                };
+            } catch (error) {
+            }
         };
     }, 2);
     system.runTimeout(() => {
         if (countryData?.alliance) {
-            countryData.alliance.forEach(a => {
-                try {
-                    RemoveAlliance(countryId, a);
-                } catch (error) {
-                }
-            });
+            try {
+                for (const a of countryData?.alliance ?? []) {
+                    try {
+                        RemoveAlliance(countryId, a);
+                    } catch (error) {
+                    }
+                };
+            } catch (error) {
+            }
         };
     }, 3);
     system.runTimeout(() => {
         if (countryData?.hostility) {
-            countryData.hostility.forEach(h => {
-                try {
-                    RemoveHostility(countryId, h);
-                } catch (error) {
+            try {
+                for (const h of countryData?.hostility ?? []) {
+                    try {
+                        RemoveHostility(countryId, h);
+                    } catch (error) {
+                    };
                 };
-            });
+            } catch (error) {
+            }
         };
     }, 4);
     system.runTimeout(() => {
         if (countryData?.roles) {
-            countryData.roles.forEach(r => {
-                try {
-                    DyProp.setDynamicProperty(`role_${r}`);
-                } catch (error) {
+            try {
+                for (const r of countryData?.roles ?? []) {
+                    try {
+                        DyProp.setDynamicProperty(`role_${r}`);
+                    } catch (error) {
+                    };
                 };
-            });
+            } catch (error) {
+            };
         };
     }, 5);
     system.runTimeout(() => {
         if (countryData?.allianceRequestSend) {
-            countryData.allianceRequestSend.forEach(a => {
-                try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
-                    aCountry.allianceRequestReceive.splice(aCountry.allianceRequestReceive.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`country_${a}`, aCountry);
-                } catch (error) {
+            try {
+                for (const a of countryData?.allianceRequestSend ?? []) {
+                    try {
+                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        aCountry.allianceRequestReceive.splice(aCountry.allianceRequestReceive.indexOf(countryData.id), 1);
+                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    } catch (error) {
+                    };
                 };
-            });
+            } catch (error) {
+            };
         };
     }, 6);
     system.runTimeout(() => {
         if (countryData?.allianceRequestReceive) {
-            countryData.allianceRequestReceive.forEach(a => {
-                try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
-                    aCountry.allianceRequestSend.splice(aCountry.allianceRequestSend.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`country_${a}`, aCountry);
-                } catch (error) {
+            try {
+                for (const a of countryData?.allianceRequestReceive ?? []) {
+                    try {
+                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        if (aCountry) {
+                            aCountry.allianceRequestSend.splice(aCountry.allianceRequestSend.indexOf(countryData.id), 1);
+                            StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        };
+                    } catch (error) {
+                    };
                 };
-            });
+            } catch (error) {
+            };
         };
     }, 7);
     system.runTimeout(() => {
         if (countryData?.applicationPeaceRequestSend) {
-            countryData.applicationPeaceRequestSend.forEach(a => {
+            for (const a of countryData?.applicationPeaceRequestSend ?? []) {
                 try {
                     const aCountry = GetAndParsePropertyData(`country_${a}`);
-                    aCountry.applicationPeaceRequestReceive.splice(aCountry.applicationPeaceRequestReceive.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    if (aCountry) {
+                        aCountry.applicationPeaceRequestReceive.splice(aCountry.applicationPeaceRequestReceive.indexOf(countryData.id), 1);
+                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    };
                 } catch (error) {
                 };
-            });
+            };
         };
     }, 8);
     system.runTimeout(() => {
         if (countryData?.applicationPeaceRequestReceive) {
-            countryData.applicationPeaceRequestReceive.forEach(a => {
+            for (const a of countryData?.applicationPeaceRequestReceive ?? []) {
                 try {
                     const aCountry = GetAndParsePropertyData(`country_${a}`);
-                    aCountry.applicationPeaceRequestSend.splice(aCountry.applicationPeaceRequestSend.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    if (aCountry) {
+                        aCountry.applicationPeaceRequestSend.splice(aCountry.applicationPeaceRequestSend.indexOf(countryData.id), 1);
+                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    };
                 } catch (error) {
                 };
-            });
+            };
         };
     }, 9);
     system.runTimeout(() => {
         if (countryData?.declarationSend) {
-            countryData.declarationSend.forEach(a => {
+            for (const a of countryData?.declarationSend ?? []) {
                 try {
                     const aCountry = GetAndParsePropertyData(`country_${a}`);
-                    aCountry.declarationReceive.splice(aCountry.declarationReceive.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    if (aCountry) {
+                        aCountry.declarationReceive.splice(aCountry.declarationReceive.indexOf(countryData.id), 1);
+                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                    };
                 } catch (error) {
                 };
-            });
+            };
         };
     }, 10);
     system.runTimeout(() => {
@@ -304,24 +337,32 @@ export function DeleteCountry(countryId) {
     }, 11);
     system.runTimeout(() => {
         if (countryData?.warNowCountries) {
-            countryData.warNowCountries.forEach(a => {
-                try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
-                    aCountry.warNowCountries.splice(aCountry.warNowCountries.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`country_${a}`, aCountry);
-                } catch (error) {
-                };
-            });
+            try {
+                for (const a of countryData?.warNowCountries ?? []) {
+                    try {
+                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        if (aCountry) {
+                            aCountry.warNowCountries.splice(aCountry.warNowCountries.indexOf(countryData.id), 1);
+                            StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        };
+                    } catch (error) {
+                    };
+                }
+            } catch (error) {
+            };
         };
     }, 12);
     system.runTimeout(() => {
         if (countryData?.plotgroup) {
-            countryData.plotgroup.forEach(g => {
-                try {
-                    StringifyAndSavePropertyData(`plotgroup_${g}`);
-                } catch (error) {
+            try {
+                for (const g of countryData?.plotgroup ?? []) {
+                    try {
+                        StringifyAndSavePropertyData(`plotgroup_${g}`);
+                    } catch (error) {
+                    };
                 };
-            });
+            } catch (error) {
+            };
         };
     }, 13);
     system.runTimeout(() => {
@@ -336,7 +377,7 @@ export function DeleteCountry(countryId) {
                 nameSet(p);
             };
         };
-    }, 30);
+    }, 20);
 }
 
 /**
@@ -400,6 +441,10 @@ export function DeleteRole(player, roleId, countryId, deleteCountry = false) {
             return;
         };
     };
+    if (deleteCountry) {
+        DyProp.setDynamicProperty(`role_${roleId}`);
+        return;
+    };
     const roleData = GetAndParsePropertyData(`role_${roleId}`);
     roleData.members.forEach(memberId => {
         try {
@@ -425,8 +470,8 @@ export function AddHostility(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
-        mainCountryData.hostility.push(countryId);
-        CountryData.hostility.push(mainCountryId);
+        mainCountryData.hostility.push(Number(countryId));
+        CountryData.hostility.push(Number(mainCountryId));
         StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
         StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
@@ -443,8 +488,8 @@ export function RemoveHostility(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
-        mainCountryData.hostility.splice(mainCountryData.hostility.indexOf(countryId), 1);
-        CountryData.hostility.splice(CountryData.hostility.indexOf(mainCountryId), 1);
+        mainCountryData.hostility.splice(mainCountryData.hostility.indexOf(Number(countryId)), 1);
+        CountryData.hostility.splice(CountryData.hostility.indexOf(Number(mainCountryId)), 1);
         StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
         StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
@@ -461,8 +506,8 @@ export function RemoveAlliance(mainCountryId, countryId) {
     const mainCountryData = GetAndParsePropertyData(`country_${mainCountryId}`);
     const CountryData = GetAndParsePropertyData(`country_${countryId}`);
     try {
-        mainCountryData.alliance.splice(mainCountryData.alliance.indexOf(countryId), 1);
-        CountryData.alliance.splice(CountryData.alliance.indexOf(mainCountryId), 1);
+        mainCountryData.alliance.splice(mainCountryData.alliance.indexOf(Number(countryId)), 1);
+        CountryData.alliance.splice(CountryData.alliance.indexOf(Number(mainCountryId)), 1);
         StringifyAndSavePropertyData(`country_${mainCountryId}`, mainCountryData);
         StringifyAndSavePropertyData(`country_${countryId}`, CountryData);
     } catch (error) {
@@ -542,8 +587,8 @@ export function playerCountryLeave(player) {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         const countryId = playerData.country;
         const countryData = GetAndParsePropertyData(`country_${countryId}`);
-        if (countryData) {
-            countryData?.members.splice(countryData.members.indexOf(playerData.id), 1);
+        if (countryData?.members) {
+            countryData.members.splice(countryData.members.indexOf(playerData.id), 1);
             StringifyAndSavePropertyData(`country_${countryId}`, countryData);
         };
         playerData.roles = [];
@@ -555,7 +600,6 @@ export function playerCountryLeave(player) {
                 nameSet(player);
             };
         }, 2);
-
     } catch (error) {
         console.warn(error);
     };
@@ -659,8 +703,8 @@ export function sendApplicationForPeace(player, countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
     countryData.applicationPeaceRequestReceive.push(playerData.country);
-    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
-    playerCountryData.applicationPeaceRequestSend.push(countryId);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(Number(countryId)), 1);
+    playerCountryData.applicationPeaceRequestSend.push(Number(countryId));
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.application.request`, with: [`${countryData.name}`] }] })
@@ -677,8 +721,8 @@ export function sendAllianceRequest(player, countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
     countryData.allianceRequestReceive.push(playerData.country);
-    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
-    playerCountryData.allianceRequestSend.push(countryId);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(Number(countryId)), 1);
+    playerCountryData.allianceRequestSend.push(Number(countryId));
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `sent.alliance.request`, with: [`${countryData.name}`] }] })
@@ -694,7 +738,7 @@ export function cancelSendApplicationForPeace(player, countryId) {
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
-    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(Number(countryId)), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.application.request`, with: [`${countryData.name}`] }] })
@@ -710,7 +754,7 @@ export function cancelAllianceRequest(player, countryId) {
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
-    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(Number(countryId)), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `cancel.alliance.request`, with: [`${countryData.name}`] }] })
@@ -727,10 +771,10 @@ export function acceptAlliance(player, countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
     countryData.allianceRequestSend.splice(countryData.allianceRequestSend.indexOf(playerData.country), 1);
-    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(Number(countryId)), 1);
     playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
     countryData.alliance.push(playerData.country);
-    playerCountryData.alliance.push(countryId);
+    playerCountryData.alliance.push(Number(countryId));
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.alliance.request`, with: [`${countryData.name}`] }] })
@@ -746,7 +790,7 @@ export function denyAllianceRequest(player, countryId) {
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.allianceRequestSend.splice(countryData.allianceRequestSend.indexOf(playerData.country), 1);
-    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
+    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(Number(countryId)), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.alliance.request`, with: [`${countryData.name}`] }] })
@@ -762,7 +806,7 @@ export function denyApplicationRequest(player, countryId) {
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.applicationPeaceRequestSend.splice(countryData.applicationPeaceRequestSend.indexOf(playerData.country), 1);
-    playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(countryId), 1);
+    playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(Number(countryId)), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `deny.application.request`, with: [`${countryData.name}`] }] })
@@ -778,13 +822,13 @@ export function acceptApplicationRequest(player, countryId) {
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
-    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(Number(countryId)), 1);
     countryData.applicationPeaceRequestSend.splice(countryData.applicationPeaceRequestSend.indexOf(playerData.country), 1);
-    playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(countryId), 1);
+    playerCountryData.applicationPeaceRequestReceive.splice(playerCountryData.applicationPeaceRequestReceive.indexOf(Number(countryId)), 1);
     countryData.hostility.splice(countryData.hostility.indexOf(playerData.country), 1);
-    playerCountryData.hostility.splice(playerCountryData.hostility.indexOf(countryId), 1);
+    playerCountryData.hostility.splice(playerCountryData.hostility.indexOf(Number(countryId)), 1);
     countryData.warNowCountries.splice(countryData.warNowCountries.indexOf(playerData.country), 1);
-    playerCountryData.warNowCountries.splice(playerCountryData.warNowCountries.indexOf(countryId), 1);
+    playerCountryData.warNowCountries.splice(playerCountryData.warNowCountries.indexOf(Number(countryId)), 1);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${countryId}`, countryData);
     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `accept.application.request`, with: [`${countryData.name}`] }] })
@@ -801,12 +845,12 @@ export function AddHostilityByPlayer(player, countryId) {
     const countryData = GetAndParsePropertyData(`country_${countryId}`);
     countryData.allianceRequestReceive.splice(countryData.allianceRequestReceive.indexOf(playerData.country), 1);
     countryData.allianceRequestSend.splice(countryData.allianceRequestSend.indexOf(playerData.country), 1);
-    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(countryId), 1);
-    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(countryId), 1);
+    playerCountryData.allianceRequestSend.splice(playerCountryData.allianceRequestSend.indexOf(Number(countryId)), 1);
+    playerCountryData.allianceRequestReceive.splice(playerCountryData.allianceRequestReceive.indexOf(Number(countryId)), 1);
     countryData.alliance.splice(countryData.alliance.indexOf(playerData.country), 1);
-    playerCountryData.alliance.splice(playerCountryData.alliance.indexOf(countryId), 1);
+    playerCountryData.alliance.splice(playerCountryData.alliance.indexOf(Number(countryId)), 1);
     countryData.applicationPeaceRequestReceive.splice(countryData.applicationPeaceRequestReceive.indexOf(playerData.country), 1);
-    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(countryId), 1);
+    playerCountryData.applicationPeaceRequestSend.splice(playerCountryData.applicationPeaceRequestSend.indexOf(Number(countryId)), 1);
     countryData.hostility.push(playerData.country);
     playerCountryData.hostility.push(countryId);
     StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
