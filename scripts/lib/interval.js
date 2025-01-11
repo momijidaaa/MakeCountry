@@ -113,6 +113,7 @@ export function tax() {
             StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
         };
     };
+    let deleteCount = 0;
     for (const cId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`))) {
         const countryData = GetAndParsePropertyData(cId);
         if (0 < countryData?.peaceChangeCooltime) {
@@ -130,7 +131,10 @@ export function tax() {
             if (countryData.money < upkeepCosts) {
                 countryData.money = 0;
                 StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
-                DeleteCountry(countryData.id);
+                system.runTimeout(() => {
+                    DeleteCountry(countryData.id);
+                }, deleteCount);
+                deleteCount++;
                 continue;
             };
             countryData.money -= upkeepCosts;
