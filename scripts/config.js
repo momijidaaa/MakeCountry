@@ -13,6 +13,12 @@ export default {
     showCountryChatLeftName: true,
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
     showRoleChatLeftName: false,
+    //二つ名を有効にするか
+    pennameEnable: false,
+    //二つ名の初期のやつ(前)
+    initialPennameBefore: "一般的な",
+    //二つ名の初期のやつ(後)
+    initialPennameAfter: "鯖民",
 
     //名前の上に国名表記するかどうか
     countryNameDisplayOnPlayerNameTag: true,
@@ -61,7 +67,7 @@ export default {
     //建国時に国庫を非公開にするか
     hideCountryMoney: true,
     //特別区域で許可する権限
-    specialAllowPermissions: [`entityUse`, `blockUse`, `setHome`, `openContainer`],
+    specialAllowPermissions: [`entityUse`, `setHome`, `openContainer`],
     //荒野で許可する権限
     wildernessAllowPermissions: [`entityUse`, `blockUse`, `makeCountry`, `buyChunk`, `place`, `break`, `setHome`, `openContainer`],
     //1ヵ国におけるロールの最大数(デフォルトのロールも考慮) (3以上)
@@ -131,4 +137,14 @@ export default {
 
     //戦争時アイテムドロップ最大距離
     maxDropDistance: 250,
+
+    //負けた時の侵略のクールタイム(秒)
+    invadeLostCoolTime: 60 * 25,
+
+    //勝った時の侵略のクールタイム(秒)
+    invadeWonCoolTime: 0,
+
+    //何チャンク以上から侵略できるか
+    minChunkCountCanInvade: 1,
+
 };

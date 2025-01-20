@@ -535,9 +535,5 @@ export function getTimeBefore(time, minutesBefore) {
  */
 export function playerNameToId(playerName) {
     const playerIds = Dyprop.DynamicPropertyIds().filter(id => id.startsWith(`player_`));
-    for (const id of playerIds) {
-        let pData = GetAndParsePropertyData(id);
-        if (pData.name == playerName) return pData.id;
-    };
-    return undefined;
+    return playerIds.find(id => playerName === GetAndParsePropertyData(id).name);
 };

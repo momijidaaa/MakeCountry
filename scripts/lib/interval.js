@@ -14,7 +14,14 @@ system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     for (const p of world.getPlayers()) {
         const playerLastInCountryId = nowCountryId.get(p.id) ?? 0;
-        const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(p));
+        const chunkId = GetPlayerChunkPropertyId(p);
+        if (playerLastInCountryId == chunkId) {
+            if (nowChunkPlotName.has(p.id)) {
+                p.onScreenDisplay.setActionBar(nowChunkPlotName.get(p.id));
+            };
+            continue;
+        };
+        const chunkData = GetAndParsePropertyData(chunkId);
         const nowChunkCountryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`) ?? { "id": 0, "name": "wilderness.name", plot: { name: `` } };
         const countryChunkDataId = nowChunkCountryData?.id;
         if (countryChunkDataId !== playerLastInCountryId) {
@@ -32,23 +39,27 @@ system.runInterval(() => {
                 switch (plot?.type ?? `public`) {
                     case `public`: {
                         p.onScreenDisplay.setActionBar({ rawtext: [{ text: `§6~§b${plotName} §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
-                        nowChunkPlotName.set(p.id, plotName);
+                        nowChunkPlotName.set(p.id, { rawtext: [{ text: `§6~§e${plotName} §r§7- §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
                         break;
                     };
                     case `private`: {
                         p.onScreenDisplay.setActionBar({ rawtext: [{ text: `§6~§a${plotName}` }] });
-                        nowChunkPlotName.set(p.id, plotName);
+                        nowChunkPlotName.set(p.id, { rawtext: [{ text: `§6~§e${plotName} §r§7- §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
                         break;
                     };
                     case `embassy`: {
                         p.onScreenDisplay.setActionBar({ rawtext: [{ text: `§6~§e${plotName} §r§7- §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
-                        nowChunkPlotName.set(p.id, plotName);
+                        nowChunkPlotName.set(p.id, { rawtext: [{ text: `§6~§e${plotName} §r§7- §6[` }, { translate: `plot.${plot?.type ?? `public`}` }, { text: `]` }] });
                         break;
                     };
                 };
                 //if(nowChunkPlotName.get(p.id) != plotName && plotName != ``) {
                 //};
+            } else {
+                nowChunkPlotName.delete(p.id);
             };
+        } else {
+            nowChunkPlotName.delete(p.id);
         };
         nowCountryId.set(p.id, countryChunkDataId);
     };
@@ -59,11 +70,13 @@ system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     if (config.taxTypeIsTimeSet) {
         const zikan = new Date();
+        const hour = zikan.getHours();
+        const min = zikan.getMinutes();
         const msgTime = getTimeBefore(config.taxTime, config.taxMessageBeforeTime);
-        if (zikan.getHours() == msgTime.hour && zikan.getMinutes() == msgTime.min) {
+        if (hour == msgTime.hour && min == msgTime.min) {
             world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n§r税回収&維持費徴収まで残り10分です\n建国から3日が経過した国は維持費が徴収されます\n平和主義は50$/1チャンク\n非平和主義国は5$/1チャンク\n維持費は国庫の国家予算から引かれるため予め入金しておいてください` }] });
         };
-        if (zikan.getHours() == config.taxTime.hour && zikan.getMinutes() == config.taxTime.min) {
+        if (hour == config.taxTime.hour && min == config.taxTime.min) {
             tax();
         };
     } else {

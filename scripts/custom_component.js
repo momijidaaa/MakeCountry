@@ -1,7 +1,7 @@
 import { world } from "@minecraft/server";
 
 world.beforeEvents.worldInitialize.subscribe((ev) => {
-    const { itemComponentRegistry, blockComponentRegistry } = ev;
+    const { blockComponentRegistry } = ev;
 
     blockComponentRegistry.registerCustomComponent("mc:grow", {
         onRandomTick(ev) {
