@@ -37,5 +37,14 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             tax();
             break;
         };
+        case `mc:lore`: {
+            const container = sourceEntity.getComponent(`inventory`).container;
+            const item = container.getItem(sourceEntity.selectedSlotIndex);
+            if (item) {
+                item.setLore([`${message}`]);
+                container.setItem(sourceEntity.selectedSlotIndex, item);
+            };
+            break;
+        };
     };
 });

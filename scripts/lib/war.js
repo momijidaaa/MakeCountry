@@ -55,6 +55,10 @@ export async function Invade(player) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.alliance` }] });
         return;
     };
+    if (playerCountryData?.territories?.length < config.minChunkCountCanInvade) {
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.self.minchunk`, with: [`${config.minChunkCountCanInvade}`] }] });
+        return;
+    };
     const targetCountryData = GetAndParsePropertyData(`country_${chunk.countryId}`);
     if (targetCountryData?.peace) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.target.peace` }] });
@@ -64,6 +68,11 @@ export async function Invade(player) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.target.protectionduration` }] });
         return;
     };
+    if (targetCountryData?.territories?.length < config.minChunkCountCanInvade) {
+        player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.target.minchunk`, with: [`${config.minChunkCountCanInvade}`] }] });
+        return;
+    };
+
     const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
     const cooltime = playerCountryData?.invadeCooltime ?? date - 1000;
 
@@ -71,6 +80,8 @@ export async function Invade(player) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.cooltime`, with: [`${Math.ceil((cooltime - date) / 100) / 10}`] }] });
         return;
     };
+
+    // なんかきもい
     const cores = player.dimension.getEntities({ type: `mc:core` });
     let coresChunks = [];
     for (let i = 0; i < cores.length; i++) {
@@ -80,6 +91,7 @@ export async function Invade(player) {
         player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.already` }] });
         return;
     };
+
     if (config.isAttackCorner) {
         const thisChunk = chunk.id;
         const [c, cx, cz, d] = thisChunk.split(`_`);
@@ -127,12 +139,7 @@ export async function Invade(player) {
 world.afterEvents.entityLoad.subscribe((ev) => {
     const entity = ev.entity;
     if (entity?.typeId !== `mc:core`) return;
-    let isWar = false;
-    warCountry.forEach((value, key, map) => {
-        if (entity.id == value.core) {
-            isWar = true;
-        };
-    });
+    const isWar = warCountry.some((value) => entity.id == value.core);
     if (!isWar) {
         entity.remove();
     };
@@ -141,20 +148,18 @@ world.afterEvents.entityLoad.subscribe((ev) => {
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { initialSpawn, player } = ev;
     if (initialSpawn) {
-        const tags = player.getTags().filter(a => a.startsWith(`war`));
-        for (let i = 0; i < tags.length; i++) {
-            player.removeTag(tags[i]);
-        };
+        player.getTags().forEach(tag => {
+            if (tag.startsWith(`war`)) player.removeTag(tag);
+        });
     };
 });
 
 world.afterEvents.worldInitialize.subscribe(() => {
     const players = world.getPlayers();
     for (const player of players) {
-        const tags = player.getTags().filter(a => a.startsWith(`war`));
-        for (let i = 0; i < tags.length; i++) {
-            player.removeTag(tags[i]);
-        };
+        player.getTags().forEach(tag => {
+            if (tag.startsWith(`war`)) player.removeTag(tag);
+        });
     };
     const overworldEntities = world.getDimension(`minecraft:overworld`).getEntities({ type: `mc:core` });
     for (const entity of overworldEntities) {
@@ -176,16 +181,13 @@ world.afterEvents.entityDie.subscribe((ev) => {
     if (deadEntity?.typeId !== `mc:core`) return;
     let isWar = false;
     let key = ``;
-    for (const mapKey of Array.from(warCountry.keys())) {
-        const value = warCountry.get(mapKey);
+    for (const [mapKey, value] of warCountry) {
         if (deadEntity.id == value.core) {
             isWar = true;
             key = mapKey;
         };
     };
-    if (!isWar) {
-        return;
-    };
+    if (!isWar) return;
     /**
      * @type {{ country: number, core: string, key: number }}
      */
@@ -198,6 +200,8 @@ world.afterEvents.entityDie.subscribe((ev) => {
         invadeCountryData.territories.splice(playerCountryData.territories.indexOf(chunkData.id), 1);
     };
     playerCountryData.territories.push(chunkData.id);
+    const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
+    playerCountryData.invadeCooltime = date + (config.invadeWonCoolTime * 1000);
     StringifyAndSavePropertyData(chunkData.id, chunkData);
     StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
     StringifyAndSavePropertyData(`country_${invadeCountryData.id}`, invadeCountryData);
@@ -232,8 +236,10 @@ world.afterEvents.entityDie.subscribe((ev) => {
     deadEntity.removeTag(`war${key}`);
     wars.delete(key);
     warCountry.delete(`${playerData.country}`);
+    const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
+    playerCountryData.invadeCooltime = date + (config.invadeLostCoolTime * 1000);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.guard`, with: [`§r${warCountryData.name}§r`, `${playerCountryData.name}§r`] }] });
-
+    StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     if (coreArray.length == 0) return;
     /** 
     * @type { Container } 
@@ -295,7 +301,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
     */
     let playerContainer = ev.deadEntity.getComponent(`inventory`).container;
     for (let i = 0; i < 36; i++) {
-        if (typeof playerContainer.getItem(i) === 'undefined') continue;
+        if (playerContainer.getItem(i) === undefined) continue;
         world.getDimension(ev.deadEntity.dimension.id).spawnItem(playerContainer.getItem(i), ev.deadEntity.location);
     };
     /** 
@@ -304,7 +310,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
     let playerEquipment = ev.deadEntity.getComponent(`minecraft:equippable`);
     const slotNames = ["Chest", "Head", "Feet", "Legs", "Offhand"];
     for (let i = 0; i < 5; i++) {
-        if (typeof playerEquipment.getEquipment(slotNames[i]) === 'undefined') continue;
+        if (playerEquipment.getEquipment(slotNames[i]) === undefined) continue;
         world.getDimension(ev.deadEntity.dimension.id).spawnItem(playerEquipment.getEquipment(slotNames[i]), ev.deadEntity.location);
     };
     ev.deadEntity.runCommandAsync(`clear @s`);
@@ -341,7 +347,7 @@ system.runInterval(() => {
             if (selectItem) {
                 const selectItemStackTypeId = selectItem.typeId;
                 let cleared = false;
-                if (selectItemStackTypeId != `minecraft:mace`) continue;
+                if (selectItemStackTypeId != `minecraft:mace` && selectItemStackTypeId != `minecraft:trident` && selectItemStackTypeId != `minecraft:ender_pearl`) continue;
                 for (let i = 9; i < container.size; i++) {
                     if (!container.getItem(i)) {
                         container.setItem(player.selectedSlotIndex);
@@ -356,7 +362,7 @@ system.runInterval(() => {
                     player.dimension.spawnItem(selectItem, { x, y: y + 5, z });
                 };
             };
-            if(chestItem) {
+            if (chestItem) {
                 const equippableItemStackTypeId = chestItem.typeId;
                 let cleared = false;
                 if (equippableItemStackTypeId != `minecraft:elytra`) continue;

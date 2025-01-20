@@ -26,9 +26,9 @@ import "./lib/ranking";
 
 import "./lib/scriptcommand";
 
-//import "./lib/piston";
+import "./lib/penname";
 
-const version = "ver.1.21.50.β.1.1.0";
+const version = "ver.1.21.51.β.1.2.0";
 
 world.afterEvents.worldInitialize.subscribe((ev) => {
     world.sendMessage({ translate: `world.message.addon`, with: [version] });

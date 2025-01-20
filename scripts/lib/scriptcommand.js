@@ -12,7 +12,6 @@ import { ShopCommonsMenu } from "./shop";
 import { Invade } from "./war";
 import { plotMainForm } from "./plot_from";
 
-
 class ScriptCommandHandler {
     constructor(event) {
         this.event = event;
@@ -160,6 +159,12 @@ class ScriptCommandHandler {
                 case "cr":
                     this.copyright();
                     break;
+                case "copyright":
+                    this.copyright();
+                    break;
+                case "setcamera":
+                    this.camera();
+                    break;
                 case "cchat":
                     this.countryChat();
                     break;
@@ -175,7 +180,59 @@ class ScriptCommandHandler {
                 case "plot":
                     this.plot();
                     break;
-
+                case "kingdoms": {
+                    switch (this.message) {
+                        case "spawn":
+                            this.chome();
+                            break;
+                        case "home":
+                            this.chome();
+                            break;
+                        case "create":
+                            this.makeCountry();
+                            break;
+                        case "spawn":
+                            this.chome();
+                            break;
+                        case "menu":
+                            this.settingCountry();
+                            break;
+                        case "gui":
+                            this.settingCountry();
+                            break;
+                        case "chat":
+                            this.countryChat();
+                            break;
+                        case "leave":
+                            this.leaveCountry();
+                            break;
+                        case "join":
+                            this.joinCountry();
+                            break;
+                        case "claim":
+                            this.buyChunk();
+                            break;
+                        case "unclaim":
+                            this.sellChunk();
+                            break;
+                        case "visualize":
+                            this.checkChunk();
+                            break;
+                        case "invade":
+                            this.invade();
+                            break;
+                        case "map":
+                            this.map();
+                            break;
+                        case "list":
+                            this.CountryList();
+                            break;
+                        case "here":
+                            this.checkChunk();
+                            break;
+                    };
+                    break;
+                };
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
                     break;
@@ -552,9 +609,6 @@ class ScriptCommandHandler {
         { translate: `command.help.cchat` }, { text: `\n` },
         { translate: `command.help.ac` }, { text: `\n` },
         { translate: `command.help.plot` }, { text: `\n` },
-        { text: `§btp §a:世界各地へテレポートするメニューを表示します\n` },
-        { text: `§blobby §a:ロビーにテレポートします\n` },
-        { text: `§bvote §a:投票の報酬を受け取ります\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
@@ -719,6 +773,9 @@ class ScriptCommandHandler {
         const container = this.sender.getComponent(`inventory`).container;
         const item = container.getItem(this.sender.selectedSlotIndex);
         if (item) {
+            if (item.typeId == "mc:penname_after" || item.typeId == "mc:penname_before") {
+                return;
+            };
             const loreArray = item.getLore();
             if (loreArray.includes(`§c§r§d${this.sender.name}(${this.sender.id})`)) {
                 item.setLore(loreArray.splice(loreArray.indexOf(`§c§r§d${this.sender.name}(${this.sender.id})`), 1));
