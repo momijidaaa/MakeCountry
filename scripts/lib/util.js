@@ -582,6 +582,21 @@ export function langChangeItemName(itemName) {
                     if (safe2.includes(name)) break;
                     name = 'sapling.' + name.replace('_sapling', '').replace('dark_oak', 'big_oak');
                     break;
+                case name.includes('_planks'):
+                    const safe3 = ['minecraft:cherry_planks', 'minecraft:mangrove_planks', 'minecraft:pale_oak_planks', 'minecraft:bamboo_planks'];
+                    if (safe2.includes(name)) break;
+                    name = 'planks.' + name.replace('_planks', '').replace('dark_oak', 'big_oak');
+                    break;
+
+                case name.endsWith('_stained_glass'):
+                    name = 'stained_glass.' + name.replace('_stained_glass', '').replace('light_gray', 'silver');
+                    break;
+                case name.endsWith('_carpet'):
+                    name = 'carpet.' + name.replace('_carpet', '').replace('light_gray', 'silver');
+                    break;
+                case name.endsWith('_stained_glass_pane'):
+                    name = 'stained_glass_pane.' + name.replace('_stained_glass', '').replace('light_gray', 'silver');
+                    break;
                 case name == 'minecraft:purpur_block':
                     name = 'minecraft:purpur_block.default'
                     break;
@@ -675,6 +690,18 @@ export function langChangeItemName(itemName) {
                 case name == 'minecraft:fern':
                     name = 'minecraft:tallgrass.fern'
                     break;
+                case name == 'minecraft:grass_block':
+                    name = 'minecraft:grass'
+                    break;
+                case name == 'minecraft:polished_andesite':
+                    name = 'minecraft:andesiteSmooth'
+                    break;
+                case name == 'minecraft:polished_diorite':
+                    name = 'minecraft:dioriteSmooth'
+                    break;
+                case name == 'minecraft:polished_granite':
+                    name = 'minecraft:graniteSmooth'
+                    break;
             };
         };
         name = `tile.${name}`;
@@ -684,14 +711,36 @@ export function langChangeItemName(itemName) {
                 name = 'spawn_egg.entity.' + name.replace('_spawn_egg', '');
                 break;
             case name.endsWith('_dye'):
-                if (name.includes('blue') || name.includes('white')) {
+                if (name.includes('blue') || name.includes('white') || name.includes('black')) {
                     name = 'dye.' + name.replace('_dye', '_new');
                 } else {
                     name = 'dye.' + name.replace('_dye', '');
                 };
                 break;
+            case name == 'minecraft:ink_sac':
+                name = 'minecraft:dye.black'
+                break;
+            case name == 'minecraft:lapis_lazuli':
+                name = 'minecraft:dye.blue'
+                break;
+            case name == 'minecraft:bone_meal':
+                name = 'minecraft:dye.white'
+                break;
             case name.includes('music_disc_'):
                 name = 'minecraft:record_' + name.replace('minecraft:music_disc_', '') + '.desc'
+                break;
+            case name == 'minecraft:tropical_fish':
+                name = 'minecraft:clownfish'
+                break;
+            case name == 'minecraft:cooked_cod':
+                name = 'minecraft:cooked_fish'
+                break;
+            case name == 'minecraft:cod':
+                name = 'minecraft:fish'
+                break;
+            case name.endsWith('_bucket'):
+                let type = name.replace('minecraft:', '');
+                name = 'minecraft:' + 'bucket' + type[0].toUpperCase() + type.slice(1, type.length).replace('_bucket', '');
                 break;
         };
         name = `item.${name}`;
