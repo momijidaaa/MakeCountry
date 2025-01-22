@@ -5,6 +5,7 @@ import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
 import { itemIdToPath } from "../texture_config";
+import { typeIdToID } from "./typeIds";
 
 world.afterEvents.worldInitialize.subscribe(() => {
     if (!DyProp.getDynamicProperty(`player_market_commons`)) DyProp.setDynamicProperty(`player_market_commons`, `[]`);
@@ -62,11 +63,14 @@ export function PlayerMarketWithdrawalGoodsMainMenu(player) {
     const allCommons = GetAndParsePropertyData(`player_market_commons`).filter(com => com.playerId == player.id);
     for (let i = 0; i < allCommons.length; i++) {
         const item = allCommons[i];
-        form.button(`${item.item.typeId} x${item.item.amount}\n${item.price}`);
+        let itemPath = itemIdToPath[item.item.typeId] ?? typeIdToID.get(item.item.typeId) ?? item.item.typeId
+        const texture = typeof itemPath === "number" ? (itemPath * 65536) : itemPath;
+        form.button({ rawtext: [{ text: `` }, { translate: `${langChangeItemName(item.item.typeId)}` }, { text: `\n${item.item.typeId} x${item.item.amount} (${config.MoneyName}${item.price})` }] }, String(texture));
     };
     form.show(player).then(rs => {
         if (rs.canceled) {
             PlayerMarketMainMenu(player);
+            return;
         };
         switch (rs.selection) {
             case 0: {
@@ -159,7 +163,9 @@ export function PlayerMarketExhibitMainMenu(player) {
         if (!item) continue;
         if (item.getComponent(`enchantable`) || item.getComponent(`durability`) || item.typeId.includes(`shulker_box`) || item.typeId.includes(`potion`)) continue;
         items.push({ slot: i, itemStack: item });
-        form.button(`${item.typeId}\n${item.amount}`);
+        let itemPath = itemIdToPath[item.typeId] ?? typeIdToID.get(item.typeId) ?? item.typeId
+        const texture = typeof itemPath === "number" ? (itemPath * 65536) : itemPath;
+        form.button({ rawtext: [{ translate: langChangeItemName(item.typeId) }, { text: `\n${item.typeId} x ${item.amount}` }] }, String(texture));
     };
     form.show(player).then(rs => {
         if (rs.canceled) {
