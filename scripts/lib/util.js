@@ -1,4 +1,4 @@
-import { Block, Entity, Player } from "@minecraft/server";
+import { Block, BlockTypes, Entity, Player } from "@minecraft/server";
 import * as Dyprop from "./DyProp";
 import config from "../config";
 import jobs_config from "../jobs_config";
@@ -536,4 +536,166 @@ export function getTimeBefore(time, minutesBefore) {
 export function playerNameToId(playerName) {
     const playerIds = Dyprop.DynamicPropertyIds().filter(id => id.startsWith(`player_`));
     return playerIds.find(id => playerName === GetAndParsePropertyData(id).name);
+};
+
+/**
+ * アイテムの名前をLangに変換
+ * @param {string} itemName 
+ * @returns {string}
+ */
+export function langChangeItemName(itemName) {
+    let name = itemName;
+    const block = BlockTypes.get(name);
+    if (block) {
+        if (name.startsWith('minecraft:')) {
+            switch (true) {
+                case name.endsWith('_log'):
+                    if (name.includes('stripped')) break;
+                    const safe = ['minecraft:cherry_log', 'minecraft:mangrove_log', 'minecraft:pale_oak_log'];
+                    if (safe.includes(name)) break;
+                    name = 'log.' + name.replace('_log', '').replace('dark_oak', 'big_oak');
+                    break;
+                case name.endsWith('_concrete'):
+                    name = 'concrete.' + name.replace('_concrete', '');
+                    break;
+                case name.endsWith('_concrete_powder'):
+                    name = 'concretePowder.' + name.replace('_concrete_powder', '');
+                    break;
+                case name.endsWith('_glazed_terracotta'):
+                    name = 'glazedTerracotta.' + name.replace('_glazed_terracotta', '');
+                    break;
+                case name.endsWith('_terracotta'):
+                    name = 'stained_hardened_clay.' + name.replace('_terracotta', '');
+                    break;
+                case name.endsWith('_wool'):
+                    name = 'wool.' + name.replace('_wool', '');
+                    break;
+                case name.endsWith('sponge'):
+                    if (name.includes('wet')) {
+                        name = 'minecraft:sponge.wet';
+                    } else {
+                        name = 'minecraft:sponge.dry';
+                    };
+                    break;
+                case name.includes('_sapling'):
+                    const safe2 = ['minecraft:cherry_sapling', 'minecraft:mangrove_sapling', 'minecraft:pale_oak_sapling'];
+                    if (safe2.includes(name)) break;
+                    name = 'sapling.' + name.replace('_sapling', '').replace('dark_oak', 'big_oak');
+                    break;
+                case name == 'minecraft:purpur_block':
+                    name = 'minecraft:purpur_block.default'
+                    break;
+                case name == 'minecraft:purpur_block':
+                    name = 'minecraft:purpur_block.default'
+                    break;
+                case name == 'minecraft:prismarine':
+                    name = 'minecraft:prismarine.rough'
+                    break;
+                case name == 'minecraft:prismarine_bricks':
+                    name = 'minecraft:prismarine.bricks'
+                    break;
+                case name == 'minecraft:dark_prismarine':
+                    name = 'minecraft:prismarine.dark'
+                    break;
+                case name == 'minecraft:sea_lantern':
+                    name = 'minecraft:seaLantern'
+                    break;
+                case name == 'minecraft:dirt':
+                    name = 'minecraft:dirt.default'
+                    break;
+                case name == 'minecraft:coarse_dirt':
+                    name = 'minecraft:dirt.coarse'
+                    break;
+                case name == 'minecraft:coarse_dirt':
+                    name = 'minecraft:dirt.coarse'
+                    break;
+                case name == 'minecraft:crimson_roots':
+                    name = 'minecraft:crimson_roots.crimsonRoots'
+                    break;
+                case name == 'minecraft:warped_roots':
+                    name = 'minecraft:warped_roots.warpedRoots'
+                    break;
+                case name == 'minecraft:poppy':
+                    name = 'minecraft:red_flower.poppy'
+                    break;
+                case name == 'minecraft:allium':
+                    name = 'minecraft:red_flower.allium'
+                    break;
+                case name == 'minecraft:blue_orchid':
+                    name = 'minecraft:red_flower.blueOrchid'
+                    break;
+                case name == 'minecraft:cornflower':
+                    name = 'minecraft:red_flower.cornflower'
+                    break;
+                case name == 'minecraft:houstonia':
+                    name = 'minecraft:red_flower.houstonia'
+                    break;
+                case name == 'minecraft:lily_of_the_valley':
+                    name = 'minecraft:red_flower.lilyOfTheValley'
+                    break;
+                case name == 'minecraft:oxeye_daisy':
+                    name = 'minecraft:red_flower.oxeyeDaisy'
+                    break;
+                case name == 'minecraft:tulip_orange':
+                    name = 'minecraft:red_flower.tulipOrange'
+                    break;
+                case name == 'minecraft:tulip_pink':
+                    name = 'minecraft:red_flower.tulipPink'
+                    break;
+                case name == 'minecraft:tulip_red':
+                    name = 'minecraft:red_flower.tulipRed'
+                    break;
+                case name == 'minecraft:tulip_white':
+                    name = 'minecraft:red_flower.tulipWhite'
+                    break;
+                case name == 'minecraft:dandelion':
+                    name = 'minecraft:yellow_flower.dandelion'
+                    break;
+                case name == 'minecraft:large_fern':
+                    name = 'minecraft:double_plant.fern'
+                    break;
+                case name == 'minecraft:tall_grass':
+                    name = 'minecraft:double_plant.grass'
+                    break;
+                case name == 'minecraft:peony':
+                    name = 'minecraft:double_plant.paeonia'
+                    break;
+                case name == 'minecraft:rose':
+                    name = 'minecraft:double_plant.rose'
+                    break;
+                case name == 'minecraft:sunflower':
+                    name = 'minecraft:double_plant.sunflower'
+                    break;
+                case name == 'minecraft:lilac':
+                    name = 'minecraft:double_plant.syringa'
+                    break;
+                case name == 'minecraft:short_grass':
+                    name = 'minecraft:tallgrass.grass'
+                    break;
+                case name == 'minecraft:fern':
+                    name = 'minecraft:tallgrass.fern'
+                    break;
+            };
+        };
+        name = `tile.${name}`;
+    } else {
+        switch (true) {
+            case name.endsWith('_spawn_egg'):
+                name = 'spawn_egg.entity.' + name.replace('_spawn_egg', '');
+                break;
+            case name.endsWith('_dye'):
+                if (name.includes('blue') || name.includes('white')) {
+                    name = 'dye.' + name.replace('_dye', '_new');
+                } else {
+                    name = 'dye.' + name.replace('_dye', '');
+                };
+                break;
+            case name.includes('music_disc_'):
+                name = 'minecraft:record_' + name.replace('minecraft:music_disc_', '') + '.desc'
+                break;
+        };
+        name = `item.${name}`;
+    };
+    if (name.includes('minecraft:') && !name.endsWith('.desc')) name += '.name';
+    return name.replace('minecraft:', '');
 };

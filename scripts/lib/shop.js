@@ -17,11 +17,11 @@ export function ShopCommonsMenu(player, page = 0) {
     const commons = allCommons.slice(0 + (45 * page), 45 + (45 * page));
     for (let i = 0; i < commons.length; i++) {
         const common = commons[i];
-        form.setButton(i + 9, { name: common.name, iconPath: itemIdToPath[common.icon] ?? common.icon, lore: [`${common.lore}`] });
+        form.setButton(i + 9, { name: common.name, iconPath: itemIdToPath[common.icon] ?? common.icon, lore: [`${common.lore}`], editedName: true });
     };
-    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
-    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
-    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"] });
+    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"], editedName: true });
+    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"], editedName: true });
+    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"], editedName: true });
 
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -86,9 +86,9 @@ export function ShopCommonsMenuCategory(player, categoryCommons, page = 0, keywo
         const common = commons[i];
         form.setButton(i + 9, { name: common.id, iconPath: itemIdToPath[common.id] ?? common.id, lore: [`${config.MoneyName}${common.price}`] });
     };
-    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
-    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
-    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"] });
+    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"], editedName: true });
+    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"], editedName: true });
+    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"], editedName: true });
 
     form.show(player).then(rs => {
         if (rs.canceled) {

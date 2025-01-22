@@ -12,6 +12,7 @@ export default [
             { id: `minecraft:jungle_log`, price: 4 },
             { id: `minecraft:mangrove_log`, price: 4 },
             { id: `minecraft:spruce_log`, price: 4 },
+            { id: `minecraft:pale_oak_log`, price: 4 },
             { id: `minecraft:white_concrete`, price: 4 },
             { id: `minecraft:glass`, price: 4 },
             { id: `minecraft:quartz_block`, price: 4 },
@@ -84,7 +85,7 @@ export default [
     {
         name: `モブドロップ`,
         lore: `mob drop item`,
-        icon: `minecraft:villager_spawn_egg`,
+        icon: `minecraft:bone`,
         items: [
             { id: `minecraft:rotten_flesh`, price: 300 },
             { id: `minecraft:spider_eye`, price: 300 },
@@ -110,6 +111,15 @@ export default [
             { id: `minecraft:beetroot_seeds`, price: 25 },
             { id: `minecraft:pumpkin_seeds`, price: 25 },
             { id: `minecraft:melon_seeds`, price: 25 },
+            { id: `mc:soybeans`, price: 50 },
+            { id: `minecraft:cherry_sapling`, price: 50 },
+            { id: `minecraft:acacia_sapling`, price: 50 },
+            { id: `minecraft:birch_sapling`, price: 50 },
+            { id: `minecraft:dark_oak_sapling`, price: 50 },
+            { id: `minecraft:jungle_sapling`, price: 50 },
+            { id: `minecraft:oak_sapling`, price: 50 },
+            { id: `minecraft:pale_oak_sapling`, price: 50 },
+            { id: `minecraft:spruce_sapling`, price: 50 },
         ]
     },
     {

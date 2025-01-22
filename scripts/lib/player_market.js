@@ -1,6 +1,6 @@
 import { ItemStack, Player, system, world } from "@minecraft/server";
 import { ChestFormData } from "./chest-ui";
-import { GetAndParsePropertyData, isDecimalNumber, StringifyAndSavePropertyData } from "./util";
+import { GetAndParsePropertyData, isDecimalNumber, langChangeItemName, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
@@ -221,7 +221,7 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
         };
 
         if (rs.formValues[2]) {
-            world.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `exhibited.message`, with: [`${itemData.itemStack.typeId}`] }] });
+            world.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `exhibited.message`, with: { rawtext: [{ translate: `${langChangeItemName(itemData.itemStack.typeId)}` }] } }] });
         };
         let id = world.getDynamicProperty(`playermarketId`) ?? "0";
         world.setDynamicProperty(`playermarketId`, `${Number(id) + 1}`);
@@ -251,7 +251,7 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
         allCommons.unshift(data);
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         playerData.marketAmount += 1;
-        player.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `success.exhibited.message`, with: [`${itemData.itemStack.typeId}`] }] });
+        player.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `success.exhibited.message`, with: { rawtext: [{ translate: `${langChangeItemName(itemData.itemStack.typeId)}` }] } }] });
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         StringifyAndSavePropertyData(`player_market_commons`, allCommons);
         return;
@@ -295,11 +295,11 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
     const commons = allCommons.slice(0 + (45 * page), 45 + (45 * page));
     for (let i = 0; i < commons.length; i++) {
         const common = commons[i];
-        form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount })
+        form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount, editedName: common.item.name ? true : false })
     };
-    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"] });
+    form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"], editedName: true });
     if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
-    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"] });
+    if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"], editedName: true });
 
     form.show(player).then(rs => {
         if (rs.canceled) {
