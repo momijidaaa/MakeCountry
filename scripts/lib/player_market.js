@@ -304,7 +304,7 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
         form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount, editedName: common.item.name ? true : false })
     };
     form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"], editedName: true });
-    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"] });
+    if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"], editedName: true });
     if (0 < page) form.setButton(3, { name: "<<", iconPath: "textures/ui/arrow_left", lore: ["Previous Page"], editedName: true });
 
     form.show(player).then(rs => {
