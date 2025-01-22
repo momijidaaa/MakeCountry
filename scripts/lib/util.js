@@ -584,7 +584,7 @@ export function langChangeItemName(itemName) {
                     break;
                 case name.includes('_planks'):
                     const safe3 = ['minecraft:cherry_planks', 'minecraft:mangrove_planks', 'minecraft:pale_oak_planks', 'minecraft:bamboo_planks'];
-                    if (safe2.includes(name)) break;
+                    if (safe3.includes(name)) break;
                     name = 'planks.' + name.replace('_planks', '').replace('dark_oak', 'big_oak');
                     break;
 
@@ -694,13 +694,22 @@ export function langChangeItemName(itemName) {
                     name = 'minecraft:grass'
                     break;
                 case name == 'minecraft:polished_andesite':
-                    name = 'minecraft:andesiteSmooth'
+                    name = 'minecraft:stone.andesiteSmooth'
                     break;
                 case name == 'minecraft:polished_diorite':
-                    name = 'minecraft:dioriteSmooth'
+                    name = 'minecraft:stone.dioriteSmooth'
                     break;
                 case name == 'minecraft:polished_granite':
-                    name = 'minecraft:graniteSmooth'
+                    name = 'minecraft:stone.graniteSmooth'
+                    break;
+                case name == 'minecraft:andesite':
+                    name = 'minecraft:stone.andesite'
+                    break;
+                case name == 'minecraft:diorite':
+                    name = 'minecraft:stone.diorite'
+                    break;
+                case name == 'minecraft:granite':
+                    name = 'minecraft:stone.granite'
                     break;
             };
         };
