@@ -12,6 +12,7 @@ import { ShopCommonsMenu } from "./shop";
 import { Invade } from "./war";
 import { plotMainForm } from "./plot_from";
 
+
 class ScriptCommandHandler {
     constructor(event) {
         this.event = event;
@@ -125,6 +126,9 @@ class ScriptCommandHandler {
                     break;
                 case "cl":
                     this.CountryList();
+                    break;
+                case "al":
+                    this.AllianceCountryList();
                     break;
                 case "chome":
                     this.chome();
@@ -487,6 +491,15 @@ class ScriptCommandHandler {
             this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` })
             return;
         };
+        const cores = this.sender.dimension.getEntities({ type: `mc:core` });
+        let coresChunks = [];
+        for (let i = 0; i < cores.length; i++) {
+            coresChunks[coresChunks.length] = GetPlayerChunkPropertyId(cores[i]);
+        };
+        if (coresChunks.includes(GetPlayerChunkPropertyId(this.sender))) {
+            this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.already` }] });
+            return;
+        };
         const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
         if (playerCountryData.territories.length < 2) {
             this.sender.sendMessage({ translate: `command.sellchunk.error.morechunk`, with: [`${chunkPrice}`] });
@@ -591,6 +604,7 @@ class ScriptCommandHandler {
         { translate: `command.help.kill` }, { text: `\n` },
         { translate: `command.help.countrylist` }, { text: `\n` },
         { translate: `command.help.cl` }, { text: `\n` },
+        { translate: `command.help.al` }, { text: `\n` },
         { translate: `command.help.joincountry` }, { text: `\n` },
         { translate: `command.help.jc` }, { text: `\n` },
         { translate: `command.help.chome` }, { text: `\n` },
@@ -668,6 +682,15 @@ class ScriptCommandHandler {
 
     CountryList() {
         countryList(this.sender);
+        return;
+    };
+
+    AllianceCountryList() {
+        if (!this.playerData?.country) {
+            this.sender.sendMessage({ translate: 'cannnot.use.nojoin.country' });
+            return;
+        };
+        countryList(this.sender, true);
         return;
     };
 

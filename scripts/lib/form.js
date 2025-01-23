@@ -2,7 +2,7 @@ import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
 import config from "../config";
-import { acceptAlliance, acceptApplicationRequest, AddHostilityByPlayer, createPlotGroup, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace } from "./land";
+import { acceptAlliance, acceptApplicationRequest, acceptMergeRequest, AddHostilityByPlayer, createPlotGroup, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, denyMergeRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace, sendMergeRequest } from "./land";
 import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, HasPermission, isDecimalNumber, isDecimalNumberZeroOK, StringifyAndSavePropertyData } from "./util";
 import { nameSet } from "./nameset";
 
@@ -689,7 +689,7 @@ export function joinCheckFromInviteForm(player, countryData) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -697,7 +697,7 @@ export function joinCheckFromInviteForm(player, countryData) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -719,6 +719,7 @@ export function joinCheckFromInviteForm(player, countryData) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
@@ -782,7 +783,7 @@ export function joinCheckFromListForm(player, countryData) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -790,7 +791,7 @@ export function joinCheckFromListForm(player, countryData) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -812,6 +813,7 @@ export function joinCheckFromListForm(player, countryData) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1273,6 +1275,7 @@ export function settingCountryInfoForm(player, countryData = undefined) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
 
@@ -1482,6 +1485,11 @@ export function externalAffairsMainForm(player) {
     //受信した講和申請
     form.button({ translate: `received.application.request` });
 
+    //受信した併合申請
+    form.button({ translate: `received.merge.request` });
+    //併合申請を送信
+    form.button({ translate: `send.merge.request` });
+
     form.show(player).then((rs) => {
         if (rs.canceled) {
             settingCountryInfoForm(player);
@@ -1535,6 +1543,26 @@ export function externalAffairsMainForm(player) {
                 //受信した講和申請
                 if (!CheckPermission(player, `hostilityAdmin`)) {
                     ReceivedApplicationRequestForm(player);
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+            case 5: {
+                //受信した併合申請
+                if (!CheckPermission(player, `owner`)) {
+                    ReceivedMergeRequestForm(player);
+                    return;
+                } else {
+                    player.sendMessage({ translate: `no.permission` });
+                };
+                break;
+            };
+            case 6: {
+                //併合申請を送信
+                if (!CheckPermission(player, `owner`)) {
+                    sendMergeRequestListForm(player);
                     return;
                 } else {
                     player.sendMessage({ translate: `no.permission` });
@@ -1614,7 +1642,7 @@ export function allianceRequestCountryForm(player, countryId) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -1622,7 +1650,7 @@ export function allianceRequestCountryForm(player, countryId) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -1643,6 +1671,7 @@ export function allianceRequestCountryForm(player, countryId) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1749,7 +1778,7 @@ export function applicationRequestCountryForm(player, countryId) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -1757,7 +1786,7 @@ export function applicationRequestCountryForm(player, countryId) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -1779,6 +1808,7 @@ export function applicationRequestCountryForm(player, countryId) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -1815,6 +1845,315 @@ export function applicationRequestCountryForm(player, countryId) {
         console.warn(error);
     };
 };
+
+
+/**
+ * マージ申請を送信する国のリスト
+ * @param {Player} player 
+ */
+export function sendMergeRequestListForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    let mergeRequestSend = playerCountryData?.mergeRequestSend ?? [];
+    const form = new ActionFormData();
+    form.title({ translate: `form.merge.send.title` });
+    let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
+    let filtered1 = countryIds.filter(id => !mergeRequestSend.includes(id));
+    form.button({ translate: `mc.button.close` });
+    let lands = [];
+    for (const countryId of filtered1) {
+        const countryData = GetAndParsePropertyData(countryId);
+        lands.push(countryData.id);
+        form.button(`${countryData.name}\nID: ${countryData.id}`);
+    };
+    form.show(player).then((rs) => {
+        if (CheckPermission(player, `allyAdmin`)) {
+            player.sendMessage({ translate: `no.permission` });
+            return;
+        };
+        if (rs.canceled) {
+            externalAffairsMainForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //閉じる
+                break;
+            };
+            default: {
+                sendMergeRequestFromListForm(player, lands[rs.selection - 1]);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 同盟国候補一覧から選んだ国
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function sendMergeRequestFromListForm(player, countryId) {
+    try {
+        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const membersId = countryData.members.filter(m => m != ownerData.id);
+        let membersName = [];
+        membersId.forEach(member => {
+            const memberData = GetAndParsePropertyData(`player_${member}`);
+            membersName.push(memberData.name);
+        });
+        let money = `show.private`;
+        let resourcePoint = `show.private`;
+        if (!countryData.hideMoney) {
+            money = `${config.MoneyName} ${countryData.money}`;
+            resourcePoint = `${countryData.resourcePoint}`;
+        };
+        const allianceIds = countryData.alliance;
+        let allianceCountryName = [];
+        allianceIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            if (subCountryData) {
+                allianceCountryName.push(subCountryData.name);
+            };
+        });
+        const hostilityIds = countryData.hostility;
+        let hostilityCountryName = [];
+        hostilityIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            if (subCountryData) {
+                hostilityCountryName.push(subCountryData.name);
+            };
+        });
+        const warNowIds = countryData.warNowCountries;
+        let warNowCountryName = [];
+        warNowIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            if (subCountryData) {
+                warNowCountryName.push(subCountryData.name);
+            };
+        });
+        const showBody =
+        {
+            rawtext: [
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.ownerRole}`).name}: ${ownerData.name}` }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.peopleRole}`).name}: ${membersName.join(`§r , `)}` }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
+            ]
+        };
+        const form = new ActionFormData();
+        form.title(countryData.name);
+        form.body(showBody);
+        form.button({ translate: `mc.button.close` });
+        form.button({ translate: `mc.button.send` });
+        form.show(player).then(rs => {
+            if (CheckPermission(player, `allyAdmin`)) {
+                player.sendMessage({ translate: `no.permission` });
+                return;
+            };
+            if (rs.canceled) {
+                sendMergeRequestListForm(player);
+                return;
+            };
+            switch (rs.selection) {
+                case 0: {
+                    //閉じる
+                    return;
+                };
+                case 1: {
+                    checkSendMergeForm(player, countryId);
+                    return;
+                };
+            };
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
+/**
+ * マージ申請送信チェックフォーム
+ * @param {Player} player 
+ * @param {Number} countryId 
+ */
+export function checkSendMergeForm(player, countryId) {
+    const form = new ActionFormData();
+    form.title({ translate: `form.check.merge.send.title` });
+    form.body({ translate: 'form.check.merge.send.body' });
+    form.button({ translate: `mc.button.close` });
+    form.button({ translate: `mc.button.send` });
+    form.show(player).then((rs) => {
+        if (CheckPermission(player, `allyAdmin`)) {
+            player.sendMessage({ translate: `no.permission` });
+            return;
+        };
+        if (rs.canceled) {
+            sendMergeRequestFromListForm(player, countryId);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //閉じる
+                return;
+            };
+            case 1: {
+                sendMergeRequest(player, countryId);
+                return;
+            };
+        };
+    });
+};
+
+/**
+ * 受信したマージ申請
+ * @param {Player} player 
+ */
+export function ReceivedMergeRequestForm(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    let receivedMergeRequests = playerCountryData.mergeRequestReceive ?? [];
+    const form = new ActionFormData();
+    form.title({ translate: `received.merge.request` });
+    form.button({ translate: `mc.button.close` });
+    for (const countryId of receivedMergeRequests) {
+        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        form.button(`${countryData.name}\nID: ${countryData.id}`);
+    };
+    form.show(player).then((rs) => {
+        if (CheckPermission(player, `hostilityAdmin`)) {
+            player.sendMessage({ translate: `no.permission` });
+        };
+        if (rs.canceled) {
+            externalAffairsMainForm(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //閉じる
+                break;
+            };
+            default: {
+                MergeRequestCountryForm(player, receivedMergeRequests[rs.selection - 1]);
+                break;
+            };
+        };
+    });
+};
+
+/**
+ * 受信リストから選択した国
+ * @param {Player} player 
+ * @param {number} countryId 
+ */
+export function MergeRequestCountryForm(player, countryId) {
+    try {
+        const countryData = GetAndParsePropertyData(`country_${countryId}`);
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const membersId = countryData.members.filter(m => m != ownerData.id);
+        let membersName = [];
+        membersId.forEach(member => {
+            const memberData = GetAndParsePropertyData(`player_${member}`);
+            membersName.push(memberData.name);
+        });
+        let money = `show.private`;
+        let resourcePoint = `show.private`;
+        if (!countryData.hideMoney) {
+            money = `${config.MoneyName} ${countryData.money}`;
+            resourcePoint = `${countryData.resourcePoint}`;
+        };
+        const allianceIds = countryData.alliance;
+        let allianceCountryName = [];
+        allianceIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            if (subCountryData) {
+                allianceCountryName.push(subCountryData.name);
+            };
+        });
+        const hostilityIds = countryData.hostility;
+        let hostilityCountryName = [];
+        hostilityIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            if (subCountryData) {
+                hostilityCountryName.push(subCountryData.name);
+            };
+        });
+        const warNowIds = countryData.warNowCountries;
+        let warNowCountryName = [];
+        warNowIds.forEach(id => {
+            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            if (subCountryData) {
+                warNowCountryName.push(subCountryData.name);
+            };
+        });
+        const showBody =
+        {
+            rawtext: [
+                { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.ownerRole}`).name}: ${ownerData.name}` }, { text: `\n§r` },
+                { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.peopleRole}`).name}: ${membersName.join(`§r , `)}` }, { text: `\n§r` },
+                { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
+                { translate: `form.showcountry.option.peace`, with: [`${countryData.peace}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.invite`, with: [`${countryData.invite}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxper`, with: [`${countryData.taxPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
+            ]
+        };
+        const form = new ActionFormData();
+        form.title(countryData.name);
+        form.body(showBody);
+        form.button({ translate: `mc.button.close` });
+        form.button({ translate: `mc.button.approval` });
+        form.button({ translate: `mc.button.delete` });
+        form.show(player).then(rs => {
+            if (CheckPermission(player, `allyAdmin`)) {
+                player.sendMessage({ translate: `no.permission` });
+                return;
+            };
+            if (rs.canceled) {
+                ReceivedMergeRequestForm(player);
+                return;
+            };
+            switch (rs.selection) {
+                case 0: {
+                    //閉じる
+                    break;
+                };
+                case 1: {
+                    acceptMergeRequest(player, countryId);
+                    break;
+                };
+                case 2: {
+                    denyMergeRequest(player, countryId);
+                    break;
+                };
+            };
+        });
+    } catch (error) {
+        console.warn(error);
+    };
+};
+
 
 /**
  * 同盟国メインフォーム
@@ -1969,7 +2308,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -1977,7 +2316,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -1999,6 +2338,7 @@ export function addAllianceCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2096,7 +2436,7 @@ export function AllianceCountryFromListForm(player, countryId) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -2104,7 +2444,7 @@ export function AllianceCountryFromListForm(player, countryId) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -2126,6 +2466,7 @@ export function AllianceCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2346,7 +2687,7 @@ export function addHostilityCountryFromListForm(player, countryId) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -2354,7 +2695,7 @@ export function addHostilityCountryFromListForm(player, countryId) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -2376,6 +2717,7 @@ export function addHostilityCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2473,7 +2815,7 @@ export function HostilityCountryFromListForm(player, countryId) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -2481,7 +2823,7 @@ export function HostilityCountryFromListForm(player, countryId) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -2503,6 +2845,7 @@ export function HostilityCountryFromListForm(player, countryId) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
@@ -2891,11 +3234,13 @@ export function countryDeleteCheckForm(player) {
  * 国の一覧表示
  * @param {Player} player 
  */
-export function countryList(player) {
+export function countryList(player, al = false) {
     try {
         const form = new ActionFormData();
         form.title({ translate: `form.countrylist.title` });
-        const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
+        let countryIds
+        if (!al) countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith('country'));
+        if (al) countryIds = GetAndParsePropertyData('country_' + GetAndParsePropertyData('player_' + player.id).country)
         let countries = [];
         countryIds.forEach(id => {
             countries[countries.length] = GetAndParsePropertyData(id);
@@ -2921,7 +3266,7 @@ export function countryList(player) {
             if (countries.length === 0) {
                 return;
             };
-            showCountryInfo(player, countries[rs.selection]);
+            showCountryInfo(player, countries[rs.selection], al);
         });
     } catch (error) {
         console.warn(error);
@@ -2933,7 +3278,7 @@ export function countryList(player) {
  * @param {Player} player 
  * @param {any} countryData 
  */
-export function showCountryInfo(player, countryData) {
+export function showCountryInfo(player, countryData, al = false) {
     try {
         const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
         const membersId = countryData.members.filter(m => m !== ownerData.id);
@@ -2960,7 +3305,7 @@ export function showCountryInfo(player, countryData) {
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
         });
@@ -2968,7 +3313,7 @@ export function showCountryInfo(player, countryData) {
         let warNowCountryName = [];
         warNowIds.forEach(id => {
             const subCountryData = GetAndParsePropertyData(`country_${id}`);
-            if(subCountryData) {
+            if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
         });
@@ -2990,6 +3335,7 @@ export function showCountryInfo(player, countryData) {
                 { translate: `form.showcountry.option.taxinstitutionisper`, with: [`${countryData.taxInstitutionIsPer}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.alliance`, with: [`${allianceCountryName.join(`§r , `)}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.hostility`, with: [`${hostilityCountryName.join(`§r , `)}`] }, { text: `\n§r` },
+                { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
         const form = new ActionFormData();
