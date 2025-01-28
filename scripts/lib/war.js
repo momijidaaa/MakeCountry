@@ -122,7 +122,7 @@ export async function Invade(player) {
     };
 
     const { x, y, z } = player.getHeadLocation();
-    const msg = `${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)} [${coreEntity.dimension.id.replace(`minecraft:`, ``)}]`;
+    const msg = `${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)} [${player.dimension.id.replace(`minecraft:`, ``)}]`;
 
     const eventData = {
         invaderCountryName: playerCountryData.name,

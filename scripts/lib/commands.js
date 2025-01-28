@@ -91,7 +91,7 @@ class ChatHandler {
                 const players = world.getPlayers();
                 for (const player of players) {
                     const pData = GetAndParsePropertyData(`player_${player.id}`);
-                    const alliance = this.playerCountryData.alliance;
+                    const alliance = this.playerCountryData.alliance ?? [];
                     if (alliance.includes(pData?.country ?? 0) || pData?.country == this.playerData.country) {
                         player.sendMessage([{ text: `[§2AC§r] §7${this.sender.name}§f: §a${this.message}` }]);
                     };

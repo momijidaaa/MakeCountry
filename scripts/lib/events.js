@@ -150,7 +150,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                         system.runTimeout(() => {
                             player.breaktp = false;
                             player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
-                            player.runCommandAsync('gamemode d @s');
+                            player.setGameMode(GameMode.survival);
                         }, 5);
                     };
                     return;
@@ -178,7 +178,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                 system.runTimeout(() => {
                     player.breaktp = false;
                     player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
-                    player.runCommandAsync('gamemode d @s');
+                    player.setGameMode(GameMode.survival);
                 }, 5);
             };
             return;
@@ -215,7 +215,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                 system.runTimeout(() => {
                     player.breaktp = false;
                     player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
-                    player.runCommandAsync('gamemode d @s');
+                    player.setGameMode(GameMode.survival);
                 }, 5);
             };
             const ownerName = GetAndParsePropertyData(`player_${chestLockData.player}`).name;
@@ -254,7 +254,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                 system.runTimeout(() => {
                     player.breaktp = false;
                     player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
-                    player.runCommandAsync('gamemode d @s');
+                    player.setGameMode(GameMode.survival);
                 }, 5);
             };
             return;
@@ -273,7 +273,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             system.runTimeout(() => {
                 player.breaktp = false;
                 player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
-                player.runCommandAsync('gamemode d @s');
+                player.setGameMode(GameMode.survival);
             }, 5);
         };
         return;
@@ -332,6 +332,7 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     const { player, block, permutationBeingPlaced } = ev;
     if (!permutationBeingPlaced?.type.id.includes(`hopper`)) return;
     const permission = `place`;
+    const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     const now = Date.now();
     if(cannot) {
