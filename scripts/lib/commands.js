@@ -580,11 +580,11 @@ class ChatHandler {
         let chunkPrice = config.defaultChunkPrice / 2;
         if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
         const cannotSell = CheckPermission(this.sender, `sellChunk`);
-        if (!chunkData || !chunkData.country) {
+        if (!chunkData || !chunkData.countryId) {
             this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` });
             return;
         };
-        if (chunkData && chunkData.country && chunkData.countryId != this.playerData.country) {
+        if (chunkData && chunkData.countryId && chunkData.countryId != this.playerData.country) {
             this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` });
             return;
         };
