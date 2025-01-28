@@ -2,6 +2,7 @@ import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import { uiManager } from "@minecraft/server-ui";
 import { tax } from "./interval";
+import { fixCountryData } from "./fixdata";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -44,6 +45,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
                 item.setLore([`${message}`]);
                 container.setItem(sourceEntity.selectedSlotIndex, item);
             };
+            break;
+        };
+        case 'mc:fixcountrydata': {
+            fixCountryData();
             break;
         };
     };

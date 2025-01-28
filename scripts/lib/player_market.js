@@ -158,10 +158,12 @@ export function PlayerMarketExhibitMainMenu(player) {
     const container = player.getComponent(`inventory`).container;
     const form = new ActionFormData();
     form.button({ translate: `mc.button.back` });
+    let itemStackArray = [];
     for (let i = 0; i < container.size; i++) {
         const item = container.getItem(i);
         if (!item) continue;
         if (item.getComponent(`enchantable`) || item.getComponent(`durability`) || item.typeId.includes(`shulker_box`) || item.typeId.includes(`potion`)) continue;
+        itemStackArray.push(item);
         items.push({ slot: i, itemStack: item });
         let itemPath = itemIdToPath[item.typeId] ?? typeIdToID.get(item.typeId) ?? item.typeId
         const texture = typeof itemPath === "number" ? (itemPath * 65536) : itemPath;
@@ -186,12 +188,12 @@ export function PlayerMarketExhibitMainMenu(player) {
                 playerData.money = playerData.money - config.playerMarketCommission;
                 StringifyAndSavePropertyData(`player_${player.id}`, playerData);
                 const newContainer = player.getComponent(`inventory`).container;
-                const item = newContainer.getItem(items[rs.selection - 1].slot);
-                if (item == items[rs.selection - 1].itemStack) {
+                const item2 = newContainer.getItem(items[rs.selection - 1].slot);
+                if (item2.typeId != itemStackArray[rs.selection - 1].typeId || item2.amount != itemStackArray[rs.selection - 1].amount) {
                     PlayerMarketExhibitMainMenu(player);
                     return;
                 };
-                PlayerMarketExhibitSelectItemMenu(player, items[rs.selection - 1]);
+                PlayerMarketExhibitSelectItemMenu(player, items[rs.selection - 1], itemStackArray[rs.selection - 1]);
                 return;
             };
         };
@@ -200,10 +202,11 @@ export function PlayerMarketExhibitMainMenu(player) {
 
 /**
  * 出品
- * @param {{ slot: number, itemStack: ItemStack }} itemData 
+ * @param {{ slot: number,itemStack: ItemStack }} itemData 
+ * @param {ItemStack} itemStack 
  * @param {Player} player 
  */
-export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
+export function PlayerMarketExhibitSelectItemMenu(player, itemData, itemStack) {
     const form = new ModalFormData();
     form.title(`Player Market`);
     form.slider(``, 1, itemData.itemStack.amount, 1);
@@ -212,7 +215,7 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData) {
     form.show(player).then(rs => {
         const newContainer = player.getComponent(`inventory`).container;
         const item = newContainer.getItem(itemData.slot);
-        if (item == itemData.itemStack) {
+        if (item.typeId != itemData.itemStack.typeId || item.amount != itemData.itemStack.amount) {
             PlayerMarketExhibitMainMenu(player);
             return;
         };

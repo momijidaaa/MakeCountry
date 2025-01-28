@@ -144,6 +144,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                     if (!player?.breaktp) {
                         player.breaktp = true;
                         system.run(() => {
+                            player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                             player.setGameMode(GameMode.adventure);
                         });
                         system.runTimeout(() => {
@@ -171,6 +172,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             if (!player?.breaktp) {
                 player.breaktp = true;
                 system.run(() => {
+                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.adventure);
                 });
                 system.runTimeout(() => {
@@ -207,6 +209,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             if (!player?.breaktp) {
                 player.breaktp = true;
                 system.run(() => {
+                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.adventure);
                 });
                 system.runTimeout(() => {
@@ -245,6 +248,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             if (!player?.breaktp) {
                 player.breaktp = true;
                 system.run(() => {
+                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.adventure);
                 });
                 system.runTimeout(() => {
@@ -263,6 +267,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
         if (!player?.breaktp) {
             player.breaktp = true;
             system.run(() => {
+                player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                 player.setGameMode(GameMode.adventure);
             });
             system.runTimeout(() => {
@@ -329,7 +334,7 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     const permission = `place`;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     const now = Date.now();
-    if (cannot) {
+    if(cannot) {
         ev.cancel = true;
         player.placeInfo = {
             time: now,
@@ -454,7 +459,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     typeId: block?.typeId,
                     location: block.location,
                     cancel: true
-                };
+                };    
                 return;
             };
             if (isOwner == true) {
@@ -463,7 +468,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     typeId: block?.typeId,
                     location: block.location,
                     cancel: false
-                };
+                };    
                 ev.cancel = false;
             };
         };
@@ -484,7 +489,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                             typeId: block?.typeId,
                             location: block.location,
                             cancel: true
-                        };
+                        };            
                         ev.cancel = true;
                         system.runTimeout(() => chestLockForm(player, chestId));
                         return;
@@ -495,7 +500,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                         typeId: block?.typeId,
                         location: block.location,
                         cancel: true
-                    };
+                    };        
                     ev.cancel = true;
                     player.sendMessage({ translate: 'message.thischest.islocked', with: [GetAndParsePropertyData(`player_${chestLockData.player}`).name] });
                     return;
@@ -510,7 +515,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     typeId: block?.typeId,
                     location: block.location,
                     cancel: true
-                };
+                };    
                 system.runTimeout(() => chestLockForm(player, chestId));
                 return;
             }
@@ -567,6 +572,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     if (ev.isFirstEvent) player.sendMessage({ translate: `cannot.permission.${permission}` });
     if ('open_bit' in block.permutation.getAllStates()) {
         const playerLocation = player.location;
+        player.runCommandAsync(`tp ${Math.floor(playerLocation.x * 100) / 100} 1000 ${Math.floor(playerLocation.z * 100) / 100}`);
         if (!player?.clicktp) {
             player.clicktp = true;
             system.runTimeout(() => {
@@ -581,7 +587,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
     const permission = `entityUse`
     const { player, target } = ev;
     const { x, z } = target.location;
-
+    
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;

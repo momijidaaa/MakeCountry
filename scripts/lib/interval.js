@@ -10,6 +10,11 @@ world.setDynamicProperty(`taxTimer`, taxTimerString);
 const nowCountryId = new Map();
 const nowChunkPlotName = new Map();
 
+world.afterEvents.worldInitialize.subscribe(() => {
+    if (!DyProp.getDynamicProperty(`voteData`)) DyProp.setDynamicProperty(`voteData`, `{}`);
+    if (!DyProp.getDynamicProperty(`loginData`)) DyProp.setDynamicProperty(`loginData`, `{}`);
+});
+
 system.runInterval(() => {
     if (!world.getDynamicProperty(`start`)) return;
     for (const p of world.getPlayers()) {
@@ -104,6 +109,9 @@ export function tax() {
         if (!playerData.country) continue;
         const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
         if (countryData.taxInstitutionIsPer) {
+            if (playerData.money < 0) {
+                continue;
+            }
             let taxValue = playerData.money * (countryData.taxPer / 100);
             playerData.money -= taxValue;
             countryData.money += taxValue;
@@ -157,3 +165,11 @@ export function tax() {
         StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
     };
 };
+
+system.runInterval(() => {
+    const zikan = new Date();
+    if (zikan.getHours() == 0 && zikan.getMinutes() == 0) {
+        DyProp.setDynamicProperty(`voteData`, `{}`);
+        DyProp.setDynamicProperty(`loginData`, `{}`);
+    };
+}, 20 * 60);

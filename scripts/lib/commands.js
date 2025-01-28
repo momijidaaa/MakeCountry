@@ -11,15 +11,16 @@ import { teleportRequest, tpaMainForm } from "./tpa";
 import { ShopCommonsMenu } from "./shop";
 import { Invade } from "./war";
 import { plotMainForm } from "./plot_from";
+import { playerHandler } from "../api/api";
 
 
 class ChatHandler {
-    constructor(event) {
+    constructor(event, isScript) {
         this.event = event;
         /**
          * @type {string}
          */
-        this.message = event.message;
+        this.message = isScript ? event.id : event.message;
         /**
          * @type {Player}
          */
@@ -30,6 +31,7 @@ class ChatHandler {
         this.prefix = config.prefix;
         this.playerData = GetAndParsePropertyData(`player_${this.sender.id}`);
         this.playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        this.script = isScript;
     }
 
     isCommand() {
@@ -40,15 +42,31 @@ class ChatHandler {
         const chatType = this.sender.getDynamicProperty(`chatType`) || `general`;
         let landId = this.playerData?.country;
         let land = `chat.player.no.join.any.country`;
+        let penname = ``;
+        if (config.pennameEnable) {
+            let penNameBefore = this.sender.getDynamicProperty(`pennameBefore`) ?? config.initialPennameBefore;
+            let penNameAfter = this.sender.getDynamicProperty(`pennameAfter`) ?? config.initialPennameAfter;
+            penname = `§r|${penNameBefore}§r${penNameAfter}`;
+        };
         if (landId) land = this.playerCountryData?.name;
         /*if (!/^[a-z]$/.test(this.message.charAt(0))) {
             this.event.cancel = true;
             world.sendMessage([{ text: `<§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: ` §r| ${this.sender.name}> ${this.message}` }]);
         };*/
         this.event.cancel = true;
+        const eventData = {
+            player: this.sender,
+            message: this.message,
+            type: chatType,
+            cancel: false
+        };
+        const isCanceled = playerHandler.beforeEvents.chat.emit(eventData);
+        if (isCanceled) return;
+        eventData.cancel = undefined;
+        playerHandler.afterEvents.chat.emit(eventData);
         switch (chatType) {
             case `general`: {
-                world.sendMessage([{ text: `[§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: `§r] §7${this.sender.name}§f: ${this.message}` }]);
+                world.sendMessage([{ text: `[§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: `${penname}§r] §7${this.sender.name}§f: ${this.message}` }]);
                 break;
             };
             case `country`: {
@@ -91,8 +109,27 @@ class ChatHandler {
     };
 
     handleCommand() {
-        this.event.cancel = true;
-        const [commandName, ...args] = this.message.slice(this.prefix.length).trim().split(/ +/);
+        let commandName = '';
+        let args;
+        if (this.script) {
+            commandName = this.message.replace(`mc_cmd:`, ``);
+            args = this.message.split(/ +/);
+        } else {
+            this.event.cancel = true;
+            const [commandNameCmd, ...argsCmd] = this.message.slice(this.prefix.length).trim().split(/ +/);
+            commandName = commandNameCmd;
+            args = argsCmd;
+        }
+        const eventData = {
+            player: this.sender,
+            args: args ?? [],
+            commandName,
+            cancel: false
+        };
+        const isCanceled = playerHandler.beforeEvents.command.emit(eventData);
+        if (isCanceled) return;
+        eventData.cancel = undefined;
+        playerHandler.afterEvents.command.emit(eventData);
         system.runTimeout(() => {
             switch (commandName) {
                 case "money":
@@ -170,6 +207,9 @@ class ChatHandler {
                 case "kill":
                     this.kill();
                     break;
+                case "selfkill":
+                    this.kill();
+                    break;
                 case "countrylist":
                     this.CountryList();
                     break;
@@ -212,6 +252,12 @@ class ChatHandler {
                 case "cr":
                     this.copyright();
                     break;
+                case "copyright":
+                    this.copyright();
+                    break;
+                case "setcamera":
+                    this.camera();
+                    break;
                 case "cchat":
                     this.countryChat();
                     break;
@@ -227,7 +273,66 @@ class ChatHandler {
                 case "plot":
                     this.plot();
                     break;
-
+                case "kingdoms": {
+                    switch (this.message) {
+                        case "spawn":
+                            this.chome();
+                            break;
+                        case "home":
+                            this.chome();
+                            break;
+                        case "create":
+                            this.makeCountry();
+                            break;
+                        case "spawn":
+                            this.chome();
+                            break;
+                        case "menu":
+                            this.settingCountry();
+                            break;
+                        case "gui":
+                            this.settingCountry();
+                            break;
+                        case "chat":
+                            this.countryChat();
+                            break;
+                        case "leave":
+                            this.leaveCountry();
+                            break;
+                        case "join":
+                            this.joinCountry();
+                            break;
+                        case "claim":
+                            this.buyChunk();
+                            break;
+                        case "unclaim":
+                            this.sellChunk();
+                            break;
+                        case "visualize":
+                            this.checkChunk();
+                            break;
+                        case "invade":
+                            this.invade();
+                            break;
+                        case "map":
+                            this.map();
+                            break;
+                        case "list":
+                            this.CountryList();
+                            break;
+                        case "here":
+                            this.checkChunk();
+                            break;
+                        default:
+                            this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
+                            break;
+                    };
+                    break;
+                };
+                case 'al': {
+                    this.AllianceCountryList();
+                    break;
+                };
                 default:
                     this.sender.sendMessage({ translate: `command.unknown.error`, with: [commandName] });
                     break;
@@ -259,7 +364,7 @@ class ChatHandler {
         }
 
         const amount = Number(args[0]);
-        const targetName = args[1];
+        const targetName = args[1].replaceAll('"', '');
         /**
          * @type {Player}
          */
@@ -419,28 +524,28 @@ class ChatHandler {
         if (chunkData && chunkData.price) chunkPrice = chunkData.price;
         const cannotBuy = CheckPermission(this.sender, `buyChunk`);
         if (cannotBuy) {
-            if (!chunkData) {
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.wilderness`, with: { rawtext: [{ translate: `wilderness.name` }] } });
-                return;
-            };
-            if (chunkData.special) {
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.special`, with: { rawtext: [{ translate: `special.name` }] } });
-                return;
-            };
-            if (chunkData.owner) {
-                const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`);
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.hasowner`, with: [ownerData.name] });
-                return;
-            };
-            if (chunkData.countryId) {
-                if (chunkData.countryId === this.playerData.country) {
-                    this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
-                    return;
-                };
-                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
-                return;
-            };
             this.sender.sendMessage({ translate: `command.permission.error` });
+            return;
+        };
+        if (!chunkData) {
+            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.wilderness`, with: { rawtext: [{ translate: `wilderness.name` }] } });
+            return;
+        };
+        if (chunkData.special) {
+            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.special`, with: { rawtext: [{ translate: `special.name` }] } });
+            return;
+        };
+        if (chunkData.owner) {
+            const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`);
+            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.hasowner`, with: [ownerData.name] });
+            return;
+        };
+        if (chunkData.countryId) {
+            if (chunkData.countryId === this.playerData.country) {
+                this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
+                return;
+            };
+            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
             return;
         };
         if (chunkData?.countryId) {
@@ -475,11 +580,16 @@ class ChatHandler {
         let chunkPrice = config.defaultChunkPrice / 2;
         if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
         const cannotSell = CheckPermission(this.sender, `sellChunk`);
+        if (!chunkData || !chunkData.country) {
+            this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` });
+            return;
+        };
+        if (chunkData && chunkData.country && chunkData.countryId != this.playerData.country) {
+            this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` });
+            return;
+        };
         if (cannotSell) {
-            if (chunkData && chunkData.country && chunkData.countryId == playerData.country) {
-                this.sender.sendMessage({ translate: `command.permission.error` });
-            };
-            this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` })
+            this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
         const cores = this.sender.dimension.getEntities({ type: `mc:core` });
@@ -558,7 +668,7 @@ class ChatHandler {
                 return;
             };
         };
-        if (args.length !== 0) {
+        if (args.length !== 0 && args.join(` `) != ``) {
             teleportRequest(this.sender, args.join(` `));
             return;
         };
@@ -614,9 +724,7 @@ class ChatHandler {
         { translate: `command.help.cchat` }, { text: `\n` },
         { translate: `command.help.ac` }, { text: `\n` },
         { translate: `command.help.plot` }, { text: `\n` },
-        { text: `§btp §a:世界各地へテレポートするメニューを表示します\n` },
-        { text: `§blobby §a:ロビーにテレポートします\n` },
-        { text: `§bvote §a:投票の報酬を受け取ります\n` },
+        { translate: `command.help.al` }, { text: `\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
@@ -790,6 +898,9 @@ class ChatHandler {
         const container = this.sender.getComponent(`inventory`).container;
         const item = container.getItem(this.sender.selectedSlotIndex);
         if (item) {
+            if (item.typeId == "mc:penname_after" || item.typeId == "mc:penname_before") {
+                return;
+            };
             const loreArray = item.getLore();
             if (loreArray.includes(`§c§r§d${this.sender.name}(${this.sender.id})`)) {
                 item.setLore(loreArray.splice(loreArray.indexOf(`§c§r§d${this.sender.name}(${this.sender.id})`), 1));
@@ -839,13 +950,19 @@ class ChatHandler {
 };
 
 world.beforeEvents.chatSend.subscribe(event => {
-    if (event.sender.hasTag(`moderator`) && event.message.startsWith(`!`)) return;
-    if (event.message === `?tp` || event.message === `?lobby` || event.message === `?vote` || event.message === `?login`) return;
-    const chatHandler = new ChatHandler(event);
+    const chatHandler = new ChatHandler(event, false);
     if (chatHandler.isCommand()) {
         chatHandler.handleCommand();
     } else {
-        if (event.sender.getDynamicProperty(`isMute`) && !event.sender.hasTag(`moderator`)) return;
         chatHandler.handleChat();
     };
+});
+
+system.afterEvents.scriptEventReceive.subscribe(event => {
+    if (!event?.sourceEntity) return;
+    if (!(event?.sourceEntity instanceof Player)) return;
+    if (!event.id.startsWith(`mc_cmd`)) return;
+    event.sender = event.sourceEntity;
+    const scriptCommandHandler = new ChatHandler(event, true);
+    scriptCommandHandler.handleCommand();
 });

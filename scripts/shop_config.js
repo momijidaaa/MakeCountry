@@ -23,6 +23,12 @@ export default [
             { id: `minecraft:cobbled_deepslate`, price: 4 },
             { id: `minecraft:white_wool`, price: 4 },
             { id: `minecraft:hardened_clay`, price: 4 },
+            { id: `minecraft:calcite`, price: 8 },
+            { id: `minecraft:pale_moss_block`, price: 8 },
+            { id: `minecraft:pale_hanging_moss`, price: 8 },
+            { id: `minecraft:prismarine_bricks`, price: 8 },
+            { id: `minecraft:brick`, price: 2 },
+            { id: `minecraft:netherbrick`, price: 3 },
         ]
     },
     {
@@ -80,6 +86,7 @@ export default [
             { id: `minecraft:strider_spawn_egg`, price: 400 },
             { id: `minecraft:piglin_spawn_egg`, price: 400 },
             { id: `minecraft:piglin_brute_spawn_egg`, price: 1500 },
+            { id: 'minecraft:bee_spawn_egg', price: 500 },
         ]
     },
     {
@@ -98,6 +105,12 @@ export default [
             { id: `minecraft:ender_pearl`, price: 300 },
             { id: `minecraft:breeze_rod`, price: 300 },
             { id: `minecraft:shulker_shell`, price: 600 },
+            { id: 'minecraft:resin_clump', price: 10 },
+            { id: 'minecraft:ink_sac', price: 25 },
+            { id: 'minecraft:glow_ink_sac', price: 50 },
+            { id: 'minecraft:feather', price: 25 },
+            { id: 'minecraft:prismarine_crystals', price: 2 },
+            { id: 'minecraft:prismarine_shard', price: 2 },
         ]
     },
     {
@@ -120,6 +133,23 @@ export default [
             { id: `minecraft:oak_sapling`, price: 50 },
             { id: `minecraft:pale_oak_sapling`, price: 50 },
             { id: `minecraft:spruce_sapling`, price: 50 },
+            { id: `minecraft:dandelion`, price: 10 },
+            { id: `minecraft:poppy`, price: 10 },
+            { id: `minecraft:blue_orchid`, price: 10 },
+            { id: `minecraft:allium`, price: 10 },
+            { id: `minecraft:azure_bluet`, price: 10 },
+            { id: `minecraft:red_tulip`, price: 10 },
+            { id: `minecraft:orange_tulip`, price: 10 },
+            { id: `minecraft:white_tulip`, price: 10 },
+            { id: `minecraft:pink_tulip`, price: 10 },
+            { id: `minecraft:oxeye_daisy`, price: 10 },
+            { id: `minecraft:cornflower`, price: 10 },
+            { id: `minecraft:lily_of_the_valley`, price: 10 },
+            { id: `minecraft:sunflower`, price: 10 },
+            { id: `minecraft:lilac`, price: 10 },
+            { id: `minecraft:rose_bush`, price: 10 },
+            { id: `minecraft:peony`, price: 10 },
+            { id: `minecraft:pink_petals`, price: 10 },
         ]
     },
     {

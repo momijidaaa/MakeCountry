@@ -83,7 +83,9 @@ const checkOnlyRole = [
     `admin`,
     `withDrawResourcepoint`,
     `withDrawTreasurybudget`,
-    `publicHomeAdmin`
+    `publicHomeAdmin`,
+    `sellChunk`,
+    `buyChunk`
 ];
 
 const restrictionPermissions = [
@@ -535,7 +537,7 @@ export function getTimeBefore(time, minutesBefore) {
  */
 export function playerNameToId(playerName) {
     const playerIds = Dyprop.DynamicPropertyIds().filter(id => id.startsWith(`player_`));
-    return playerIds.find(id => playerName === GetAndParsePropertyData(id).name);
+    return playerIds.find(id => playerName === GetAndParsePropertyData(id).name).split('_')[1];
 };
 
 /**
@@ -651,16 +653,19 @@ export function langChangeItemName(itemName) {
                 case name == 'minecraft:oxeye_daisy':
                     name = 'minecraft:red_flower.oxeyeDaisy'
                     break;
-                case name == 'minecraft:tulip_orange':
+                case name == 'minecraft:orange_tulip':
                     name = 'minecraft:red_flower.tulipOrange'
                     break;
-                case name == 'minecraft:tulip_pink':
+                case name == 'minecraft:pink_tulip':
                     name = 'minecraft:red_flower.tulipPink'
                     break;
-                case name == 'minecraft:tulip_red':
+                case name == 'minecraft:red_tulip':
                     name = 'minecraft:red_flower.tulipRed'
                     break;
-                case name == 'minecraft:tulip_white':
+                case name == 'minecraft:azure_bluet':
+                    name = 'minecraft:red_flower.houstonia'
+                    break;
+                case name == 'minecraft:white_tulip':
                     name = 'minecraft:red_flower.tulipWhite'
                     break;
                 case name == 'minecraft:dandelion':
@@ -675,7 +680,7 @@ export function langChangeItemName(itemName) {
                 case name == 'minecraft:peony':
                     name = 'minecraft:double_plant.paeonia'
                     break;
-                case name == 'minecraft:rose':
+                case name == 'minecraft:rose_bush':
                     name = 'minecraft:double_plant.rose'
                     break;
                 case name == 'minecraft:sunflower':
@@ -746,6 +751,9 @@ export function langChangeItemName(itemName) {
                 break;
             case name == 'minecraft:cod':
                 name = 'minecraft:fish'
+                break;
+            case name == 'minecraft:nether_star':
+                name = 'minecraft:netherStar'
                 break;
             case name.endsWith('_bucket'):
                 let type = name.replace('minecraft:', '');

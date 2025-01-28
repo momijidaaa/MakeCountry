@@ -139,6 +139,15 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             sourceEntity.sendMessage(`${world.setDynamicProperty(message)}`);
             break;
         };
+        case `karo:lore`: {
+            const container = sourceEntity.getComponent(`inventory`).container;
+            const item = container.getItem(sourceEntity.selectedSlotIndex);
+            if (item) {
+                item.setLore([`${message}`]);
+                container.setItem(sourceEntity.selectedSlotIndex, item);
+            };
+            break;
+        };
         case `karo:deletedyprop`: {
             sourceEntity.sendMessage(`${DyProp.setDynamicProperty(message)}`);
             break;
@@ -167,6 +176,23 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             };
             break;
         };*/
+        case 'karo:mergechunk': {
+            const [from, to] = message.split(' ');
+            const fromNum = Number(from);
+            const toNum = Number(to);
+            DyProp.DynamicPropertyIds().filter(id => id.startsWith(`chunk_`)).map(id => {
+                /**
+                 * @type {{plot: {},countryId: undefined|number}}
+                 */
+                const chunkData = GetAndParsePropertyData(id);
+                if (chunkData?.countryId && chunkData?.countryId == fromNum) {
+                    chunkData.countryId = toNum;
+                    chunkData.plot = undefined;
+                    StringifyAndSavePropertyData(id, chunkData);
+                };
+            });
+
+        };
     };
 });
 

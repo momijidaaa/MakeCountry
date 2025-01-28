@@ -3,9 +3,13 @@ import * as DyProp from "./DyProp";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 
 world.afterEvents.worldInitialize.subscribe(() => {
+    fixCountryData();
+});
+
+export function fixCountryData() {
     /**
-     * @type {Array<string>}
-     */
+ * @type {Array<string>}
+ */
     const countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`));
     const checkCountryIds = countryIds;
     const aliveCountryIds = countryIds.map(a => Number(a.split('_')[1]));
@@ -86,4 +90,4 @@ world.afterEvents.worldInitialize.subscribe(() => {
 
         StringifyAndSavePropertyData(id, countryData);
     };
-});
+};

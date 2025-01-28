@@ -5,6 +5,9 @@ import config from "../config";
 import { acceptAlliance, acceptApplicationRequest, acceptMergeRequest, AddHostilityByPlayer, createPlotGroup, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, denyMergeRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace, sendMergeRequest } from "./land";
 import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, HasPermission, isDecimalNumber, isDecimalNumberZeroOK, StringifyAndSavePropertyData } from "./util";
 import { nameSet } from "./nameset";
+import { ChestFormData } from "./chest-ui";
+import { kingdomsSettingForm, resourcePointConverter } from "./kingdoms_form";
+import { country } from "../api/api";
 
 /**
  * 
@@ -75,7 +78,7 @@ export function settingCountryMembersForm(player) {
 /**
  * 選んだメンバーを表示
  * @param {Player} player 
- * @param {Player} member 
+ * @param {{country: undefined|number,name: string,id: string}} member 
  * @param {any} countryData
  */
 export function memberSelectedShowForm(player, member, countryData) {
@@ -224,21 +227,14 @@ export function playerRoleChangeForm(player, member, countryData) {
         };
     } else {
         const playerAdminRoles = [];
-        for (const playerRoleId of playerData.roles) {
-            const role = GetAndParsePropertyData(`role_${playerRoleId}`);
-            if (role.permissions.includes(`admin`)) {
+        for (const role of countryData?.roles) {
+            const roleData = GetAndParsePropertyData(`role_${role}`);
+            if (roleData.permissions.includes(`admin`)) {
                 playerAdminRoles.push(role);
+            } else {
+                EnableEditRoleIds.push(role);
             };
         };
-
-        let maxRoleNumber = countryData.roles.length;
-        for (const role of playerAdminRoles) {
-            const place = countryData.roles.indexOf(role);
-            if (-1 < place) {
-                if (maxRoleNumber < place) maxRoleNumber = place;
-            };
-        };
-        EnableEditRoleIds = countryData.roles.slice(maxRoleNumber + 1);
     };
     if (EnableEditRoleIds.length === 0) {
         const form = new ActionFormData();
@@ -1161,60 +1157,107 @@ export function resourcepointWithdrawForm(player) {
  * @param {Player} player 
  */
 export function settingCountry(player) {
-    const form = new ActionFormData();
-    form.title({ translate: `form.setting.title` });
-    form.body({ translate: `form.setting.body` });
-    form.button({ translate: `form.setting.button.info` });
-    form.button({ translate: `form.setting.button.treasury` });
-    form.button({ translate: `form.setting.button.invite` });
-    form.button({ translate: `form.setting.button.members` });
-    form.button({ translate: `form.setting.button.role` });
-    form.button({ translate: `form.setting.button.plotgroup` });
-    if (!CheckPermission(player, `owner`)) form.button({ translate: `form.setting.button.delete` });
+    const uiType = player.getDynamicProperty('uiType') ?? 'default';
+    switch (uiType) {
+        case 'default': {
+            const form = new ActionFormData();
+            form.title({ translate: `form.setting.title` });
+            form.body({ translate: `form.setting.body` });
+            form.button({ translate: `form.setting.button.info` });
+            form.button({ translate: `form.setting.button.treasury` });
+            form.button({ translate: `form.setting.button.invite` });
+            form.button({ translate: `form.setting.button.members` });
+            form.button({ translate: `form.setting.button.role` });
+            form.button({ translate: `form.setting.button.plotgroup` });
+            if (!CheckPermission(player, `owner`)) form.button({ translate: `form.setting.button.delete` });
 
-    form.show(player).then(rs => {
-        if (rs.canceled) {
-            if (rs.cancelationReason === FormCancelationReason.UserBusy) {
-                system.runTimeout(() => {
-                    settingCountry(player);
+            form.show(player).then(rs => {
+                if (rs.canceled) {
+                    if (rs.cancelationReason === FormCancelationReason.UserBusy) {
+                        system.runTimeout(() => {
+                            settingCountry(player);
+                            return;
+                        }, 10);
+                        return;
+                    };
+                    //player.sendMessage({ translate: `form.cancel.message` });
                     return;
-                }, 10);
+                };
+                switch (rs.selection) {
+                    case 0: {
+                        settingCountryInfoForm(player);
+                        break;
+                    };
+                    case 1: {
+                        treasuryMainForm(player);
+                        break;
+                    };
+                    case 2: {
+                        inviteForm(player);
+                        break;
+                    };
+                    case 3: {
+                        settingCountryMembersForm(player);
+                        break;
+                    };
+                    case 4: {
+                        settingCountryRoleForm(player);
+                        break;
+                    };
+                    case 5: {
+                        settingCountryPlotGroupForm(player);
+                        break;
+                    };
+                    case 6: {
+                        countryDeleteCheckForm(player);
+                        break;
+                    };
+                };
+            });
+            break;
+        };
+        case 'kingdoms': {
+            const playerData = GetAndParsePropertyData('player_' + player.id);
+            const countryData = GetAndParsePropertyData('country_' + playerData.country);
+            const form = new ChestFormData();
+            form.setTitle([{ text: `§a§l<${countryData.name}§r§a§l> §6` }, { translate: 'form.setting.title' }]);
+            form.setPattern([0, 0], [
+                'xoxxoxxox',
+                'oo  s  oo',
+                'x       x',
+                'x       x',
+                'oo r p oo',
+                'xoxxoxxox',
+            ], {
+                'x': { 'iconPath': 'textures/blocks/glass_pane_top_black', 'name': '', 'lore': [], 'editedName': true },
+                'o': { 'iconPath': 'textures/blocks/glass_pane_top_red', 'name': '', 'lore': [], 'editedName': true },
+                's': { 'iconPath': 'textures/items/paper', 'name': 'form.kingdoms.sc.button.setting', 'lore': ['form.kingdoms.sc.button.setting.lore'], 'editedName': true },
+                'r': { 'iconPath': 'minecraft:hay_block', 'name': 'form.kingdoms.sc.button.resourcepoint', 'lore': [{ translate: 'form.kingdoms.sc.button.resourcepoint.lore', with: [String(countryData.resourcePoint)] }], 'editedName': true },
+                'p': { 'iconPath': 'minecraft:bookshelf', 'name': 'form.kingdoms.sc.button.permission', 'lore': [{ translate: 'form.kingdoms.sc.button.permission.lore', with: [String(countryData.resourcePoint)] }], 'editedName': true },
+            });
+            form.show(player).then((rs) => {
+                if (rs.canceled) {
+                    if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                        system.runTimeout(() => {
+                            settingCountry(player);
+                        }, 5);
+                    };
+                };
+                switch (rs.selection) {
+                    case 13: {
+                        kingdomsSettingForm(player);
+                        break;
+                    };
+                    case 39: {
+                        resourcePointConverter(player);
+                        break;
+                    };
+                }
                 return;
-            };
-            //player.sendMessage({ translate: `form.cancel.message` });
-            return;
+            });
+            break;
         };
-        switch (rs.selection) {
-            case 0: {
-                settingCountryInfoForm(player);
-                break;
-            };
-            case 1: {
-                treasuryMainForm(player);
-                break;
-            };
-            case 2: {
-                inviteForm(player);
-                break;
-            };
-            case 3: {
-                settingCountryMembersForm(player);
-                break;
-            };
-            case 4: {
-                settingCountryRoleForm(player);
-                break;
-            };
-            case 5: {
-                settingCountryPlotGroupForm(player);
-                break;
-            };
-            case 6: {
-                countryDeleteCheckForm(player);
-                break;
-            };
-        };
-    });
+    };
 };
 
 /**
@@ -3383,6 +3426,11 @@ export function showCountryInfo(player, countryData, al = false) {
  * @param {Player} player 
  */
 export function settingCountryRoleForm(player) {
+    const cannot = CheckPermission(player, 'admin');
+    if (cannot) {
+        this.sender.sendMessage({ translate: `command.permission.error` });
+        return;
+    };
     try {
         let EnableEditRoleIds = [];
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
@@ -3393,20 +3441,14 @@ export function settingCountryRoleForm(player) {
             };
         } else {
             const playerAdminRoles = [];
-            for (const playerRoleId of playerData.roles) {
-                const role = GetAndParsePropertyData(`role_${playerRoleId}`);
-                if (role.permissions.includes(`admin`)) {
+            for (const role of countryData?.roles) {
+                const roleData = GetAndParsePropertyData(`role_${role}`);
+                if (roleData.permissions.includes(`admin`)) {
                     playerAdminRoles.push(role);
+                } else {
+                    EnableEditRoleIds.push(role);
                 };
             };
-            let maxRoleNumber = countryData.roles.length;
-            for (const role of playerAdminRoles) {
-                const place = countryData.roles.indexOf(role);
-                if (-1 < place) {
-                    if (maxRoleNumber < place) maxRoleNumber = place;
-                };
-            };
-            EnableEditRoleIds = countryData.roles.slice(maxRoleNumber + 1);
         };
         const form = new ActionFormData();
         if (EnableEditRoleIds.length === 0) {
@@ -3619,7 +3661,10 @@ export function MakeCountryForm(player) {
             return;
         };
         if (rs.formValues) {
-            MakeCountry(player, rs.formValues[0], rs.formValues[1], rs.formValues[2]);
+            const eventData = { player, countryName: rs.formValues[0], invite: rs.formValues[1], peace: rs.formValues[2], type: 'player', cancel: false };
+            const isCanceled = country.beforeEvents.create.emit(eventData);
+            if (isCanceled) return;
+            MakeCountry(player, rs.formValues[0], 'player', rs.formValues[1], rs.formValues[2]);
             return;
         };
     });

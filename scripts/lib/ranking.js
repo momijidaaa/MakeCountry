@@ -5,18 +5,9 @@ import config from "../config";
 
 world.afterEvents.worldInitialize.subscribe(() => {
     const texts = world.getDimension(`overworld`).getEntities({ type: `mc:text` });
-    let players = [];
-    let countries = [];
-    const allKeys = DyProp.DynamicPropertyIds()
-    const playersKey = allKeys.filter(id => id.startsWith(`player_`));
-    const countriesKey = allKeys.filter(id => id.startsWith(`country_`));
-    for (const playerKey of playersKey) {
-        players.push(GetAndParsePropertyData(playerKey));
-    };
-    for (const countryKey of countriesKey) {
-        countries.push(GetAndParsePropertyData(countryKey));
-    };
-    players = players.filter(p => p?.name && !isNaN(parseInt(p?.money)));
+    const allKeys = DyProp.DynamicPropertyIds();
+    const players = allKeys.filter(key => key.startsWith(`player_`)).map(key => GetAndParsePropertyData(key)).filter(p => p?.name && !isNaN(parseInt(p?.money)));
+    const countries = allKeys.filter(key => key.startsWith(`country_`)).map(key => GetAndParsePropertyData(key));
     for (const text of texts) {
         switch (true) {
             case text.hasTag(`text:baltop`): {

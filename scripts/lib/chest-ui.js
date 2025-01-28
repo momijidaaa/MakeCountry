@@ -30,12 +30,17 @@ export class ChestFormData {
 
     /**
      * 
-     * @param {string} title 
+     * @param {string|Array<import("@minecraft/server").RawText>} title 
      * @returns {ChestFormData}
      */
     setTitle(title) {
         try {
-            this.#formData.title(`${this.#type}${title}`);
+            if (typeof title == 'string') {
+                this.#formData.title({ rawtext: [{ text: this.#type }, { translate: title }] });
+            } else {
+
+                this.#formData.title({ rawtext: [{ text: this.#type }].concat(title) });
+            };
             return this;
         } catch (e) {
             console.error(e, e.stack);
@@ -58,17 +63,17 @@ export class ChestFormData {
             const text = {
                 rawtext: [
                     { text: `stack#${Math.min(Math.max(item.stackAmount, 1) || 1, 64).toString().padStart(2, "0")}§r` },
-                    { translate: `${item.name}` },
-                    { text: `§r` }
                 ]
             };
 
+            typeof item.name == 'string' ? text.rawtext.push({ translate: `${item.name}` }, { text: `§r` }) : text.rawtext.push(...item.name);
+
             // lore のフォーマット処理
             const formattedLore = item.lore?.length > 0
-                ? item.lore.flatMap((l) => [
+                ? typeof item.lore[0] == 'string' ? item.lore.flatMap((l) => [
                     { text: "\n§r" },
                     { translate: `${l}` }
-                ])
+                ]) : [{ text: "\n§r" }].concat(item.lore)
                 : [];
 
             // formattedLore を rawtext に追加

@@ -1,6 +1,8 @@
 import { Container, EntityEquippableComponent, EquipmentSlot, Player, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, isWithinTimeRange, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
+import { sendToDiscord } from "../plugins/karoearth/server_net";
+import { country } from "../api/api";
 
 const warCountry = new Map();
 
@@ -120,19 +122,30 @@ export async function Invade(player) {
         };
     };
 
+    const { x, y, z } = player.getHeadLocation();
+    const msg = `${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)} [${coreEntity.dimension.id.replace(`minecraft:`, ``)}]`;
+
+    const eventData = {
+        invaderCountryName: playerCountryData.name,
+        invadedCountryName: targetCountryData.name,
+        invader: player,
+        locationString: msg,
+        cancel: false
+    };
+    const isCanceled = country.beforeEvents.startInvade.emit(eventData);
+    if(isCanceled) return;
+    eventData.cancel = undefined;
     playerCountryData.invadeCooltime = date + (config.invadeCooltime * 1000);
     playerCountryData.peaceChangeCooltime = config.invadePeaceChangeCooltime;
 
     const coreEntity = player.dimension.spawnEntity(`mc:core`, player.getHeadLocation(), { initialPersistence: true });
     warCountry.set(`${playerCountryData.id}`, { country: targetCountryData.id, core: coreEntity.id, time: date + 1000 * config.invadeTimelimit, key: key });
     coreEntity.nameTag = `${targetCountryData.name}§r Core`;
-    const { x, y, z } = coreEntity.location;
-    const msg = `${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)} [${coreEntity.dimension.id.replace(`minecraft:`, ``)}]`;
     player.addTag(`war${key}`);
     coreEntity.addTag(`war${key}`);
     wars.set(`${key}`, true);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n§f` }, { translate: `invade.success`, with: [`${player.name}§r(${playerCountryData.name}§r)`, `${msg}§r(${targetCountryData.name})§r`] }] });
-
+    country.afterEvents.startInvade.emit(eventData);
     StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
 };
 

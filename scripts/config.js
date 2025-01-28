@@ -14,7 +14,7 @@ export default {
     //チャットの際にプレイヤー名の左にロール(着いてる中で一番高いロール)を表示するか
     showRoleChatLeftName: false,
     //二つ名を有効にするか
-    pennameEnable: false,
+    pennameEnable: true,
     //二つ名の初期のやつ(前)
     initialPennameBefore: "一般的な",
     //二つ名の初期のやつ(後)
