@@ -875,6 +875,7 @@ class ChatHandler {
             result.push(jResult.join(``));
         };
         this.sender.sendMessage(`§c----------------------------------------------------\n${result.join(`\n`)}\n§c----------------------------------------------------`);
+        this.sender.teleport(this.sender.location, { rotation: { x: 0, y: -90 } });
         return;
     };
     invade() {
