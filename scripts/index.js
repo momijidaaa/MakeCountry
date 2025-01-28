@@ -42,7 +42,7 @@ import "./lib/ranking";
 
 import "./lib/fixdata";
 
-const version = "ver.KaroEarth"
+const version = "ver.1.21.51 β.1.3.0"
 
 
 world.afterEvents.worldInitialize.subscribe(() => {

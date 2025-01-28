@@ -1,7 +1,6 @@
 import { Container, EntityEquippableComponent, EquipmentSlot, Player, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, isWithinTimeRange, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
-import { sendToDiscord } from "../plugins/karoearth/server_net";
 import { country } from "../api/api";
 
 const warCountry = new Map();
