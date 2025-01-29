@@ -112,8 +112,8 @@ class ChatHandler {
         let commandName = '';
         let args;
         if (this.script) {
-            commandName = this.message.replace(`mc_cmd:`, ``);
-            args = this.message.split(/ +/);
+            commandName = this.message.replace(`mc_cmd:`, ``).split(' ')[0];
+            args = this.message.split(/ +/).slice(1);
         } else {
             this.event.cancel = true;
             const [commandNameCmd, ...argsCmd] = this.message.slice(this.prefix.length).trim().split(/ +/);
@@ -668,7 +668,7 @@ class ChatHandler {
                 return;
             };
         };
-        if (args.length !== 0 && args.join(` `) != ``) {
+        if (args.length != 0 && args.join(` `) != `` && args.join(` `).length != 0) {
             teleportRequest(this.sender, args.join(` `));
             return;
         };
