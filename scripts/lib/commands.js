@@ -1,6 +1,6 @@
 import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, StringifyAndSavePropertyData } from "./util";
+import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, isDecimalNumberZeroOK, isNumber, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData, playerCountryLeave } from "./land";
 import { MakeCountryForm, countryList, joinTypeSelectForm, playerMainMenu, settingCountry } from "./form";
 import { jobsForm } from "./jobs";
@@ -20,7 +20,7 @@ class ChatHandler {
         /**
          * @type {string}
          */
-        this.message = isScript ? event.id : event.message;
+        this.message = isScript ? event.id + ' ' + event.message : event.message;
         /**
          * @type {Player}
          */
@@ -112,8 +112,8 @@ class ChatHandler {
         let commandName = '';
         let args;
         if (this.script) {
-            commandName = this.message.replace(`mc_cmd:`, ``).split(' ')[0];
             args = this.message.split(/ +/).slice(1);
+            commandName = this.message.replace(`mc_cmd:`, ``).split(' ')[0];
         } else {
             this.event.cancel = true;
             const [commandNameCmd, ...argsCmd] = this.message.slice(this.prefix.length).trim().split(/ +/);
@@ -166,19 +166,19 @@ class ChatHandler {
                     this.resetChunk();
                     break;
                 case "resetc":
-                    this.resetChunk();
+                    this.resetChunk(args);
                     break;
                 case "buychunk":
-                    this.buyChunk();
+                    this.buyChunk(args);
                     break;
                 case "buyc":
-                    this.buyChunk();
+                    this.buyChunk(args);
                     break;
                 case "sellchunk":
-                    this.sellChunk();
+                    this.sellChunk(args);
                     break;
                 case "sellc":
-                    this.sellChunk();
+                    this.sellChunk(args);
                     break;
                 case "help":
                     this.sendHelp();
@@ -303,10 +303,10 @@ class ChatHandler {
                             this.joinCountry();
                             break;
                         case "claim":
-                            this.buyChunk();
+                            this.buyChunk(args);
                             break;
                         case "unclaim":
-                            this.sellChunk();
+                            this.sellChunk(args);
                             break;
                         case "visualize":
                             this.checkChunk();
@@ -488,11 +488,46 @@ class ChatHandler {
         return;
     };
 
-    resetChunk() {
+    resetChunk(args) {
         if (!this.sender.hasTag("mc_admin")) {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
+        const dimension = this.sender.dimension.id;
+        if (args.length == 2) {
+            const [ix, iz] = args.map(str => Math.floor(Number(str)));
+            const { x, z } = this.sender.location;
+            const chunks = getChunksInRange(Math.floor(x), Math.floor(z), ix, iz);
+            if (!isNumber(ix) || !isNumber(iz)) {
+                this.sender.sendMessage({ translate: '§c座標が間違っています' });
+                return;
+            };
+            if (chunks.length > 100) {
+                this.sender.sendMessage({ translate: '1度にリセット可能なチャンクは100チャンクまでです' });
+                return;
+            };
+            for (let i = 0; i < chunks.length; i++) {
+                system.runTimeout(() => {
+                    const chunkId = `chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`;
+                    let chunkData = GetAndParsePropertyData(chunkId);
+                    if (chunkData) {
+                        if (chunkData?.countryId) {
+                            const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`);
+                            if (countryData) {
+                                countryData.territories.splice(countryData.territories.indexOf(chunkId), 1);
+                                let chunkPrice = config.defaultChunkPrice / 2;
+                                if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
+                                countryData.money += chunkPrice;
+                                StringifyAndSavePropertyData(`country_${chunkData?.countryId}`, countryData);
+                            };
+                        };
+                    };
+                    DyProp.setDynamicProperty(chunkId);
+                    this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { rawtext: [{ translate: `wilderness.name` }] } });
+                }, i)
+            }
+            return;
+        }
         const chunkId = GetPlayerChunkPropertyId(this.sender);
         const chunkData = GetAndParsePropertyData(chunkId);
         if (chunkData) {
@@ -511,15 +546,100 @@ class ChatHandler {
         this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { rawtext: [{ translate: `wilderness.name` }] } });
     };
 
-    buyChunk() {
+    /**
+     * 
+     * @param {Array<string>} args 
+     * @returns 
+     */
+    buyChunk(args) {
         if (!this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.buychunk.error.notjoin.country` });
             return;
         };
+        const dimension = this.sender.dimension.id;
+        if (args.length == 2) {
+            const [ix, iz] = args.map(str => Math.floor(Number(str)));
+            const { x, z } = this.sender.location;
+            const chunks = getChunksInRange(Math.floor(x), Math.floor(z), ix, iz);
+            if (!isNumber(ix) || !isNumber(iz)) {
+                this.sender.sendMessage({ translate: '§c座標が間違っています' });
+                return;
+            };
+            if (chunks.length > 100) {
+                this.sender.sendMessage({ translate: '1度に買えるチャンクは100チャンクまでです' });
+                return;
+            };
+            let chunkPrice = config.defaultChunkPrice;
+            for (let i = 0; i < chunks.length; i++) {
+                system.runTimeout(() => {
+                    let chunkData = GetAndParsePropertyData(`chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`);
+                    if (!chunkData) chunkData = GenerateChunkData(chunks[i].chunkX * 16, chunks[i].chunkZ * 16, dimension);
+                    if (chunkData && chunkData.price) chunkPrice = chunkData.price;
+                    const cannotBuy = CheckPermission(this.sender, `buyChunk`);
+                    if (cannotBuy) {
+                        this.sender.sendMessage({ translate: `command.permission.error` });
+                        return;
+                    };
+                    if (!chunkData) {
+                        this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.wilderness`, with: { rawtext: [{ translate: `wilderness.name` }] } });
+                        return;
+                    };
+                    if (chunkData.special) {
+                        this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.special`, with: { rawtext: [{ translate: `special.name` }] } });
+                        return;
+                    };
+                    if (chunkData.owner) {
+                        const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`);
+                        this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.hasowner`, with: [ownerData.name] });
+                        return;
+                    };
+                    if (chunkData.countryId) {
+                        if (chunkData.countryId === this.playerData.country) {
+                            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
+                            return;
+                        };
+                        this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
+                        return;
+                    };
+                    if (chunkData?.countryId) {
+                        if (chunkData.countryId === this.playerData.country) {
+                            this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.yourcountry` });
+                            return;
+                        };
+                        this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
+                        return;
+                    };
+                    const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+                    const eventData = {
+                        player: this.sender,
+                        cancel: false,
+                        type: 'player',
+                        territoryCount: playerCountryData.territories.length,
+                        countryName: playerCountryData.name
+                    };
+                    const isCanceled = country.beforeEvents.chunkbuy.emit(eventData);
+                    if (isCanceled) return;
+                    eventData.cancel = undefined;
+                    country.afterEvents.chunkbuy.emit(eventData);
+                    if (playerCountryData.resourcePoint < chunkPrice) {
+                        this.sender.sendMessage({ translate: `command.buychunk.error.not.enough.money`, with: [`${chunkPrice}`] });
+                        return;
+                    };
+
+                    chunkData.countryId = this.playerData.country;
+                    playerCountryData.resourcePoint -= chunkPrice;
+                    playerCountryData.territories.push(chunkData.id);
+                    StringifyAndSavePropertyData(chunkData.id, chunkData);
+                    StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
+                    this.sender.sendMessage({ translate: `command.buychunk.result`, with: [`${playerCountryData.resourcePoint}`] });
+                    return;
+                }, i);
+            };
+            return;
+        };
         let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
         const { x, z } = this.sender.location;
-        const dimention = this.sender.dimension.id;
-        if (!chunkData) chunkData = GenerateChunkData(x, z, dimention);
+        if (!chunkData) chunkData = GenerateChunkData(x, z, dimension);
         let chunkPrice = config.defaultChunkPrice;
         if (chunkData && chunkData.price) chunkPrice = chunkData.price;
         const cannotBuy = CheckPermission(this.sender, `buyChunk`);
@@ -582,11 +702,69 @@ class ChatHandler {
         return;
     };
 
-    sellChunk() {
+    sellChunk(args) {
         if (!this.playerData.country) {
             this.sender.sendMessage({ translate: `command.sellchunk.error.notjoin.country` });
             return;
         };
+        const dimension = this.sender.dimension.id;
+        if (args.length == 2) {
+            const [ix, iz] = args.map(str => Math.floor(Number(str)));
+            const { x, z } = this.sender.location;
+            const chunks = getChunksInRange(Math.floor(x), Math.floor(z), ix, iz);
+            if (!isNumber(ix) || !isNumber(iz)) {
+                this.sender.sendMessage({ translate: '§c座標が間違っています' });
+                return;
+            };
+            if (chunks.length > 100) {
+                this.sender.sendMessage({ translate: '1度に売れるチャンクは100チャンクまでです' });
+                return;
+            };
+            let chunkPrice = config.defaultChunkPrice / 2;
+            for (let i = 0; i < chunks.length; i++) {
+                system.runTimeout(() => {
+                    let chunkData = GetAndParsePropertyData(`chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`);
+                    if (!chunkData) chunkData = GenerateChunkData(chunks[i].chunkX * 16, chunks[i].chunkZ * 16, dimension);
+                    if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
+                    const cannotSell = CheckPermission(this.sender, `sellChunk`);
+                    if (!chunkData || !chunkData.countryId) {
+                        this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` });
+                        return;
+                    };
+                    if (chunkData && chunkData.countryId && chunkData.countryId != this.playerData.country) {
+                        this.sender.sendMessage({ translate: `command.sellchunk.error.thischunk.notterritory` });
+                        return;
+                    };
+                    if (cannotSell) {
+                        this.sender.sendMessage({ translate: `command.permission.error` });
+                        return;
+                    };
+                    const cores = this.sender.dimension.getEntities({ type: `mc:core` });
+                    let coresChunks = [];
+                    for (let i = 0; i < cores.length; i++) {
+                        coresChunks[coresChunks.length] = GetPlayerChunkPropertyId(cores[i]);
+                    };
+                    if (coresChunks.includes(GetPlayerChunkPropertyId(this.sender))) {
+                        this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.already` }] });
+                        return;
+                    };
+                    const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+                    if (playerCountryData.territories.length < 2) {
+                        this.sender.sendMessage({ translate: `command.sellchunk.error.morechunk`, with: [`${chunkPrice}`] });
+                        return;
+                    };
+
+                    chunkData.countryId = undefined;
+                    playerCountryData.resourcePoint += chunkPrice;
+                    playerCountryData.territories.splice(playerCountryData.territories.indexOf(chunkData.id), 1);
+                    StringifyAndSavePropertyData(chunkData.id, chunkData);
+                    StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
+                    this.sender.sendMessage({ translate: `command.sellchunk.result`, with: [`${playerCountryData.resourcePoint}`] });
+                    return;
+                }, i)
+            }
+            return;
+        }
         const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
         let chunkPrice = config.defaultChunkPrice / 2;
         if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
@@ -978,3 +1156,30 @@ system.afterEvents.scriptEventReceive.subscribe(event => {
     const scriptCommandHandler = new ChatHandler(event, true);
     scriptCommandHandler.handleCommand();
 });
+
+/**
+ * 
+ * @param {number} x1 
+ * @param {number} y1 
+ * @param {number} x2 
+ * @param {number} y2 
+ * @returns {Array<{chunkX: number,chunkZ: number}>}
+ * @returns 
+ */
+function getChunksInRange(x1, z1, x2, z2) {
+    // 小さい座標を開始点にする
+    let startX = Math.floor(Math.min(x1, x2) / 16);
+    let endX = Math.floor(Math.max(x1, x2) / 16);
+    let startZ = Math.floor(Math.min(z1, z2) / 16);
+    let endZ = Math.floor(Math.max(z1, z2) / 16);
+
+    let chunks = [];
+
+    // 範囲内のすべてのチャンク座標を取得
+    for (let cx = startX; cx <= endX; cx++) {
+        for (let cz = startZ; cz <= endZ; cz++) {
+            chunks.push({ chunkX: cx, chunkZ: cz });
+        }
+    }
+    return chunks;
+}

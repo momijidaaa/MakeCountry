@@ -493,6 +493,14 @@ export function isDecimalNumberZeroOK(value) {
     return integerRegex.test(value);
 };
 
+export function isNumber(value) {
+    if (value == 0) {
+        return true;
+    };
+    const integerRegex = /^[1-9]\d*$/;
+    return integerRegex.test(Math.abs(value));
+};
+
 export function isWithinTimeRange(startTime, endTime) {
     const date = new Date();
     const currentHour = date.getHours();

@@ -380,13 +380,13 @@ world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
         setSignTexts(ev.block, signTexts[0], signTexts[1]);
         return;
     }
-
     if (signTexts[0].split('\n')[4] !== chestShopConfig.shopId) return;
     if (signTexts[1] !== chestShopConfig.shopId) return;
 
     if (shopData.buyPrice <= 0) return;
 
-    let money = getPlayerMoney(ev.player.nameTag);
+    let money = getPlayerMoney(ev.player.name);
+
     if (money === undefined) return;
     let shopMoney = getPlayerMoney(shopData.player);
     if (shopMoney === undefined) return;
@@ -414,9 +414,9 @@ world.beforeEvents.playerInteractWithBlock.subscribe(async (ev) => {
     shopMoney -= shopData.buyPrice;
     setPlayerMoney(shopData.player, shopMoney);
 
-    money = getPlayerMoney(ev.player.nameTag);
+    money = getPlayerMoney(ev.player.name);
     money += shopData.buyPrice;
-    setPlayerMoney(ev.player.nameTag, money);
+    setPlayerMoney(ev.player.name, money);
 });
 
 // sell

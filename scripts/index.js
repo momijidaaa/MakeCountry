@@ -13,7 +13,11 @@
  */
 
 import { world } from "@minecraft/server";
-
+world.afterEvents.itemUse.subscribe((ev) => {
+    if(ev.itemStack.typeId == "minecraft:recovery_compass") {
+        ev.source.runCommand('scriptevent ')
+    };
+});
 import "./lib/commands";
 
 import "./lib/events";

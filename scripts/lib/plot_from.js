@@ -852,7 +852,7 @@ function plotOwnerShowForm(player, chunkId, plotAdmin = false) {
     form.show(player).then((rs) => {
         if (rs.canceled) {
             if (plotAdmin) {
-                plotEditMainFormPlotAdmin(player, plot);
+                plotEditMainFormPlotAdmin(player, plot, chunkId);
                 return;
             };
             plotEditMainFormPlotOwner(player, plot, chunkId);
@@ -861,7 +861,7 @@ function plotOwnerShowForm(player, chunkId, plotAdmin = false) {
         switch (rs.selection) {
             case 0: {
                 if (plotAdmin) {
-                    plotEditMainFormPlotAdmin(player, plot);
+                    plotEditMainFormPlotAdmin(player, plot, chunkId);
                     return;
                 };
                 break;
@@ -1448,7 +1448,7 @@ function plotEditPlayersListForm(player, chunkId, plotAdmin = false) {
     form.show(player).then(rs => {
         if (rs.canceled) {
             if (plotAdmin) {
-                plotEditMainFormPlotAdmin(player, plot);
+                plotEditMainFormPlotAdmin(player, plot, chunkId);
                 return;
             };
             plotEditMainFormPlotOwner(player, plot, chunkId);
@@ -1761,7 +1761,7 @@ function plotEditSettingFormPlotAdmin(player, chunkId) {
             plotEditMainFormPlotAdmin(player, plot, chunkId);
             return;
         };
-        if (rs.formValues[0] !== 0) {
+        if (rs.formValues[0] != 0) {
             addPlotToGroup(player, countryData?.plotgroup[rs.formValues[0] - 1], chunkId);
             return;
         };
@@ -1777,6 +1777,7 @@ function plotEditSettingFormPlotAdmin(player, chunkId) {
         if (Number(price) < 0) {
             price = `0`;
         };
+        plot.group = undefined;
         plot.name = newPlotName;
         plot.price = Math.floor(Number(price));
         plot.type = type[rs.formValues[2]];

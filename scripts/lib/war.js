@@ -350,8 +350,6 @@ system.runInterval(() => {
     const cores = world.getDimension("overworld").getEntities({ type: `mc:core` });
     for (const core of cores) {
         for (const player of core.dimension.getPlayers({ maxDistance: config.maxDropDistance, location: core.location })) {
-            const tags = player.getTags().filter(tag => tag.startsWith(`war`));
-            if (tags.length == 0) continue;
             const container = player.getComponent(`inventory`).container;
             const selectItem = container.getItem(player.selectedSlotIndex);
             const equippable = player.getComponent(`equippable`);

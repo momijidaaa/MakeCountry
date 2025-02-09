@@ -1229,8 +1229,8 @@ export function settingCountry(player) {
                 'oo r p oo',
                 'xoxxoxxox',
             ], {
-                'x': { 'iconPath': 'textures/blocks/glass_pane_top_black', 'name': '', 'lore': [], 'editedName': true },
-                'o': { 'iconPath': 'textures/blocks/glass_pane_top_red', 'name': '', 'lore': [], 'editedName': true },
+                'x': { 'iconPath': 'textures/blocks/glass_black', 'name': '', 'lore': [], 'editedName': true },
+                'o': { 'iconPath': 'textures/blocks/glass_red', 'name': '', 'lore': [], 'editedName': true },
                 's': { 'iconPath': 'textures/items/paper', 'name': 'form.kingdoms.sc.button.setting', 'lore': ['form.kingdoms.sc.button.setting.lore'], 'editedName': true },
                 'r': { 'iconPath': 'minecraft:hay_block', 'name': 'form.kingdoms.sc.button.resourcepoint', 'lore': [{ translate: 'form.kingdoms.sc.button.resourcepoint.lore', with: [String(countryData.resourcePoint)] }], 'editedName': true },
                 'p': { 'iconPath': 'minecraft:bookshelf', 'name': 'form.kingdoms.sc.button.permission', 'lore': [{ translate: 'form.kingdoms.sc.button.permission.lore', with: [String(countryData.resourcePoint)] }], 'editedName': true },
@@ -3664,7 +3664,7 @@ export function MakeCountryForm(player) {
             const eventData = { player, countryName: rs.formValues[0], invite: rs.formValues[1], peace: rs.formValues[2], type: 'player', cancel: false };
             const isCanceled = country.beforeEvents.create.emit(eventData);
             if (isCanceled) return;
-            MakeCountry(player, rs.formValues[0], 'player', rs.formValues[1], rs.formValues[2]);
+            MakeCountry(player, 'player', rs.formValues[0], rs.formValues[1], rs.formValues[2]);
             return;
         };
     });

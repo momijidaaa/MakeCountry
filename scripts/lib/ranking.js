@@ -4,6 +4,10 @@ import { GetAndParsePropertyData } from "./util";
 import config from "../config";
 
 world.afterEvents.worldInitialize.subscribe(() => {
+    updateRanking();
+});
+
+export function updateRanking() {
     const texts = world.getDimension(`overworld`).getEntities({ type: `mc:text` });
     const allKeys = DyProp.DynamicPropertyIds();
     const players = allKeys.filter(key => key.startsWith(`player_`)).map(key => GetAndParsePropertyData(key)).filter(p => p?.name && !isNaN(parseInt(p?.money)));
@@ -64,4 +68,4 @@ world.afterEvents.worldInitialize.subscribe(() => {
         };
 
     };
-});
+};

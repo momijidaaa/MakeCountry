@@ -4,6 +4,7 @@ import { changeOwnerScriptEvent, DeleteCountry, playerCountryJoin } from "./land
 import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, uiManager } from "@minecraft/server-ui";
 import { itemIdToPath } from "../texture_config";
+import { updateRanking } from "./ranking";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -191,7 +192,29 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
                     StringifyAndSavePropertyData(id, chunkData);
                 };
             });
-
+            break;
+        };
+        case 'karo:chunkdeleter': {
+            const ids = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`chunk_`))
+            for (let i = 0; i < ids.length; i++) {
+                system.runTimeout(() => {
+                    const id = ids[i];
+                    /**
+                     * @type {{plot: {},countryId: undefined|number}}
+                     */
+                    const chunkData = GetAndParsePropertyData(id);
+                    if (!chunkData?.countryId || chunkData?.countryId == 0) {
+                        if (chunkData?.special) {
+                            StringifyAndSavePropertyData(id);
+                        };
+                    };
+                }, Math.floor(i / 50));
+            };
+            break;
+        };
+        case 'karo:updaterank': {
+            updateRanking();
+            break;
         };
     };
 });
