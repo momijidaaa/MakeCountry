@@ -1,4 +1,4 @@
-import { ItemStack, Player, system, world } from "@minecraft/server";
+import { world } from "@minecraft/server";
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
     if (ev.initialSpawn) {

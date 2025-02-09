@@ -755,6 +755,12 @@ export function langChangeItemName(itemName) {
             case name == 'minecraft:nether_star':
                 name = 'minecraft:netherStar'
                 break;
+            case name == 'minecraft:firework_rocket':
+                name = 'minecraft:fireworks'
+                break;
+            case name == 'minecraft:firework_star':
+                name = 'minecraft:fireworksCharge'
+                break;
             case name.endsWith('_bucket'):
                 let type = name.replace('minecraft:', '');
                 name = 'minecraft:' + 'bucket' + type[0].toUpperCase() + type.slice(1, type.length).replace('_bucket', '');

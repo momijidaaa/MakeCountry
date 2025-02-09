@@ -50,6 +50,8 @@ export const country = {
     afterEvents: {
         /** @type {EventManager<{countryName: string, type: 'player'|'system' player?: Player, peace?: boolean, invite?: boolean, id: number}>} */
         create: new EventManager(),
+        /** @type {EventManager<{countryName: string, type: 'player'|'system' player?: Player, territoryCount: number }>} */
+        chunkbuy: new EventManager(),
         /** @type {EventManager<{countryName: string,type: 'player'|'delete'|'system' ,player?: Player}>} */
         delete: new EventManager(),
         /** @type {EventManager<{ oldName: string, type: 'player'|'system', newName: string ,player?: Player }>} */
@@ -60,6 +62,8 @@ export const country = {
     beforeEvents: {
         /** @type {EventManager<{countryName: string, type: 'player'|'system' player?: Player,cancel: boolean, peace?: boolean, invite?: boolean }>} */
         create: new EventManager(),
+        /** @type {EventManager<{countryName: string, type: 'player'|'system' player?: Player,cancel: boolean, territoryCount: number }>} */
+        chunkbuy: new EventManager(),
         /** @type {EventManager<{countryName: string,type: 'player'|'delete'|'system' ,player?: Player,cancel: boolean}>} */
         delete: new EventManager(),
         /** @type {EventManager<{ oldName: string, type: 'player'|'system', newName: string,cancel: boolean ,player?: Player}>} */

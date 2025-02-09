@@ -11,7 +11,7 @@ import { teleportRequest, tpaMainForm } from "./tpa";
 import { ShopCommonsMenu } from "./shop";
 import { Invade } from "./war";
 import { plotMainForm } from "./plot_from";
-import { playerHandler } from "../api/api";
+import { country, playerHandler } from "../api/api";
 
 
 class ChatHandler {
@@ -557,6 +557,17 @@ class ChatHandler {
             return;
         };
         const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        const eventData = {
+            player: this.sender,
+            cancel: false,
+            type: 'player',
+            territoryCount: playerCountryData.territories.length,
+            countryName: playerCountryData.name
+        };
+        const isCanceled = country.beforeEvents.chunkbuy.emit(eventData);
+        if (isCanceled) return;
+        eventData.cancel = undefined;
+        country.afterEvents.chunkbuy.emit(eventData);
         if (playerCountryData.resourcePoint < chunkPrice) {
             this.sender.sendMessage({ translate: `command.buychunk.error.not.enough.money`, with: [`${chunkPrice}`] });
             return;
