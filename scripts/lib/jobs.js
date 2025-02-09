@@ -21,6 +21,36 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
+    if (brokenBlockPermutation.type.id === `minecraft:mangrove_log` && player.hasTag(`mcjobs_woodcutter`)) {
+        const jobs = new JobLevel(player, "woodcutter");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.woodCutReward.min, jobs_config.woodCutReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
+        return;
+    };
+    if (brokenBlockPermutation.type.id === `minecraft:mangrove_roots` && player.hasTag(`mcjobs_woodcutter`)) {
+        const jobs = new JobLevel(player, "woodcutter");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.woodCutReward.min, jobs_config.woodCutReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
+        return;
+    };
+    if (brokenBlockPermutation.type.id === `minecraft:pale_oak_log` && player.hasTag(`mcjobs_woodcutter`)) {
+        const jobs = new JobLevel(player, "woodcutter");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.woodCutReward.min, jobs_config.woodCutReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
+        return;
+    };
 
     //土掘り士
     if (brokenBlockPermutation.type.id === `minecraft:dirt` && player.hasTag(`mcjobs_dirtdigger`)) {

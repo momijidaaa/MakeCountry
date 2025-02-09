@@ -3,6 +3,7 @@ import PlayerFishingAfterEvent from "./fishingEvent";
 import itemConfig from "../item_plugin_config";
 import jobs_config from "../jobs_config";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { JobLevel } from "./jobslevel";
 
 PlayerFishingAfterEvent.subscribe(ev => {
     if (!itemConfig.customFishing) return;
@@ -27,7 +28,10 @@ PlayerFishingAfterEvent.subscribe(ev => {
              */
             if (!player.hasTag(`mcjobs_fisherman`)) return;
             const playerData = GetAndParsePropertyData(`player_${player.id}`);
-            if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${selectedItem.reward}`)
+            const jobs = new JobLevel(player, "fisherman");
+            const jobsLevel = jobs.getLevel();
+            jobs.addXp(jobs_config.jobsXp);
+            if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${selectedItem.reward} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
             playerData.money += selectedItem.reward;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         })
