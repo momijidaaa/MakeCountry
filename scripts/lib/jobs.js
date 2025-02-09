@@ -220,7 +220,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
             const jobs = new JobLevel(player, "hunter");
             const jobsLevel = jobs.getLevel();
             jobs.addXp(jobs_config.jobsXp);
-            const random = Math.floor(getRandomInteger(jobs_config[`${id}KillReward`].min, jobs_config[`${id}KillReward`]) * 100 * jobs.getReward(jobsLevel)) / 100
+            const random = Math.floor(getRandomInteger(jobs_config[`${id}KillReward`].min, jobs_config[`${id}KillReward`].max) * 100 * jobs.getReward(jobsLevel)) / 100
             if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`)
             playerData.money += random;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
