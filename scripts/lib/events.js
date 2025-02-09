@@ -7,6 +7,7 @@ import jobs_config from "../jobs_config";
 import { chestShopConfig } from "../chest_shop_config";
 import { getShopData, getSignTexts, isShopOwner } from "./chest_shop";
 import { nameSet } from "./nameset";
+import { JobLevel } from "./jobslevel";
 
 system.runInterval(() => {
     const permission = 'break';
@@ -335,7 +336,7 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     const { x, z } = block.location;
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     const now = Date.now();
-    if(cannot) {
+    if (cannot) {
         ev.cancel = true;
         player.placeInfo = {
             time: now,
@@ -460,7 +461,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     typeId: block?.typeId,
                     location: block.location,
                     cancel: true
-                };    
+                };
                 return;
             };
             if (isOwner == true) {
@@ -469,7 +470,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     typeId: block?.typeId,
                     location: block.location,
                     cancel: false
-                };    
+                };
                 ev.cancel = false;
             };
         };
@@ -490,7 +491,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                             typeId: block?.typeId,
                             location: block.location,
                             cancel: true
-                        };            
+                        };
                         ev.cancel = true;
                         system.runTimeout(() => chestLockForm(player, chestId));
                         return;
@@ -501,7 +502,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                         typeId: block?.typeId,
                         location: block.location,
                         cancel: true
-                    };        
+                    };
                     ev.cancel = true;
                     player.sendMessage({ translate: 'message.thischest.islocked', with: [GetAndParsePropertyData(`player_${chestLockData.player}`).name] });
                     return;
@@ -516,7 +517,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     typeId: block?.typeId,
                     location: block.location,
                     cancel: true
-                };    
+                };
                 system.runTimeout(() => chestLockForm(player, chestId));
                 return;
             }
@@ -559,7 +560,10 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                 if (CheckPermissionFromLocation(player, x, z, dimensionId, `place`)) return;
                 //block.setPermutation(block.permutation.withState(`growth`, 0));
                 const playerData = GetAndParsePropertyData(`player_${playerId}`);
-                const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
+                const jobs = new JobLevel(player, "farmer");
+                const jobsLevel = jobs.getLevel();
+                jobs.addXp(jobs_config.jobsXp);
+                const random = Math.floor(getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
                 const reward = Math.ceil((random / 10 * growth) * 100) / 100;
                 playerData.money += reward;
                 StringifyAndSavePropertyData(`player_${playerId}`, playerData);
@@ -588,7 +592,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
     const permission = `entityUse`
     const { player, target } = ev;
     const { x, z } = target.location;
-    
+
     const cannot = CheckPermissionFromLocation(player, x, z, player.dimension.id, permission);
     ev.cancel = cannot;
     if (!cannot) return;

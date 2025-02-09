@@ -555,6 +555,12 @@ export function plotBuyForm(player, chunkId) {
     form.button({ translate: `mc.button.buy` });
     form.show(player).then((rs) => {
         if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
+                    plotBuyForm(player, chunkId);
+                }, 10);
+                return;
+            };
             return;
         };
         switch (rs.selection) {
@@ -628,6 +634,12 @@ export function plotGroupBuyForm(player, plotgroupId) {
     form.button({ translate: `mc.button.buy` });
     form.show(player).then((rs) => {
         if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
+                    plotGroupBuyForm(player, plotgroupId);
+                }, 10)
+                return;
+            };
             return;
         };
         switch (rs.selection) {
@@ -777,7 +789,12 @@ export function plotEditMainFormPlotOwner(player, plot, chunkId) {
     form.button({ translate: `plot.edit.menu.button.role` });
     form.show(player).then((rs) => {
         if (rs.canceled) {
-            plotMainForm(player);
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
+                    plotEditMainFormPlotOwner(player, plot, chunkId);
+                }, 10);
+                return;
+            };
             return;
         };
         switch (rs.selection) {

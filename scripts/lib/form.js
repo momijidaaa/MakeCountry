@@ -3848,6 +3848,12 @@ export function plotGroupEditMainFormPlotOwner(player, plotGroupId) {
     form.button({ translate: `plot.edit.menu.button.role` });
     form.show(player).then((rs) => {
         if (rs.canceled) {
+            if (rs.cancelationReason == FormCancelationReason.UserBusy) {
+                system.runTimeout(() => {
+                    plotGroupEditMainFormPlotOwner(player, plotGroupId);
+                }, 10);
+                return;
+            };
             return;
         };
         switch (rs.selection) {
