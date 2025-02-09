@@ -223,9 +223,9 @@ world.afterEvents.playerPlaceBlock.subscribe((ev) => {
 
     if (!jobs_config.validity) return;
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    
+
     //建築士
-    if (brokenBlockPermutation.type.id.includes('leaves') && player.hasTag(`mcjobs_builder`)) {
+    if (player.hasTag(`mcjobs_builder`)) {
         const jobs = new JobLevel(player, "builder");
         const jobsLevel = jobs.getLevel();
         jobs.addXp(jobs_config.jobsXp);
