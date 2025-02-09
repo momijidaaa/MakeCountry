@@ -266,12 +266,21 @@ playerFishingAfterEvent.subscribe((event) => {
 export function jobsForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `jobs.title` });
+    const body = [];
     for (const job of jobs_config.jobsList) {
         let isEmploy = player.hasTag(`mcjobs_${job.id}`);
         let employMessage = `not.yet.employed`;
-        if (isEmploy) employMessage = `already.found.employment`;
+        const jobs = new JobLevel(player, job.id);
+        const level = jobs.getLevel();
+        let pushElement = [{ translate: job.id }, { text: `§f Lv: ${level} XP: [${jobs.getXp()}/${jobs.getXpRequired(level)}]§f\n` }]
+        if (isEmploy) {
+            employMessage = `already.found.employment`;
+            pushElement = [{ text: '§a' }, { translate: job.id }, { text: `§a Lv: ${level} XP: [${jobs.getXp()}/${jobs.getXpRequired(level)}]§f\n` }]
+        };
+        body.push(...pushElement)
         form.button({ rawtext: [{ text: `§l` }, { translate: job.name }, { text: `\n` }, { translate: employMessage }] });
     };
+    form.body({ rawtext: body });
     form.show(player).then((rs) => {
         if (rs.canceled) {
             if (rs.cancelationReason === FormCancelationReason.UserBusy) {

@@ -32,7 +32,7 @@ export class JobLevel {
     }
 
     getXpRequired(level) {
-        return 4 * level ^ 2 + 10 * level; // 計算結果を返す
+        return (4 * level ^ 2) + (10 * level); // 計算結果を返す
     }
 
     getReward(level) {

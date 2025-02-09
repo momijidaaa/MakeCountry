@@ -203,16 +203,18 @@ export function DeleteCountry(countryId) {
     system.runTimeout(() => {
         if (countryData?.territories) {
             try {
-                for (const t of countryData?.territories ?? []) {
-                    try {
-                        const chunkData = GetAndParsePropertyData(t);
+                const ids = countryData?.territories ?? []
+                for (let i = 0; i < ids.length; i++) {
+                    system.runTimeout(async () => {
+                        const id = ids[i];
+                        /**
+                         * @type {{plot: {},countryId: undefined|number}}
+                         */
+                        const chunkData = GetAndParsePropertyData(id);
                         if (chunkData) {
-                            chunkData.countryId = undefined;
-                            chunkData.plot = undefined;
-                            StringifyAndSavePropertyData(t, chunkData);
+                            StringifyAndSavePropertyData(id);
                         };
-                    } catch (error) {
-                    };
+                    }, Math.floor(i / 50));
                 };
             } catch (error) {
             }
@@ -1056,16 +1058,20 @@ export function MergeCountry(fromCountryId, toCountryId) {
     system.runTimeout(() => {
         if (countryData?.territories) {
             try {
-                for (const t of countryData?.territories ?? []) {
-                    try {
-                        const chunkData = GetAndParsePropertyData(t);
+                const ids = countryData?.territories ?? []
+                for (let i = 0; i < ids.length; i++) {
+                    system.runTimeout(async () => {
+                        const id = ids[i];
+                        /**
+                         * @type {{plot: {},countryId: undefined|number}}
+                         */
+                        const chunkData = GetAndParsePropertyData(id);
                         if (chunkData) {
                             chunkData.countryId = toCountryData.id;
                             chunkData.plot = undefined;
-                            StringifyAndSavePropertyData(t, chunkData);
+                            StringifyAndSavePropertyData(id, chunkData);
                         };
-                    } catch (error) {
-                    };
+                    }, Math.floor(i / 50));
                 };
             } catch (error) {
             }

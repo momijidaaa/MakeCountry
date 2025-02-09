@@ -147,4 +147,6 @@ export default {
     //何チャンク以上から侵略できるか
     minChunkCountCanInvade: 1,
 
+    //建国後の併合ができない、されない期間
+    mergeProtectionDuration: 12,
 };

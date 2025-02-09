@@ -1897,11 +1897,12 @@ export function applicationRequestCountryForm(player, countryId) {
 export function sendMergeRequestListForm(player) {
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    if (playerCountryData.days < config.mergeProtectionDuration) return;
     let mergeRequestSend = playerCountryData?.mergeRequestSend ?? [];
     const form = new ActionFormData();
     form.title({ translate: `form.merge.send.title` });
     let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
-    let filtered1 = countryIds.filter(id => !mergeRequestSend.includes(id));
+    let filtered1 = countryIds.filter(id => !mergeRequestSend.includes(id) && GetAndParsePropertyData(id)?.days >= config.mergeProtectionDuration);
     form.button({ translate: `mc.button.close` });
     let lands = [];
     for (const countryId of filtered1) {
@@ -3283,7 +3284,7 @@ export function countryList(player, al = false) {
         form.title({ translate: `form.countrylist.title` });
         let countryIds
         if (!al) countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith('country'));
-        if (al) countryIds = GetAndParsePropertyData('country_' + GetAndParsePropertyData('player_' + player.id).country)
+        if (al) countryIds = GetAndParsePropertyData('country_' + GetAndParsePropertyData('player_' + player.id).country).alliance.map(alliance => `country_${alliance}`);
         let countries = [];
         countryIds.forEach(id => {
             countries[countries.length] = GetAndParsePropertyData(id);
@@ -3299,7 +3300,7 @@ export function countryList(player, al = false) {
             if (rs.canceled) {
                 if (rs.cancelationReason === FormCancelationReason.UserBusy) {
                     system.runTimeout(() => {
-                        countryList(player);
+                        countryList(player, al);
                         return;
                     }, 10);
                     return;
