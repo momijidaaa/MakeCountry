@@ -6,17 +6,11 @@ export default {
 
     showRewardMessage: true, //メッセージをアクションバーに表示するか
 
-    //jobsレベルの経験値の計算式(xは職業レベル)
-    jobsLevelFormula: '4x^2+10x',
-    
-    //jobsレベルごとの金の倍率の計算式(xは職業レベル)
-    jobsLevelFormula: '0.9*(1+(x-1)/100)',
-
     //1回あたりの報酬
     jobsXp: 0.98,
 
     //職業レベルの最大値
-    jobsLevelMax: 100,
+    jobsLevelMax: 200,
 
     //職業一覧
     jobsList: [
@@ -65,7 +59,7 @@ export default {
     ],
 
     //職業報酬の全体倍率
-    jobRewardMagnification: 1,
+    jobRewardMagnification: 0.6,
 
     fishingReward: { min: 20, max: 35 }, //釣りでアイテムを釣ったときにもらえるお金の変域
 

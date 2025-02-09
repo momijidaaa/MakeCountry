@@ -1,4 +1,4 @@
-import { Player } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import jobs_config from "../jobs_config";
 
 export class JobLevel {
@@ -6,51 +6,40 @@ export class JobLevel {
      * 
      * @param {Player} player 
      * @param {string} key 
-     * @param {} baseXp 
      */
     constructor(player, key) {
         this.player = player;
         this.key = key;
-        this.maxLevel = jobs_config.maxLevel;
+        this.maxLevel = jobs_config.jobsLevelMax;
     }
 
     getLevel() {
-        return parseInt(this.player.getDynamicProperty(`${this.key}_level`) ?? "1") || 1;
+        return Math.floor(Number(this.player.getDynamicProperty(`${this.key}_level`) ?? "1") * 100) / 100 || 1;
     }
 
     getXp() {
-        return parseInt(this.player.getDynamicProperty(`${this.key}_xp`) ?? "0") || 0;
+        return Math.floor(Number(this.player.getDynamicProperty(`${this.key}_xp`) ?? "0") * 100) / 100 || 0;
     }
 
     setLevel(level) {
-        this.player.setDynamicProperty(`${this.key}_level`, level.toString());
+        this.player.setDynamicProperty(`${this.key}_level`, `${level}`);
     }
 
     setXp(xp) {
-        this.player.setDynamicProperty(`${this.key}_xp`, xp.toString());
+        system.runTimeout(() => {
+            this.player.setDynamicProperty(`${this.key}_xp`, `${xp}`);
+        });
     }
 
     getXpRequired(level) {
-        const formula = jobs_config.jobsLevelFormula; // 必要経験値の計算式
-        const expr = formula
-            .replace(/(\d)x/g, "$1*x") // "4x" → "4*x"
-            .replace(/\^/g, "**") // "^" → "**"
-            .replace(/x/g, `(${level})`); // "x" を `(level)` に置換
-        return eval(expr); // 計算結果を返す
+        return 4 * level ^ 2 + 10 * level; // 計算結果を返す
     }
 
     getReward(level) {
-        const formula = jobs_config.jobsLevelFormula; // 必要経験値の計算式
-        const expr = formula
-            .replace(/(\d)x/g, "$1*x") // "4x" → "4*x"
-            .replace(/\^/g, "**") // "^" → "**"
-            .replace(/x/g, `(${level})`); // "x" を `(level)` に置換
-        return eval(expr); // 計算結果を返す
+        return 0.9 * (1 + (level - 1) / 100);
     }
 
     addXp(amount) {
-        if (amount <= 0) return;
-
         let xp = this.getXp() + amount;
         let level = this.getLevel();
 
@@ -61,7 +50,6 @@ export class JobLevel {
             this.player.onScreenDisplay.updateSubtitle(`§e${level - 1}Lv --> ${level}Lv`);
             this.player.playSound(`random.levelup`);
         }
-
         this.setXp(xp);
         this.setLevel(level);
     }

@@ -3,6 +3,7 @@ import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData
 import jobs_config from "../jobs_config";
 import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
 import playerFishingAfterEvent from "./fishingEvent";
+import { JobLevel } from "./jobslevel";
 
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
@@ -11,72 +12,99 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
     //木こり
     const playerData = GetAndParsePropertyData(`player_${player.id}`);
     if (brokenBlockPermutation.hasTag(`log`) && player.hasTag(`mcjobs_woodcutter`)) {
-        const random = getRandomInteger(jobs_config.woodCutReward.min, jobs_config.woodCutReward.max);
+        const jobs = new JobLevel(player, "woodcutter");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.woodCutReward.min, jobs_config.woodCutReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
 
     //土掘り士
     if (brokenBlockPermutation.type.id === `minecraft:dirt` && player.hasTag(`mcjobs_dirtdigger`)) {
-        const random = getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max);
+        const jobs = new JobLevel(player, "dirtdigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:grass` && player.hasTag(`mcjobs_dirtdigger`)) {
-        const random = getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max);
+        const jobs = new JobLevel(player, "dirtdigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:grass_block` && player.hasTag(`mcjobs_dirtdigger`)) {
-        const random = getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max);
+        const jobs = new JobLevel(player, "dirtdigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.dirtdiggerReward.min, jobs_config.dirtdiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
 
     //砂掘り士
     if (brokenBlockPermutation.type.id.endsWith(`sand`) && player.hasTag(`mcjobs_sanddigger`)) {
-        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        const jobs = new JobLevel(player, "sanddigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:gravel` && player.hasTag(`mcjobs_sanddigger`)) {
-        const random = getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max);
+        const jobs = new JobLevel(player, "sanddigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.sanddiggerReward.min, jobs_config.sanddiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
 
     //ネザー掘り士
     if (brokenBlockPermutation.type.id === `minecraft:netherrack` && player.hasTag(`mcjobs_netherdigger`)) {
-        const random = getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max);
+        const jobs = new JobLevel(player, "netherdigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:basalt` && player.hasTag(`mcjobs_netherdigger`)) {
-        const random = getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max);
+        const jobs = new JobLevel(player, "netherdigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:soul_soil` && player.hasTag(`mcjobs_netherdigger`)) {
-        const random = getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max);
+        const jobs = new JobLevel(player, "netherdigger");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.netherdiggerReward.min, jobs_config.netherdiggerReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
 
@@ -85,68 +113,95 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         return;
     };
     if (brokenBlockPermutation.type.id == `minecraft:stone` && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.normalStoneMiningReward.min, jobs_config.normalStoneMiningReward.max);
+        const jobs = new JobLevel(player, "miner");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.normalStoneMiningReward.min, jobs_config.normalStoneMiningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id.endsWith(`_ore`) && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max);
+        const jobs = new JobLevel(player, "miner");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:ancient_debris` && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max);
+        const jobs = new JobLevel(player, "miner");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.oreMiningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:deepslate` && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max);
+        const jobs = new JobLevel(player, "miner");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:tuff` && player.hasTag(`mcjobs_miner`)) {
-        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max);
+        const jobs = new JobLevel(player, "miner");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.hasTag(`stone`) && player.hasTag(`mcjobs_miner`) && brokenBlockPermutation.type.id != `minecraft:cobblestone`) {
-        const random = getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max);
+        const jobs = new JobLevel(player, "miner");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.stoneMiningReward.min, jobs_config.stoneMiningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
 
     //農家
     if (brokenBlockPermutation.getTags().includes(`minecraft:crop`) && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`growth`) == 7) {
-        const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
+        const jobs = new JobLevel(player, "farmer");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `minecraft:cocoa` && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`age`) === 2) {
-        const random = getRandomInteger(jobs_config.cocoaHarvestReward.min, jobs_config.cocoaHarvestReward.max);
+        const jobs = new JobLevel(player, "farmer");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.cocoaHarvestReward.min, jobs_config.cocoaHarvestReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
     if (brokenBlockPermutation.type.id === `mc:rice_crop` && player.hasTag(`mcjobs_farmer`) && brokenBlockPermutation.getState(`mc:growth_stage`) === 3) {
-        const random = getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max);
+        const jobs = new JobLevel(player, "farmer");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
-        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6+${random}`);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
         return;
     };
 });
@@ -162,13 +217,19 @@ world.afterEvents.entityDie.subscribe((ev) => {
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
         try {
             const id = ev.deadEntity.typeId.split(`:`)[1];
-            const random = getRandomInteger(jobs_config[`${id}KillReward`].min, jobs_config[`${id}KillReward`].max)
-            if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
+            const jobs = new JobLevel(player, "hunter");
+            const jobsLevel = jobs.getLevel();
+            jobs.addXp(jobs_config.jobsXp);
+            const random = Math.floor(getRandomInteger(jobs_config[`${id}KillReward`].min, jobs_config[`${id}KillReward`]) * 100 * jobs.getReward(jobsLevel)) / 100
+            if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`)
             playerData.money += random;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         } catch (error) {
-            const random = getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.otherMobkillReward.max)
-            if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
+            const jobs = new JobLevel(player, "hunter");
+            const jobsLevel = jobs.getLevel();
+            jobs.addXp(jobs_config.jobsXp);
+            const random = Math.floor(getRandomInteger(jobs_config.oreMiningReward.min, jobs_config.otherMobkillReward.max) * 100 * jobs.getReward(jobsLevel)) / 100
+            if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`)
             playerData.money += random;
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         };
@@ -188,8 +249,11 @@ playerFishingAfterEvent.subscribe((event) => {
         const player = event.player;
         if (!player.hasTag(`mcjobs_fisherman`)) return;
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
-        const random = getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max)
-        if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${random}`)
+        const jobs = new JobLevel(player, "fisherman");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.fishingReward.min, jobs_config.fishingReward.max) * 100 * jobs.getReward(jobsLevel)) / 100
+        if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`)
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
     });
