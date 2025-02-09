@@ -76,6 +76,18 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         return;
     };
 
+    //庭師
+    if (brokenBlockPermutation.type.id.includes('leaves') && player.hasTag(`mcjobs_gardener`)) {
+        const jobs = new JobLevel(player, "gardener");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.gardeningReward.min, jobs_config.gardeningReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
+        return;
+    };
+
     //ネザー掘り士
     if (brokenBlockPermutation.type.id === `minecraft:netherrack` && player.hasTag(`mcjobs_netherdigger`)) {
         const jobs = new JobLevel(player, "netherdigger");
@@ -199,6 +211,25 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
         const jobsLevel = jobs.getLevel();
         jobs.addXp(jobs_config.jobsXp);
         const random = Math.floor(getRandomInteger(jobs_config.cropHarvestReward.min, jobs_config.cropHarvestReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
+        playerData.money += random;
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+        if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
+        return;
+    };
+});
+
+world.afterEvents.playerPlaceBlock.subscribe((ev) => {
+    const { player, block } = ev;
+
+    if (!jobs_config.validity) return;
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    
+    //建築士
+    if (brokenBlockPermutation.type.id.includes('leaves') && player.hasTag(`mcjobs_builder`)) {
+        const jobs = new JobLevel(player, "builder");
+        const jobsLevel = jobs.getLevel();
+        jobs.addXp(jobs_config.jobsXp);
+        const random = Math.floor(getRandomInteger(jobs_config.buildReward.min, jobs_config.buildReward.max) * 100 * jobs.getReward(jobsLevel)) / 100;
         playerData.money += random;
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         if (jobs_config.showRewardMessage) ev.player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);

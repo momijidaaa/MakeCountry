@@ -54,12 +54,25 @@ export default {
             id: `netherdigger`,
             name: `netherdigger`,
         },
-
+        //建築士
+        {
+            id: `builder`,
+            name: `builder`,
+        },
+        //庭師
+        {
+            id: `gardener`,
+            name: `gardener`,
+        },
         //ここに追加可能
     ],
 
     //職業報酬の全体倍率
     jobRewardMagnification: 0.6,
+
+    buildReward: { min: 0.02, max: 0.08 }, //ブロックを置いたときにもらえるお金の変域
+
+    gardeningReward: { min: 0.3, max: 0.6 }, //葉っぱブロックを素手で壊したときにもらえるお金の変域
 
     fishingReward: { min: 20, max: 35 }, //釣りでアイテムを釣ったときにもらえるお金の変域
 
@@ -76,7 +89,7 @@ export default {
 
     oreMiningReward: { min: 5, max: 20 }, //鉱石系ブロックを掘ったときにもらえるお金の変域
     stoneMiningReward: { min: 1, max: 2 }, //石系ブロックを掘ったときにもらえるお金の変域
-    normalStoneMiningReward: {min: 1, max: 2}, //minecraft:stoneを掘ったときにもらえるお金の変域 
+    normalStoneMiningReward: { min: 1, max: 2 }, //minecraft:stoneを掘ったときにもらえるお金の変域 
 
     skeletonKillReward: { min: 10, max: 25 }, //スケルトンを倒したときにもらえるお金の変域
     strayKillReward: { min: 10, max: 25 }, //ストレイを倒したときにもらえるお金の変域

@@ -40,7 +40,6 @@ export function kingdomsSettingForm(player) {
             //settingCountry(player);
             return;
         };
-        player.sendMessage(`${rs.selection}`)
         switch (rs.selection) {
             //戻る
             case 0: {

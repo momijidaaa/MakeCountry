@@ -295,6 +295,7 @@ export function playerMainMenu(player) {
     form.button({ translate: `form.mainmenu.button.profile` });
     form.button({ translate: `form.mainmenu.button.sendmoney` });
     form.button({ translate: `form.mainmenu.button.join` });
+    form.button({ translate: `form.mainmenu.button.setting` });
     form.button({ translate: `form.mainmenu.button.penname` });
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -325,6 +326,10 @@ export function playerMainMenu(player) {
                 break;
             };
             case 3: {
+                playerSettingForm(player);
+                break;
+            };
+            case 4: {
                 if (config.pennameEnable) {
                     penNameMainForm(player);
                     return;
@@ -332,6 +337,27 @@ export function playerMainMenu(player) {
                 break;
             };
         };
+    });
+};
+
+/**
+ * 
+ * @param {Player} player 
+ */
+function playerSettingForm(player) {
+    const form = new ModalFormData();
+    const uiTypes = [undefined, 'kingdoms', 'towny'];
+    const index = uiTypes.indexOf(player.getDynamicProperty('uiType'));
+    form.title({ translate: 'form.mainmenu.button.setting' });
+    form.dropdown('UI Type', ['default', 'kingdoms', 'towny'],index);
+    form.submitButton({ translate: 'mc.button.update' });
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            playerMainMenu(player);
+            return;
+        };
+        player.setDynamicProperty('uiType', uiTypes[rs.formValues[0]]);
+        player.sendMessage({translate: 'updated'});
     });
 };
 
