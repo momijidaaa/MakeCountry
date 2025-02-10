@@ -567,7 +567,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                 const reward = Math.ceil((random / 10 * growth) * 100) / 100;
                 playerData.money += reward;
                 StringifyAndSavePropertyData(`player_${playerId}`, playerData);
-                if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${reward}`);
+                if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
                 return;
             }
         });
