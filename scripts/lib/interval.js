@@ -4,13 +4,14 @@ import * as DyProp from "./DyProp";
 import config from "../config";
 import { DeleteCountry } from "./land";
 
-let taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
-world.setDynamicProperty(`taxTimer`, taxTimerString);
+let taxTimerString
 
 const nowCountryId = new Map();
 const nowChunkPlotName = new Map();
 
 world.afterEvents.worldInitialize.subscribe(() => {
+    taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
+    world.setDynamicProperty(`taxTimer`, taxTimerString);
     if (!DyProp.getDynamicProperty(`voteData`)) DyProp.setDynamicProperty(`voteData`, `{}`);
     if (!DyProp.getDynamicProperty(`loginData`)) DyProp.setDynamicProperty(`loginData`, `{}`);
 });
