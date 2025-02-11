@@ -4,7 +4,7 @@ import * as DyProp from "./DyProp";
 import config from "../config";
 import { DeleteCountry } from "./land";
 
-let taxTimerString
+let taxTimerString;
 
 const nowCountryId = new Map();
 const nowChunkPlotName = new Map();

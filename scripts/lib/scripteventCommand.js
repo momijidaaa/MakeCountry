@@ -3,6 +3,7 @@ import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import { uiManager } from "@minecraft/server-ui";
 import { tax } from "./interval";
 import { fixCountryData } from "./fixdata";
+import { updateRanking } from "./ranking";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -49,6 +50,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         };
         case 'mc:fixcountrydata': {
             fixCountryData();
+            break;
+        };
+        case 'mc:updaterank': {
+            updateRanking();
             break;
         };
     };

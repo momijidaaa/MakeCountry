@@ -3,7 +3,7 @@ export default {
     prefix: `?`,
     //プレイヤーの初期の所持金
     initialMoney: 2000,
-    //所持金をスコアボードで変更できるようにするか(オンラインのプレイヤーのみ)
+    //所持金をスコアボードで取得できるようにするか(オンラインのプレイヤーのみ)
     getMoneyByScoreboard: false,
     //所持金と連動するスコアボードのオブジェクト名
     moneyScoreboardName: `mc_money`,

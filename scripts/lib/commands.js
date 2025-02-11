@@ -1179,6 +1179,9 @@ function getChunksInRange(x1, z1, x2, z2) {
     for (let cx = startX; cx <= endX; cx++) {
         for (let cz = startZ; cz <= endZ; cz++) {
             chunks.push({ chunkX: cx, chunkZ: cz });
+            if (chunks.length > 101) {
+                return chunks;
+            };
         }
     }
     return chunks;
