@@ -19,9 +19,15 @@
                 "item": "minecraft:milk_bucket"
             }
         },
-        "result": {
-            "item": "mc:white_chocolate",
-            "count": 1
-        }
+        "result": [
+            {
+                "item": "mc:white_chocolate",
+                "count": 1
+            },
+            {
+                "item": "minecraft:bucket",
+                "count": 3
+            }
+        ]
     }
 }

@@ -5,19 +5,19 @@
             "identifier": "mc:hamburger_recipe"
         },
         "tags": [
-            "crafting_table"
+            "cutting_board"
         ],
         "pattern": [
-            "+++",
+            " + ",
             "*#&",
-            "+++"
+            " + "
         ],
         "key": {
             "*": {
                 "item": "mc:cheese_bucket"
             },
             "+": {
-                "item": "minecraft:bread"
+                "item": "mc:buns"
             },
             "#": {
                 "item": "minecraft:cooked_beef"

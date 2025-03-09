@@ -157,10 +157,10 @@ class ChatHandler {
                     this.checkHome();
                     break;
                 case "adminchunk":
-                    this.setAdminChunk();
+                    this.setAdminChunk(args);
                     break;
                 case "adminc":
-                    this.setAdminChunk();
+                    this.setAdminChunk(args);
                     break;
                 case "resetchunk":
                     this.resetChunk();
@@ -476,11 +476,33 @@ class ChatHandler {
         };
     };
 
-    setAdminChunk() {
+    setAdminChunk(args) {
         if (!this.sender.hasTag("mc_admin")) {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
         };
+        if (args.length == 2) {
+            const [ix, iz] = args.map(str => Math.floor(Number(str)));
+            const { x, z } = this.sender.location;
+            const chunks = getChunksInRange(Math.floor(x), Math.floor(z), ix, iz);
+            if (!isNumber(ix) || !isNumber(iz)) {
+                this.sender.sendMessage({ translate: '§c座標が間違っています' });
+                return;
+            };
+            if (chunks.length > 100) {
+                this.sender.sendMessage({ translate: '1度に特別区にできるチャンクは100チャンクまでです' });
+                return;
+            };
+            for (let i = 0; i < chunks.length; i++) {
+                system.runTimeout(() => {
+                    this.sender.sendMessage({ translate: `command.setadminchunk.result`, with: { rawtext: [{ translate: `special.name` }] } });
+                    const chunk = GenerateChunkData(chunks[i].chunkX, chunks[i].chunkZ, this.sender.dimension.id, undefined, undefined, 10000, true);
+                    StringifyAndSavePropertyData(chunk.id, chunk);
+                    return;
+                }, i)
+            }
+            return;
+        }
         const { x, z } = this.sender.location;
         this.sender.sendMessage({ translate: `command.setadminchunk.result`, with: { rawtext: [{ translate: `special.name` }] } });
         const chunk = GenerateChunkData(x, z, this.sender.dimension.id, undefined, undefined, 10000, true);
@@ -913,7 +935,6 @@ class ChatHandler {
         { translate: `command.help.cchat` }, { text: `\n` },
         { translate: `command.help.ac` }, { text: `\n` },
         { translate: `command.help.plot` }, { text: `\n` },
-        { translate: `command.help.al` }, { text: `\n` },
         { text: `§a------------------------------------` }];
         this.sender.sendMessage({ rawtext: helpMessage });
     };
@@ -1178,10 +1199,8 @@ function getChunksInRange(x1, z1, x2, z2) {
     // 範囲内のすべてのチャンク座標を取得
     for (let cx = startX; cx <= endX; cx++) {
         for (let cz = startZ; cz <= endZ; cz++) {
+            if (chunks.length > 101) return chunks;
             chunks.push({ chunkX: cx, chunkZ: cz });
-            if (chunks.length > 101) {
-                return chunks;
-            };
         }
     }
     return chunks;

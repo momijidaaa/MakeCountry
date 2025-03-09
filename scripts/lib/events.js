@@ -567,7 +567,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                 const reward = Math.ceil((random / 10 * growth) * 100) / 100;
                 playerData.money += reward;
                 StringifyAndSavePropertyData(`player_${playerId}`, playerData);
-                if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6+${reward}`);
+                if (jobs_config.showRewardMessage) player.onScreenDisplay.setActionBar(`§6[Money] +${random} §e[XP] ${jobs.getXp()}/${jobs.getXpRequired(jobsLevel)}`);
                 return;
             }
         });
@@ -607,6 +607,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
         if (dataCheck) {
             const playerData = JSON.parse(dataCheck);
             playerData.name = player.name;
+            playerData.lastLogined = Date.now();
             playerData.money = Math.floor(playerData.money);
             StringifyAndSavePropertyData(`player_${player.id}`, playerData);
             if (config.countryNameDisplayOnPlayerNameTag) {
@@ -631,21 +632,35 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     };
 });
 
-system.runInterval(() => {
-    try {
-        const players = world.getAllPlayers();
-        for (const player of players) {
-            const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
-            if (dataCheck) {
-                if (config.countryNameDisplayOnPlayerNameTag) {
-                    nameSet(player);
-                };
-                let moneyValue = JSON.parse(dataCheck).money;
-                if (config.getMoneyByScoreboard) {
-                    const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
-                    scoreboard.setScore(player, Math.floor(moneyValue));
-                };
+try {
+    const players = world.getAllPlayers();
+    for (const player of players) {
+        const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
+        if (dataCheck) {
+            player.setDynamicProperty(`nowCountryId`);
+            if (config.countryNameDisplayOnPlayerNameTag) {
+                nameSet(player);
             };
+        } else {
+            let moneyValue = config.initialMoney;
+            if (config.getMoneyByScoreboard) {
+                const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
+                const scoreValue = scoreboard.getScore(player);
+                if (scoreValue) moneyValue = scoreValue;
+            };
+            const newPlayerData = {
+                name: player.name,
+                id: player.id,
+                country: undefined,
+                money: moneyValue,
+                roles: [],
+                days: 0,
+                invite: [],
+                settings: {
+                    inviteReceiveMessage: true,
+                }
+            };
+            StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
         };
-    } catch (error) { };
-});
+    };
+} catch (error) { };

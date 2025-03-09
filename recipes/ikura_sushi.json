@@ -5,7 +5,7 @@
             "identifier": "mc:ikura_sushi_recipe"
         },
         "tags": [
-            "crafting_table"
+            "cutting_board"
         ],
         "pattern": [
             "*#+"
@@ -15,7 +15,7 @@
                 "item": "minecraft:dried_kelp_block"
             },
             "*": {
-                "item": "mc:rice"
+                "item": "mc:cooked_rice_vinegared"
             },
             "+": {
                 "item": "minecraft:salmon"

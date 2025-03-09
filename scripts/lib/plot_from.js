@@ -196,6 +196,7 @@ export function plotMainForm(player) {
                         plotEditMainFormPlotAdmin(player, plot, chunkId);
                         return;
                     });
+                    return;
                 };
 
                 //売り出し中
@@ -380,6 +381,7 @@ export function plotMainForm(player) {
                     plotEditMainFormPlotAdmin(player, plot, chunkId);
                     return;
                 });
+                return;
             };
 
             //売り出し中
@@ -1349,7 +1351,7 @@ function countrySelectedShowForm(player, targetData, chunkId, plotAdmin = false)
                     enable: false,
                 };
                 if (!plot?.countries) plot.countries = [];
-                plot.countries.splice(plot.countries.indexOf(d => d.id == targetData.id), 1);
+                plot.countries = plot.countries.filter(d => aliveCountries.includes(d.id));
                 chunkData.plot = plot;
                 StringifyAndSavePropertyData(`${chunkId}`, chunkData);
                 plotEditCountriesListForm(player, chunkId, plotAdmin);

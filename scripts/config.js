@@ -3,7 +3,7 @@ export default {
     prefix: `?`,
     //プレイヤーの初期の所持金
     initialMoney: 2000,
-    //所持金をスコアボードで取得できるようにするか(オンラインのプレイヤーのみ)
+    //所持金をスコアボードで変更できるようにするか(オンラインのプレイヤーのみ)
     getMoneyByScoreboard: false,
     //所持金と連動するスコアボードのオブジェクト名
     moneyScoreboardName: `mc_money`,
@@ -31,7 +31,7 @@ export default {
     //国を作るのに必要な金
     MakeCountryCost: 5000,
     //デフォルトのチャンクの値段
-    defaultChunkPrice: 2000,
+    defaultChunkPrice: 1800,
     //国際組織の設立にかかる金
     MakeInternationalOrganizationCost: 20000,
     //共通通貨の単位
@@ -60,9 +60,11 @@ export default {
     //建国後何回分の徴税をなしにするか
     NonMaintenanceCostAccrualPeriod: 3,
     //平和主義国の維持費(1チャンク)
-    MaintenanceFeePacifistCountries: 50,
+    MaintenanceFeePacifistCountries: 60,
     //非平和主義国の維持費(1チャンク)
-    MaintenanceFeeNonPeacefulCountries: 5,
+    MaintenanceFeeNonPeacefulCountries: 3,
+    //国王の最終ログインから何日間(現実時間)経ってたら徴税時に国を自動で消すか
+    autoDeleteAfterFinalLogined: 30,
 
     //建国時に国庫を非公開にするか
     hideCountryMoney: true,

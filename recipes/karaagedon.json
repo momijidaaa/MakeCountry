@@ -5,14 +5,14 @@
             "identifier": "mc:karaagedon_recipe"
         },
         "tags": [
-            "crafting_table"
+            "cutting_board"
         ],
         "pattern": [
-            "*+"
+            "*+-"
         ],
         "key": {
             "*": {
-                "item": "mc:rice"
+                "item": "mc:cooked_rice"
             },
             "+": {
                 "item": "mc:karaage"

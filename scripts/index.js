@@ -13,11 +13,7 @@
  */
 
 import { world } from "@minecraft/server";
-world.afterEvents.itemUse.subscribe((ev) => {
-    if(ev.itemStack.typeId == "minecraft:recovery_compass") {
-        ev.source.runCommand('scriptevent ')
-    };
-});
+
 import "./lib/commands";
 
 import "./lib/events";
@@ -46,7 +42,8 @@ import "./lib/ranking";
 
 import "./lib/fixdata";
 
-const version = "ver.1.21.60 β.1.5.0"
+const version = "ver.KaroEarth"
+
 
 world.afterEvents.worldInitialize.subscribe(() => {
     world.sendMessage({ translate: `world.message.addon`, with: [version] });

@@ -1,0 +1,18 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:squid_tempra"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "squid_tempra"
+            },
+            "minecraft:use_duration": 2,
+            "minecraft:food": {
+                "nutrition": 5
+            },
+            "minecraft:use_animation": "eat"
+        }
+    }
+}

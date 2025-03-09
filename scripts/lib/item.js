@@ -71,12 +71,12 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
         };
         case `mc:white_wine`: {
             source.addEffect(`nausea`, 200, { amplifier: 20 });
-            source.addEffect(`regeneration`, 100, { amplifier: 0 });
+            source.addEffect(`jump_boost`, 100, { amplifier: 3 });
             break;
         };
         case `mc:red_wine`: {
             source.addEffect(`nausea`, 200, { amplifier: 20 });
-            source.addEffect(`regeneration`, 100, { amplifier: 0 });
+            source.addEffect(`speed`, 150, { amplifier: 4 });
             break;
         };
         case `mc:whiskey`: {
@@ -85,12 +85,22 @@ world.afterEvents.itemCompleteUse.subscribe((ev) => {
             break;
         };
         case `mc:vodka`: {
-            source.addEffect(`nausea`, 200, { amplifier: 20 });
-            source.addEffect(`regeneration`, 100, { amplifier: 0 });
+            source.addEffect(`nausea`, 250, { amplifier: 20 });
+            source.addEffect(`regeneration`, 100, { amplifier: 1 });
             break;
         };
         case `mc:sake`: {
-            source.addEffect(`nausea`, 200, { amplifier: 20 });
+            source.addEffect(`nausea`, 300, { amplifier: 20 });
+            source.addEffect(`regeneration`, 100, { amplifier: 2 });
+            break;
+        };
+        case `mc:abisinthe`: {
+            source.addEffect(`nausea`, 300, { amplifier: 20 });
+            source.addEffect(`regeneration`, 100, { amplifier: 2 });
+            break;
+        };
+        case `mc:aoziru`: {
+            source.addEffect(`resistance`, 200, { amplifier: 1 });
             source.addEffect(`regeneration`, 100, { amplifier: 0 });
             break;
         };

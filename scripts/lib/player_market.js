@@ -21,10 +21,13 @@ export function PlayerMarketMainMenu(player) {
     form.button({ translate: `view.products` });
     form.button({ translate: `sell.products` });
     form.button({ translate: `withdrawal.goods` });
+    form.button({ translate: `sale.history` });
     form.show(player).then(rs => {
         if (rs.canceled) {
             if (rs.cancelationReason == FormCancelationReason.UserBusy) {
-                PlayerMarketMainMenu(player);
+                system.runTimeout(() => {
+                    PlayerMarketMainMenu(player);
+                }, 10);
             };
             //閉じる
             return;
@@ -45,7 +48,50 @@ export function PlayerMarketMainMenu(player) {
                 PlayerMarketWithdrawalGoodsMainMenu(player);
                 break;
             };
+            case 3: {
+                //売上確認
+                PlayerMarketCheckSold(player);
+                break;
+            };
         };
+    });
+};
+
+/**
+ * 売却履歴
+ * @param {Player} player 
+ */
+export function PlayerMarketCheckSold(player) {
+    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    /**
+     * @type {Array<{ price: number, user: string, item: {name: undefined|string, typeId: string,amount: number,lore: [string] } }>}
+     */
+    let soldHistory = playerData?.soldhistory ?? [];
+    let string = '';
+    let addMoney = 0;
+    for (const history of soldHistory) {
+        string += `>>${history.user}§r §a+§e${history.price}§r\n${history.item?.name ? `${history.item.name}§r(${history.item.typeId})` : history.item.typeId} * ${history.item.amount}\n${history.item?.lore.join('§r\n')}\n\n\n`;
+        addMoney += history.price;
+    };
+    playerData.soldhistory = [];
+    playerData.money += addMoney;
+    StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+    const form = new ActionFormData();
+    form.title({ translate: 'sale.history' });
+    form.body(string);
+    form.button({ translate: 'mc.button.close' });
+    form.show(player).then((rs) => {
+        if (rs.canceled) {
+            PlayerMarketMainMenu(player);
+            return;
+        };
+        switch (rs.selection) {
+            case 0: {
+                //閉じる
+                break;
+            };
+        };
+
     });
 };
 
@@ -128,6 +174,7 @@ export function PlayerMarketWithdrawalGoodsSelectMenu(player, common) {
                 player.sendMessage({ translate: `finish.goods.withdrawal.message` })
                 const item = new ItemStack(common.item.typeId, common.item.amount);
                 item.nameTag = common.item?.name;
+                item.setLore(common?.item?.lore);
                 const container = player.getComponent(`inventory`).container;
                 if (container.emptySlotsCount < 1) {
                     player.dimension.spawnItem(item, player.location);
@@ -247,6 +294,7 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData, itemStack) {
             item: {
                 name: itemData.itemStack?.nameTag,
                 typeId: itemData.itemStack.typeId,
+                lore: itemData.itemStack.getLore(),
                 amount: itemAmount
             }
         };
@@ -259,7 +307,6 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData, itemStack) {
         };
         allCommons.unshift(data);
         const playerData = GetAndParsePropertyData(`player_${player.id}`);
-        playerData.marketAmount += 1;
         player.sendMessage({ rawtext: [{ text: `§a[PlayerMarket]\n` }, { translate: `success.exhibited.message`, with: { rawtext: [{ translate: `${langChangeItemName(itemData.itemStack.typeId)}` }] } }] });
         StringifyAndSavePropertyData(`player_${player.id}`, playerData);
         StringifyAndSavePropertyData(`player_market_commons`, allCommons);
@@ -304,7 +351,8 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
     const commons = allCommons.slice(0 + (45 * page), 45 + (45 * page));
     for (let i = 0; i < commons.length; i++) {
         const common = commons[i];
-        form.setButton(i + 9, { name: common.item.name || common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`], stackAmount: common.item.amount, editedName: common.item.name ? true : false })
+        common.item.lore = common.item.lore ?? [];
+        form.setButton(i + 9, { name: common.item.name ? [{ text: `${common.item.name}§r(` }, { translate: `${langChangeItemName(common.item.typeId)}` }, { text: `§r)` }] : common.item.typeId, iconPath: itemIdToPath[common.item.typeId] ?? common.item.typeId, lore: [`${config.MoneyName}${common.price}`, `${common.playerName}`, ...common.item.lore], stackAmount: common.item.amount, editedName: common.item.name ? true : false })
     };
     form.setButton(0, { name: "§l§4Close", iconPath: "minecraft:barrier", lore: ["Push here"], editedName: true });
     if ((page + 1) * 45 < commonsAll.length) form.setButton(5, { name: ">>", iconPath: "textures/ui/arrow_right", lore: ["Next Page"], editedName: true });
@@ -389,8 +437,9 @@ export function PlayerMarketSelectCommonForm(player, common) {
                     return;
                 };
                 const exhibitorData = GetAndParsePropertyData(`player_${common.playerId}`);
-                exhibitorData.money += common.price;
-                exhibitorData.marketAmount -= 1;
+                let soldHistory = exhibitorData?.soldhistory ?? [];
+                soldHistory.push({ price: common.price, user: player.name, item: common.item });
+                exhibitorData.soldhistory = soldHistory;
                 playerData.money -= common.price;
                 StringifyAndSavePropertyData(`player_market_commons`, newAllCommons.filter(com => com.id != common.id));
                 StringifyAndSavePropertyData(`player_${player.id}`, playerData);
@@ -398,6 +447,7 @@ export function PlayerMarketSelectCommonForm(player, common) {
                 player.sendMessage({ translate: `finish.bought` });
                 const item = new ItemStack(common.item.typeId, common.item.amount);
                 item.nameTag = common.item?.name;
+                item.setLore(common.item?.lore);
                 const container = player.getComponent(`inventory`).container;
                 if (container.emptySlotsCount < 1) {
                     player.dimension.spawnItem(item, player.location);

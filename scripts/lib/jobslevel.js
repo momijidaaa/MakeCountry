@@ -22,7 +22,9 @@ export class JobLevel {
     }
 
     setLevel(level) {
-        this.player.setDynamicProperty(`${this.key}_level`, `${level}`);
+        system.runTimeout(() => {
+            this.player.setDynamicProperty(`${this.key}_level`, `${level}`);
+        })
     }
 
     setXp(xp) {

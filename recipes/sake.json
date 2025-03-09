@@ -5,7 +5,7 @@
             "identifier": "mc:sake_recipe"
         },
         "tags": [
-            "crafting_table"
+            "fermentation_machine"
         ],
         "pattern": [
             "#*"

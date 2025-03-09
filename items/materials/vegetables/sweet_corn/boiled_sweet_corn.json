@@ -1,0 +1,18 @@
+{
+    "format_version": "1.20.30",
+    "minecraft:item": {
+        "description": {
+            "identifier": "mc:boiled_sweet_corn"
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "boiled_sweet_corn"
+            },
+            "minecraft:use_duration": 2,
+            "minecraft:food": {
+                "nutrition": 5
+            },
+            "minecraft:use_animation": "eat"
+        }
+    }
+}

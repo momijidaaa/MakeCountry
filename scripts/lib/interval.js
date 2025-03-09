@@ -4,7 +4,7 @@ import * as DyProp from "./DyProp";
 import config from "../config";
 import { DeleteCountry } from "./land";
 
-let taxTimerString;
+let taxTimerString
 
 const nowCountryId = new Map();
 const nowChunkPlotName = new Map();
@@ -109,7 +109,8 @@ export function tax() {
         StringifyAndSavePropertyData(pId, playerData);
         if (!playerData.country) continue;
         const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
-        if (countryData.taxInstitutionIsPer) {
+        if(!countryData) continue;
+        if (countryData?.taxInstitutionIsPer) {
             if (playerData.money < 0) {
                 continue;
             }
@@ -147,8 +148,18 @@ export function tax() {
             StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
             continue;
         };
+        const ownerData = GetAndParsePropertyData(`player_${countryData?.owner}`);
+        if(ownerData?.lastLogined) {
+            if(Date.now() - ownerData.lastLogined >= config.autoDeleteAfterFinalLogined * 24 * 60 * 60 * 1000 ) {
+                system.runTimeout(() => {
+                    DeleteCountry(countryData.id);
+                }, deleteCount);
+                deleteCount++;
+                continue;
+            };    
+        };
         let upkeepCosts = config.MaintenanceFeeNonPeacefulCountries * countryData.territories.length;
-        if (countryData.peace) upkeepCosts = config.MaintenanceFeePacifistCountries * countryData.territories.length;
+        if (countryData?.peace) upkeepCosts = config.MaintenanceFeePacifistCountries * countryData.territories.length;
         if (typeof countryData?.money == "number") {
             if (countryData.money < upkeepCosts) {
                 countryData.money = 0;

@@ -5,7 +5,7 @@
             "identifier": "mc:black_chocolate_recipe"
         },
         "tags": [
-            "crafting_table"
+            "stew"
         ],
         "pattern": [
             "#*",
@@ -19,9 +19,15 @@
                 "item": "minecraft:milk_bucket"
             }
         },
-        "result": {
-            "item": "mc:black_chocolate",
-            "count": 1
-        }
+        "result": [
+            {
+                "item": "mc:black_chocolate",
+                "count": 1
+            },
+            {
+                "item": "minecraft:bucket",
+                "count": 1
+            }
+        ]
     }
 }

@@ -5,10 +5,10 @@
             "identifier": "mc:shrimp_tempra_recipe"
         },
         "tags": [
-            "crafting_table"
+            "fry_stew"
         ],
         "pattern": [
-            "*+"
+            "*+a"
         ],
         "key": {
             "*": {
@@ -16,6 +16,9 @@
             },
             "+": {
                 "item": "mc:food_oil"
+            },
+            "a": {
+                "item": "mc:flour"
             }
         },
         "result": {

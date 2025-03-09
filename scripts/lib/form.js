@@ -349,7 +349,7 @@ function playerSettingForm(player) {
     const uiTypes = [undefined, 'kingdoms', 'towny'];
     const index = uiTypes.indexOf(player.getDynamicProperty('uiType'));
     form.title({ translate: 'form.mainmenu.button.setting' });
-    form.dropdown('UI Type', ['default', 'kingdoms', 'towny'],index);
+    form.dropdown('UI Type', ['default', 'kingdoms', 'towny'], index);
     form.submitButton({ translate: 'mc.button.update' });
     form.show(player).then((rs) => {
         if (rs.canceled) {
@@ -357,7 +357,7 @@ function playerSettingForm(player) {
             return;
         };
         player.setDynamicProperty('uiType', uiTypes[rs.formValues[0]]);
-        player.sendMessage({translate: 'updated'});
+        player.sendMessage({ translate: 'updated' });
     });
 };
 
@@ -4333,7 +4333,7 @@ function plotGroupCountrySelectedShowForm(player, targetData, plotGroupId, plotA
                     return;
                 };
                 if (!plot?.countries) plot.countries = [];
-                plot.countries.splice(plot.countries.indexOf(d => d.id == targetData.id), 1);
+                plot.countries = plot.countries.filter(d => d.id != targetData.id);
                 StringifyAndSavePropertyData(`plotgroup_${plotGroupId}`, plot);
                 plotGroupEditCountriesListForm(player, plotGroupId, plotAdmin);
                 break;

@@ -5,7 +5,7 @@
             "identifier": "mc:beer_recipe"
         },
         "tags": [
-            "crafting_table"
+            "fermentation_machine"
         ],
         "pattern": [
             "#*"

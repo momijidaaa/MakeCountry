@@ -201,25 +201,22 @@ export function DeleteCountry(countryId) {
         };
     });
     system.runTimeout(() => {
-        if (countryData?.territories) {
-            try {
-                const ids = countryData?.territories ?? []
-                for (let i = 0; i < ids.length; i++) {
-                    system.runTimeout(async () => {
-                        const id = ids[i];
-                        /**
-                         * @type {{plot: {},countryId: undefined|number}}
-                         */
-                        const chunkData = GetAndParsePropertyData(id);
-                        if (chunkData) {
-                            StringifyAndSavePropertyData(id);
-                        };
-                    }, Math.floor(i / 50));
+        try {
+            const ids = DyProp.DynamicPropertyIds().filter(id => id.startsWith("chunk_"));
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i];
+                /**
+                 * @type {{plot: {},countryId: undefined|number}}
+                 */
+                const chunkData = GetAndParsePropertyData(id);
+                if (chunkData) {
+                    if (chunkData?.countryId != Number(countryId)) continue;
+                    StringifyAndSavePropertyData(id);
                 };
-            } catch (error) {
-            }
-        };
-    }, 2);
+            };
+        } catch (error) {
+        }
+    })
     system.runTimeout(() => {
         if (countryData?.alliance) {
             try {
@@ -1056,26 +1053,23 @@ export function MergeCountry(fromCountryId, toCountryId) {
         };
     });
     system.runTimeout(() => {
-        if (countryData?.territories) {
-            try {
-                const ids = countryData?.territories ?? []
-                for (let i = 0; i < ids.length; i++) {
-                    system.runTimeout(async () => {
-                        const id = ids[i];
-                        /**
-                         * @type {{plot: {},countryId: undefined|number}}
-                         */
-                        const chunkData = GetAndParsePropertyData(id);
-                        if (chunkData) {
-                            chunkData.countryId = toCountryData.id;
-                            chunkData.plot = undefined;
-                            StringifyAndSavePropertyData(id, chunkData);
-                        };
-                    }, Math.floor(i / 50));
+        try {
+            const ids = DyProp.DynamicPropertyIds().filter(id => id.startsWith("chunk_"));
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i];
+                /**
+                 * @type {{plot: {},countryId: undefined|number}}
+                 */
+                const chunkData = GetAndParsePropertyData(id);
+                if (chunkData) {
+                    if (chunkData?.countryId != Number(fromCountryId)) continue;
+                    chunkData.countryId = toCountryData.id;
+                    chunkData.plot = undefined;
+                    StringifyAndSavePropertyData(id, chunkData);
                 };
-            } catch (error) {
-            }
-        };
+            };
+        } catch (error) {
+        }
     }, 2);
     system.runTimeout(() => {
         if (countryData?.alliance) {
