@@ -6,6 +6,7 @@ const blackList = [
 
 const blackListXuid = [
     '2535466281074450',
+    '2535426288675628'
 ];
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
