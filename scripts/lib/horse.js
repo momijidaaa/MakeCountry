@@ -73,7 +73,7 @@ world.afterEvents.itemUse.subscribe( async (ev)=>{
         system.runTimeout(() => {
             try {
                 horse.getComponent("tamemount").setTamed(false);
-                horse.runCommandAsync("replaceitem entity @s slot.saddle 0 saddle");
+                horse.runCommand("replaceitem entity @s slot.saddle 0 saddle");
                 horse.triggerEvent(parseId(pattern));
                 horse.triggerEvent(parseId(color));
             } catch (e) {}    

@@ -145,12 +145,12 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                     if (!player?.breaktp) {
                         player.breaktp = true;
                         system.run(() => {
-                            player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
+                            player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                             player.setGameMode(GameMode.adventure);
                         });
                         system.runTimeout(() => {
                             player.breaktp = false;
-                            player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
+                            player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
                             player.setGameMode(GameMode.survival);
                         }, 5);
                     };
@@ -173,12 +173,12 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             if (!player?.breaktp) {
                 player.breaktp = true;
                 system.run(() => {
-                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
+                    player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.adventure);
                 });
                 system.runTimeout(() => {
                     player.breaktp = false;
-                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
+                    player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.survival);
                 }, 5);
             };
@@ -210,12 +210,12 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             if (!player?.breaktp) {
                 player.breaktp = true;
                 system.run(() => {
-                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
+                    player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.adventure);
                 });
                 system.runTimeout(() => {
                     player.breaktp = false;
-                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
+                    player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.survival);
                 }, 5);
             };
@@ -249,12 +249,12 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             if (!player?.breaktp) {
                 player.breaktp = true;
                 system.run(() => {
-                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
+                    player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.adventure);
                 });
                 system.runTimeout(() => {
                     player.breaktp = false;
-                    player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
+                    player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
                     player.setGameMode(GameMode.survival);
                 }, 5);
             };
@@ -268,12 +268,12 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
         if (!player?.breaktp) {
             player.breaktp = true;
             system.run(() => {
-                player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
+                player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} 1000 ${Math.floor(pL.z * 100) / 100}`);
                 player.setGameMode(GameMode.adventure);
             });
             system.runTimeout(() => {
                 player.breaktp = false;
-                player.runCommandAsync(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
+                player.runCommand(`tp ${Math.floor(pL.x * 100) / 100} ${Math.floor(pL.y * 100) / 100} ${Math.floor(pL.z * 100) / 100}`);
                 player.setGameMode(GameMode.survival);
             }, 5);
         };
@@ -577,7 +577,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     if (ev.isFirstEvent) player.sendMessage({ translate: `cannot.permission.${permission}` });
     if ('open_bit' in block.permutation.getAllStates()) {
         const playerLocation = player.location;
-        player.runCommandAsync(`tp ${Math.floor(playerLocation.x * 100) / 100} 1000 ${Math.floor(playerLocation.z * 100) / 100}`);
+        player.runCommand(`tp ${Math.floor(playerLocation.x * 100) / 100} 1000 ${Math.floor(playerLocation.z * 100) / 100}`);
         if (!player?.clicktp) {
             player.clicktp = true;
             system.runTimeout(() => {

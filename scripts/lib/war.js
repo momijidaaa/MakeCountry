@@ -270,7 +270,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
         if (typeof playerEquipment.getEquipment(slotNames[i]) === 'undefined') continue;
         world.getDimension(ev.deadEntity.dimension.id).spawnItem(playerEquipment.getEquipment(slotNames[i]), ev.deadEntity.location);
     };
-    ev.deadEntity.runCommandAsync(`clear @s`);
+    ev.deadEntity.runCommand(`clear @s`);
 });
 
 world.beforeEvents.playerLeave.subscribe((ev) => {
@@ -325,7 +325,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
         if (playerEquipment.getEquipment(slotNames[i]) === undefined) continue;
         world.getDimension(ev.deadEntity.dimension.id).spawnItem(playerEquipment.getEquipment(slotNames[i]), ev.deadEntity.location);
     };
-    ev.deadEntity.runCommandAsync(`clear @s`);
+    ev.deadEntity.runCommand(`clear @s`);
 });
 
 system.runInterval(() => {
