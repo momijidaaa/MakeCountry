@@ -3,7 +3,7 @@ import * as DyProp from "./DyProp";
 import { GetAndParsePropertyData } from "./util";
 import config from "../config";
 
-world.afterEvents.worldInitialize.subscribe(() => {
+world.afterEvents.worldLoad.subscribe(() => {
     updateRanking();
 });
 

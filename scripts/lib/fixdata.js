@@ -2,7 +2,7 @@ import { world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 
-world.afterEvents.worldInitialize.subscribe(() => {
+world.afterEvents.worldLoad.subscribe(() => {
     fixCountryData();
 });
 

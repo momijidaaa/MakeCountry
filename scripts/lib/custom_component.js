@@ -1,6 +1,6 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 
-world.beforeEvents.worldInitialize.subscribe((ev) => {
+system.beforeEvents.startup.subscribe((ev) => {
     const { blockComponentRegistry } = ev;
 
     blockComponentRegistry.registerCustomComponent("mc:grow", {

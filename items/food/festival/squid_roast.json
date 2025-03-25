@@ -11,7 +11,8 @@
             "minecraft:use_duration": 2,
             "minecraft:food": {
                 "nutrition": 5,
-                "using_converts_to": "minecraft:stick"
+                "using_converts_to": "minecraft:stick",
+                "can_always_eat": true
             },
             "minecraft:use_animation": "eat"
         }

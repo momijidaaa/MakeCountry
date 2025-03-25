@@ -24,29 +24,31 @@ world.afterEvents.entityDie.subscribe((ev) => {
 
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { initialSpawn, player } = ev;
-    if(!initialSpawn) return;
+    if (!initialSpawn) return;
     combatSeconds.delete(player.id);
     player.removeTag(`mc_combat`);
 });
 
-system.runInterval(() => {
-    if (!config.combatTagValidity) return;
-    const players = world.getPlayers({ tags: [`mc_combat`] });
-    for (const player of players) {
-        const value = combatSeconds.get(player.id);
-        if (!value) {
-            player.removeTag(`mc_combat`);
-            continue;
+world.afterEvents.worldLoad.subscribe(() => {
+    system.runInterval(() => {
+        if (!config.combatTagValidity) return;
+        const players = world.getPlayers({ tags: [`mc_combat`] });
+        for (const player of players) {
+            const value = combatSeconds.get(player.id);
+            if (!value) {
+                player.removeTag(`mc_combat`);
+                continue;
+            };
+            if (value <= 0) {
+                player.playSound(`random.levelup`, { location: player.location });
+                combatSeconds.delete(player.id);
+                player.removeTag(`mc_combat`);
+                continue;
+            };
+            if (0 < value) {
+                combatSeconds.set(player.id, value - 1);
+                continue;
+            };
         };
-        if (value <= 0) {
-            player.playSound(`random.levelup`, { location: player.location });
-            combatSeconds.delete(player.id);
-            player.removeTag(`mc_combat`);
-            continue;
-        };
-        if (0 < value) {
-            combatSeconds.set(player.id, value - 1);
-            continue;
-        };
-    };
-}, 20);
+    }, 20);
+})

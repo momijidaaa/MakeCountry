@@ -2,6 +2,7 @@ import { Container, EntityEquippableComponent, EquipmentSlot, Player, system, wo
 import { GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, isWithinTimeRange, StringifyAndSavePropertyData } from "./util";
 import config from "../config";
 import { country } from "../api/api";
+import { DeleteCountry } from "./land";
 
 const warCountry = new Map();
 
@@ -166,7 +167,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
     };
 });
 
-world.afterEvents.worldInitialize.subscribe(() => {
+world.afterEvents.worldLoad.subscribe(() => {
     const players = world.getPlayers();
     for (const player of players) {
         player.getTags().forEach(tag => {
@@ -189,7 +190,7 @@ world.afterEvents.worldInitialize.subscribe(() => {
 
 world.afterEvents.entityDie.subscribe((ev) => {
     const { deadEntity } = ev;
-    if (!deadEntity.isValid()) return;
+    if (!deadEntity.isValid) return;
     if (deadEntity?.typeId !== `mc:core`) return;
     let isWar = false;
     let key = ``;
@@ -209,7 +210,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
     const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(deadEntity));
     chunkData.countryId = playerCountryData.id;
     if (invadeCountryData.territories.includes(chunkData.id)) {
-        invadeCountryData.territories.splice(playerCountryData.territories.indexOf(chunkData.id), 1);
+        invadeCountryData.territories = invadeCountryData.territories.filter(id => id != chunkData.id);
     };
     playerCountryData.territories.push(chunkData.id);
     const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
@@ -223,11 +224,16 @@ world.afterEvents.entityDie.subscribe((ev) => {
     wars.delete(`${data.key}`);
     warCountry.delete(key);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.won`, with: [`§r${playerCountryData.name}§r`, `${invadeCountryData.name}§r`] }] });
+    system.runTimeout(() => {
+        if(invadeCountryData.territories.length == 0) {
+            DeleteCountry(invadeCountryData.id);
+        };
+    },10);
 });
 
 world.afterEvents.entityDie.subscribe((ev) => {
     const { deadEntity } = ev;
-    if (!deadEntity.isValid()) return;
+    if (!deadEntity.isValid) return;
     if (deadEntity?.typeId !== `minecraft:player`) return;
     const tags = deadEntity.getTags().find(a => a.startsWith(`war`));
     if (!tags) return;
@@ -275,7 +281,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
 
 world.beforeEvents.playerLeave.subscribe((ev) => {
     const { player: deadEntity } = ev;
-    if (!deadEntity.isValid()) return;
+    if (!deadEntity.isValid) return;
     if (deadEntity?.typeId !== `minecraft:player`) return;
     const tags = deadEntity.getTags().find(a => a.startsWith(`war`));
     if (!tags) return;
@@ -301,7 +307,7 @@ world.beforeEvents.playerLeave.subscribe((ev) => {
 });
 
 world.afterEvents.entityDie.subscribe((ev) => {
-    if (!ev.deadEntity.isValid()) return;
+    if (!ev.deadEntity.isValid) return;
     if (ev.deadEntity.typeId != `minecraft:player`) return;
     if (!config.invadeItemDrop) return;
     const tags = ev.deadEntity.getTags().find(a => a.startsWith(`war`));
@@ -328,6 +334,7 @@ world.afterEvents.entityDie.subscribe((ev) => {
     ev.deadEntity.runCommand(`clear @s`);
 });
 
+world.afterEvents.worldLoad.subscribe(() => {
 system.runInterval(() => {
     const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
     for (const key of warCountry.keys()) {
@@ -345,7 +352,9 @@ system.runInterval(() => {
         };
     };
 }, 20);
+});
 
+world.afterEvents.worldLoad.subscribe(() => {
 system.runInterval(() => {
     const cores = world.getDimension("overworld").getEntities({ type: `mc:core` });
     for (const core of cores) {
@@ -393,3 +402,4 @@ system.runInterval(() => {
         };
     };
 });
+})

@@ -70,121 +70,120 @@ export default {
     //職業報酬の全体倍率
     jobRewardMagnification: 0.6,
 
-    buildReward: { min: 0.02, max: 0.08 }, //ブロックを置いたときにもらえるお金の変域
+    buildReward: { min: 0.02, max: 0.08, xp: 0.1 }, //ブロックを置いたときにもらえる報酬の変域
 
-    gardeningReward: { min: 0.3, max: 0.6 }, //葉っぱブロックを素手で壊したときにもらえるお金の変域
+    gardeningReward: { min: 0.3, max: 0.6, xp: 0.15 }, //葉っぱブロックを素手で壊したときにもらえる報酬の変域
 
-    fishingReward: { min: 20, max: 35 }, //釣りでアイテムを釣ったときにもらえるお金の変域
+    fishingReward: { min: 20, max: 35, xp: 1.2 }, //釣りでアイテムを釣ったときにもらえる報酬の変域
 
-    sanddiggerReward: { min: 0.1, max: 0.3 }, //砂を掘ったときにもらえるお金の変域
+    sanddiggerReward: { min: 0.1, max: 0.3, xp: 0.2 }, //砂を掘ったときにもらえる報酬の変域
 
-    netherdiggerReward: { min: 0.07, max: 0.13 }, //ネザー系ブロックを掘ったときにもらえるお金の変域
+    netherdiggerReward: { min: 0.07, max: 0.13, xp: 0.5 }, //ネザー系ブロックを掘ったときにもらえる報酬の変域
 
-    dirtdiggerReward: { min: 0.1, max: 0.3 }, //土を掘ったときにもらえるお金の変域
+    dirtdiggerReward: { min: 0.1, max: 0.3, xp: 0.15 }, //土を掘ったときにもらえる報酬の変域
 
-    woodCutReward: { min: 2, max: 5 }, //木を切ったときにもらえるお金の変域
+    woodCutReward: { min: 2, max: 5, xp: 0.98 }, //木を切ったときにもらえる報酬の変域
 
-    cropHarvestReward: { min: 5, max: 20 }, //作物収穫時にもらえるお金の変域
-    cocoaHarvestReward: { min: 5, max: 15 }, //ココア収穫時にもらえるお金の変域
+    cropHarvestReward: { min: 5, max: 20, xp: 0.1 }, //作物収穫時にもらえる報酬の変域
+    cocoaHarvestReward: { min: 5, max: 15, xp: 0.11 }, //ココア収穫時にもらえる報酬の変域
 
-    oreMiningReward: { min: 5, max: 20 }, //鉱石系ブロックを掘ったときにもらえるお金の変域
-    stoneMiningReward: { min: 1, max: 2 }, //石系ブロックを掘ったときにもらえるお金の変域
-    normalStoneMiningReward: { min: 1, max: 2 }, //minecraft:stoneを掘ったときにもらえるお金の変域 
+    oreMiningReward: { min: 5, max: 20, xp: 1.2 }, //鉱石系ブロックを掘ったときにもらえる報酬の変域
+    stoneMiningReward: { min: 1, max: 2, xp: 0.5 }, //石系ブロックを掘ったときにもらえる報酬の変域
+    normalStoneMiningReward: { min: 1, max: 2, xp: 0.45 }, //minecraft:stoneを掘ったときにもらえる報酬の変域 
 
-    skeletonKillReward: { min: 10, max: 25 }, //スケルトンを倒したときにもらえるお金の変域
-    strayKillReward: { min: 10, max: 25 }, //ストレイを倒したときにもらえるお金の変域
-    zombieKillReward: { min: 10, max: 25 }, //ゾンビを倒したときにもらえるお金の変域
-    huskKillReward: { min: 10, max: 30 }, //ハスクを倒したときにもらえるお金の変域
-    zombieKillReward: { min: 10, max: 25 }, //ゾンビを倒したときにもらえるお金の変域
-    slimeKillReward: { min: 1, max: 5 }, //スライムを倒したときにもらえるお金の変域
-    spiderKillReward: { min: 10, max: 30 }, //クモを倒したときにもらえるお金の変域
-    cave_spiderKillReward: { min: 10, max: 30 }, //洞窟クモを倒したときにもらえるお金の変域
-    creeper_spiderKillReward: { min: 15, max: 30 }, //クリーパーを倒したときにもらえるお金の変域
-    endermanKillReward: { min: 15, max: 30 }, //エンダーマンを倒したときにもらえるお金の変域
-    endermiteKillReward: { min: 15, max: 30 }, //エンダーマイトを倒したときにもらえるお金の変域
-    evocation_illagerKillReward: { min: 15, max: 35 }, //エヴォーカーを倒したときにもらえるお金の変域
-    guardianKillReward: { min: 15, max: 30 }, //ガーディアンを倒したときにもらえるお金の変域
-    pillagerKillReward: { min: 15, max: 30 }, //ピリジャーを倒したときにもらえるお金の変域
-    shulkerKillReward: { min: 15, max: 30 }, //シュルカーを倒したときにもらえるお金の変域
-    silverfishKillReward: { min: 1, max: 5 }, //シルバーフィッシュを倒したときにもらえるお金の変域
-    phantomKillReward: { min: 10, max: 30 }, //ファントムを倒したときにもらえるお金の変域
-    ravagerKillReward: { min: 10, max: 40 }, //ラヴェジャーを倒したときにもらえるお金の変域
-    vexKillReward: { min: 10, max: 30 }, //ヴェックスを倒したときにもらえるお金の変域
-    vindicatorKillReward: { min: 10, max: 30 }, //ヴィンディケーターを倒したときにもらえるお金の変域
-    zombie_villagerKillReward: { min: 10, max: 30 }, //村人ゾンビを倒したときにもらえるお金の変域
-    witchKillReward: { min: 10, max: 30 }, //ウィッチを倒したときにもらえるお金の変域
+    skeletonKillReward: { min: 10, max: 25, xp: 1.2 }, //スケルトンを倒したときにもらえる報酬の変域
+    strayKillReward: { min: 10, max: 25, xp: 0.5 }, //ストレイを倒したときにもらえる報酬の変域
+    zombieKillReward: { min: 10, max: 25, xp: 0.98 }, //ゾンビを倒したときにもらえる報酬の変域
+    huskKillReward: { min: 10, max: 30, xp: 0.98 }, //ハスクを倒したときにもらえる報酬の変域
+    slimeKillReward: { min: 0.2, max: 2, xp: 0.2 }, //スライムを倒したときにもらえる報酬の変域
+    spiderKillReward: { min: 10, max: 30, xp: 0.78 }, //クモを倒したときにもらえる報酬の変域
+    cave_spiderKillReward: { min: 10, max: 30, xp: 0.98 }, //洞窟クモを倒したときにもらえる報酬の変域
+    creeper_spiderKillReward: { min: 15, max: 30, xp: 0.98 }, //クリーパーを倒したときにもらえる報酬の変域
+    endermanKillReward: { min: 15, max: 30, xp: 1.3 }, //エンダーマンを倒したときにもらえる報酬の変域
+    endermiteKillReward: { min: 15, max: 30, xp: 0.4 }, //エンダーマイトを倒したときにもらえる報酬の変域
+    evocation_illagerKillReward: { min: 15, max: 35, xp: 1.3 }, //エヴォーカーを倒したときにもらえる報酬の変域
+    guardianKillReward: { min: 0.5, max: 2, xp: 0.2 }, //ガーディアンを倒したときにもらえる報酬の変域
+    pillagerKillReward: { min: 15, max: 30, xp: 1.1 }, //ピリジャーを倒したときにもらえる報酬の変域
+    shulkerKillReward: { min: 15, max: 30, xp: 2 }, //シュルカーを倒したときにもらえる報酬の変域
+    silverfishKillReward: { min: 0.2, max: 2, xp: 0.01 }, //シルバーフィッシュを倒したときにもらえる報酬の変域
+    phantomKillReward: { min: 10, max: 30, xp: 1.5 }, //ファントムを倒したときにもらえる報酬の変域
+    ravagerKillReward: { min: 10, max: 40, xp: 2 }, //ラヴェジャーを倒したときにもらえる報酬の変域
+    vexKillReward: { min: 10, max: 30, xp: 1.1 }, //ヴェックスを倒したときにもらえる報酬の変域
+    vindicatorKillReward: { min: 10, max: 30, xp: 1.2 }, //ヴィンディケーターを倒したときにもらえる報酬の変域
+    zombie_villagerKillReward: { min: 10, max: 30, xp: 0.98 }, //村人ゾンビを倒したときにもらえる報酬の変域
+    witchKillReward: { min: 10, max: 30, xp: 0.98 }, //ウィッチを倒したときにもらえる報酬の変域
 
-    skeleton_horseKillReward: { min: 10, max: 20 }, //スケルトンホースを倒したときにもらえるお金の変域
-    zombie_horseKillReward: { min: 10, max: 20 }, //ゾンビホースを倒したときにもらえるお金の変域
+    skeleton_horseKillReward: { min: 10, max: 20, xp: 0.98 }, //スケルトンホースを倒したときにもらえる報酬の変域
+    zombie_horseKillReward: { min: 10, max: 20, xp: 0.98 }, //ゾンビホースを倒したときにもらえる報酬の変域
 
-    blazeKillReward: { min: 20, max: 30 }, //ブレイズを倒したときにもらえるお金の変域
-    ghastKillReward: { min: 20, max: 30 }, //ガストを倒したときにもらえるお金の変域
-    hoglinKillReward: { min: 10, max: 35 }, //ホグリンを倒したときにもらえるお金の変域
-    zoglinKillReward: { min: 10, max: 30 }, //ゾグリンを倒したときにもらえるお金の変域
-    magma_cubeKillReward: { min: 1, max: 5 }, //マグマキューブを倒したときにもらえるお金の変域
-    zombie_pigmanKillReward: { min: 10, max: 25 }, //ゾンビピッグマンを倒したときにもらえるお金の変域
-    piglinKillReward: { min: 20, max: 40 }, //ピグリンを倒したときにもらえるお金の変域
-    piglin_bruteKillReward: { min: 15, max: 35 }, //ピグリンブルートを倒したときにもらえるお金の変域
-    striderKillReward: { min: 20, max: 30 }, //ストライダーを倒したときにもらえるお金の変域
-    striderKillReward: { min: 20, max: 40 }, //ウィザースケルトンを倒したときにもらえるお金の変域
+    blazeKillReward: { min: 20, max: 30, xp: 0.98 }, //ブレイズを倒したときにもらえる報酬の変域
+    ghastKillReward: { min: 20, max: 30, xp: 0.98 }, //ガストを倒したときにもらえる報酬の変域
+    hoglinKillReward: { min: 10, max: 35, xp: 0.98 }, //ホグリンを倒したときにもらえる報酬の変域
+    zoglinKillReward: { min: 10, max: 30, xp: 0.98 }, //ゾグリンを倒したときにもらえる報酬の変域
+    magma_cubeKillReward: { min: 1, max: 5, xp: 0.98 }, //マグマキューブを倒したときにもらえる報酬の変域
+    zombie_pigmanKillReward: { min: 10, max: 25, xp: 0.98 }, //ゾンビピッグマンを倒したときにもらえる報酬の変域
+    piglinKillReward: { min: 20, max: 40, xp: 0.98 }, //ピグリンを倒したときにもらえる報酬の変域
+    piglin_bruteKillReward: { min: 15, max: 35, xp: 0.98 }, //ピグリンブルートを倒したときにもらえる報酬の変域
+    striderKillReward: { min: 20, max: 30, xp: 0.98 }, //ストライダーを倒したときにもらえる報酬の変域
+    striderKillReward: { min: 20, max: 40, xp: 0.98 }, //ウィザースケルトンを倒したときにもらえる報酬の変域
 
-    allayKillReward: { min: 1, max: 40 }, //アレイを倒したときにもらえるお金の変域
-    beeKillReward: { min: 1, max: 20 }, //ハチを倒したときにもらえるお金の変域
-    batKillReward: { min: 1, max: 20 }, //コウモリを倒したときにもらえるお金の変域
-    axolotlKillReward: { min: 1, max: 30 }, //ウーパールーパーを倒したときにもらえるお金の変域
-    camelKillReward: { min: 1, max: 35 }, //ラクダを倒したときにもらえるお金の変域
-    catKillReward: { min: 1, max: 1 }, //猫を倒したときにもらえるお金の変域
-    ocelotKillReward: { min: 1, max: 1 }, //ヤマネコを倒したときにもらえるお金の変域
-    pandaKillReward: { min: 1, max: 30 }, //パンダを倒したときにもらえるお金の変域
-    parrotKillReward: { min: 1, max: 20 }, //オウムを倒したときにもらえるお金の変域
-    snifferKillReward: { min: 1, max: 40 }, //スニッファーを倒したときにもらえるお金の変域
-    wolfKillReward: { min: 1, max: 20 }, //オオカミを倒したときにもらえるお金の変域
+    allayKillReward: { min: 1, max: 40, xp: 0.98 }, //アレイを倒したときにもらえる報酬の変域
+    beeKillReward: { min: 1, max: 20, xp: 0.98 }, //ハチを倒したときにもらえる報酬の変域
+    batKillReward: { min: 1, max: 20, xp: 0.98 }, //コウモリを倒したときにもらえる報酬の変域
+    axolotlKillReward: { min: 1, max: 30, xp: 0.98 }, //ウーパールーパーを倒したときにもらえる報酬の変域
+    camelKillReward: { min: 1, max: 35, xp: 0.98 }, //ラクダを倒したときにもらえる報酬の変域
+    catKillReward: { min: 1, max: 1, xp: 0.98 }, //猫を倒したときにもらえる報酬の変域
+    ocelotKillReward: { min: 1, max: 1, xp: 0.98 }, //ヤマネコを倒したときにもらえる報酬の変域
+    pandaKillReward: { min: 1, max: 30, xp: 0.98 }, //パンダを倒したときにもらえる報酬の変域
+    parrotKillReward: { min: 1, max: 20, xp: 0.98 }, //オウムを倒したときにもらえる報酬の変域
+    snifferKillReward: { min: 1, max: 40, xp: 0.98 }, //スニッファーを倒したときにもらえる報酬の変域
+    wolfKillReward: { min: 1, max: 20, xp: 0.98 }, //オオカミを倒したときにもらえる報酬の変域
 
-    dolphinKillReward: { min: 1, max: 10 }, //イルカを倒したときにもらえるお金の変域
-    codKillReward: { min: 1, max: 10 }, //タラを倒したときにもらえるお金の変域
-    pufferfishKillReward: { min: 1, max: 10 }, //フグを倒したときにもらえるお金の変域
-    salmonKillReward: { min: 1, max: 10 }, //鮭を倒したときにもらえるお金の変域
-    tropicalfishKillReward: { min: 1, max: 10 }, //熱帯魚を倒したときにもらえるお金の変域
-    turtleKillReward: { min: 1, max: 15 }, //カメを倒したときにもらえるお金の変域
+    dolphinKillReward: { min: 1, max: 10, xp: 0.98 }, //イルカを倒したときにもらえる報酬の変域
+    codKillReward: { min: 1, max: 10, xp: 0.98 }, //タラを倒したときにもらえる報酬の変域
+    pufferfishKillReward: { min: 1, max: 10, xp: 0.98 }, //フグを倒したときにもらえる報酬の変域
+    salmonKillReward: { min: 1, max: 10, xp: 0.98 }, //鮭を倒したときにもらえる報酬の変域
+    tropicalfishKillReward: { min: 1, max: 10, xp: 0.98 }, //熱帯魚を倒したときにもらえる報酬の変域
+    turtleKillReward: { min: 1, max: 15, xp: 0.98 }, //カメを倒したときにもらえる報酬の変域
 
-    pigKillReward: { min: 1, max: 20 }, //豚を倒したときにもらえるお金の変域
-    chickenKillReward: { min: 1, max: 20 }, //ニワトリを倒したときにもらえるお金の変域
-    cowKillReward: { min: 1, max: 20 }, //牛を倒したときにもらえるお金の変域
-    sheepKillReward: { min: 1, max: 20 }, //羊を倒したときにもらえるお金の変域
-    rabbitKillReward: { min: 1, max: 20 }, //ウサギを倒したときにもらえるお金の変域
-    donkeyKillReward: { min: 1, max: 20 }, //ロバを倒したときにもらえるお金の変域
-    horseKillReward: { min: 1, max: 20 }, //馬を倒したときにもらえるお金の変域
-    llamaKillReward: { min: 1, max: 20 }, //ラマを倒したときにもらえるお金の変域
-    muleKillReward: { min: 1, max: 20 }, //ラバを倒したときにもらえるお金の変域
-    foxKillReward: { min: 1, max: 20 }, //きつねを倒したときにもらえるお金の変域
-    frogKillReward: { min: 1, max: 20 }, //カエルを倒したときにもらえるお金の変域
-    tadpoleKillReward: { min: 1, max: 20 }, //オタマジャクシを倒したときにもらえるお金の変域
-    squidKillReward: { min: 1, max: 20 }, //イカを倒したときにもらえるお金の変域
-    glow_squidKillReward: { min: 1, max: 20 }, //光るイカを倒したときにもらえるお金の変域
-    goatKillReward: { min: 1, max: 20 }, //ヤギを倒したときにもらえるお金の変域
-    mooshroomKillReward: { min: 1, max: 20 }, //ムーシュルームを倒したときにもらえるお金の変域
-    polar_bearKillReward: { min: 1, max: 25 }, //ホッキョクグマを倒したときにもらえるお金の変域
+    pigKillReward: { min: 1, max: 20, xp: 0.98 }, //豚を倒したときにもらえる報酬の変域
+    chickenKillReward: { min: 1, max: 20, xp: 0.98 }, //ニワトリを倒したときにもらえる報酬の変域
+    cowKillReward: { min: 1, max: 20, xp: 0.98 }, //牛を倒したときにもらえる報酬の変域
+    sheepKillReward: { min: 1, max: 20, xp: 0.98 }, //羊を倒したときにもらえる報酬の変域
+    rabbitKillReward: { min: 1, max: 20, xp: 0.98 }, //ウサギを倒したときにもらえる報酬の変域
+    donkeyKillReward: { min: 1, max: 20, xp: 0.98 }, //ロバを倒したときにもらえる報酬の変域
+    horseKillReward: { min: 1, max: 20, xp: 0.98 }, //馬を倒したときにもらえる報酬の変域
+    llamaKillReward: { min: 1, max: 20, xp: 0.98 }, //ラマを倒したときにもらえる報酬の変域
+    muleKillReward: { min: 1, max: 20, xp: 0.98 }, //ラバを倒したときにもらえる報酬の変域
+    foxKillReward: { min: 1, max: 20, xp: 0.98 }, //きつねを倒したときにもらえる報酬の変域
+    frogKillReward: { min: 1, max: 20, xp: 0.98 }, //カエルを倒したときにもらえる報酬の変域
+    tadpoleKillReward: { min: 1, max: 20, xp: 0.98 }, //オタマジャクシを倒したときにもらえる報酬の変域
+    squidKillReward: { min: 1, max: 20, xp: 0.98 }, //イカを倒したときにもらえる報酬の変域
+    glow_squidKillReward: { min: 1, max: 20, xp: 0.98 }, //光るイカを倒したときにもらえる報酬の変域
+    goatKillReward: { min: 1, max: 20, xp: 0.98 }, //ヤギを倒したときにもらえる報酬の変域
+    mooshroomKillReward: { min: 1, max: 20, xp: 0.98 }, //ムーシュルームを倒したときにもらえる報酬の変域
+    polar_bearKillReward: { min: 1, max: 25, xp: 0.98 }, //ホッキョクグマを倒したときにもらえる報酬の変域
 
-    villagerKillReward: { min: 20, max: 30 }, //村人を倒したときにもらえるお金の変域
-    wandering_traderKillReward: { min: 20, max: 30 }, //行商人を倒したときにもらえるお金の変域
-    trader_llamaKillReward: { min: 20, max: 30 }, //行商人のラマを倒したときにもらえるお金の変域
+    villagerKillReward: { min: 20, max: 30, xp: 0.98 }, //村人を倒したときにもらえる報酬の変域
+    wandering_traderKillReward: { min: 20, max: 30, xp: 0.98 }, //行商人を倒したときにもらえる報酬の変域
+    trader_llamaKillReward: { min: 20, max: 30, xp: 0.98 }, //行商人のラマを倒したときにもらえる報酬の変域
 
-    iron_golemKillReward: { min: 20, max: 50 }, //アイアンゴーレムを倒したときにもらえるお金の変域
-    snow_golemKillReward: { min: 20, max: 35 }, //スノーゴーレムを倒したときにもらえるお金の変域
+    iron_golemKillReward: { min: 20, max: 50, xp: 1.2 }, //アイアンゴーレムを倒したときにもらえる報酬の変域
+    snow_golemKillReward: { min: 20, max: 35, xp: 0.98 }, //スノーゴーレムを倒したときにもらえる報酬の変域
 
-    elder_guardianKillReward: { min: 200, max: 600 }, //エルダーガーディアンを倒したときにもらえるお金の変域
-    wardenKillReward: { min: 1000, max: 3000 }, //ウォーデンを倒したときにもらえるお金の変域
-    witherKillReward: { min: 2000, max: 6000 }, //ウィザーを倒したときにもらえるお金の変域
-    ender_dragonKillReward: { min: 3000, max: 7000 }, //エンダードラゴンを倒したときにもらえるお金の変域
+    elder_guardianKillReward: { min: 200, max: 600, xp: 5 }, //エルダーガーディアンを倒したときにもらえる報酬の変域
+    wardenKillReward: { min: 100, max: 300, xp: 15 }, //ウォーデンを倒したときにもらえる報酬の変域
+    witherKillReward: { min: 2000, max: 6000, xp: 20 }, //ウィザーを倒したときにもらえる報酬の変域
+    ender_dragonKillReward: { min: 3000, max: 7000, xp: 100 }, //エンダードラゴンを倒したときにもらえる報酬の変域
 
-    boatKillReward: { min: 0, max: 0 }, //ボートをこわしたときにもらえるお金の変域
-    chest_boatKillReward: { min: 0, max: 0 }, //チェスト付きボートをこわしたときにもらえるお金の変域
-    chest_minecartKillReward: { min: 0, max: 0 }, //チェスト付きトロッコをこわしたときにもらえるお金の変域
-    minecartKillReward: { min: 0, max: 0 }, //トロッコをこわしたときにもらえるお金の変域
-    command_block_minecartKillReward: { min: 0, max: 0 }, //コマンドブロック付きトロッコをこわしたときにもらえるお金の変域
-    hopper_minecartKillReward: { min: 0, max: 0 }, //ホッパー付きトロッコをこわしたときにもらえるお金の変域
-    tnt_minecartKillReward: { min: 0, max: 0 }, //TNT付きトロッコをこわしたときにもらえるお金の変域
-    armor_standKillReward: { min: 0, max: 0 }, //防具立てをこわしたときにもらえるお金の変域
+    boatKillReward: { min: 0, max: 0, xp: 0 }, //ボートをこわしたときにもらえる報酬の変域
+    chest_boatKillReward: { min: 0, max: 0, xp: 0 }, //チェスト付きボートをこわしたときにもらえる報酬の変域
+    chest_minecartKillReward: { min: 0, max: 0, xp: 0 }, //チェスト付きトロッコをこわしたときにもらえる報酬の変域
+    minecartKillReward: { min: 0, max: 0, xp: 0 }, //トロッコをこわしたときにもらえる報酬の変域
+    command_block_minecartKillReward: { min: 0, max: 0, xp: 0 }, //コマンドブロック付きトロッコをこわしたときにもらえる報酬の変域
+    hopper_minecartKillReward: { min: 0, max: 0, xp: 0 }, //ホッパー付きトロッコをこわしたときにもらえる報酬の変域
+    tnt_minecartKillReward: { min: 0, max: 0, xp: 0 }, //TNT付きトロッコをこわしたときにもらえる報酬の変域
+    armor_standKillReward: { min: 0, max: 0, xp: 0 }, //防具立てをこわしたときにもらえる報酬の変域
 
-    otherMobkillReward: { min: 0, max: 0 }, //その他のエンティティを倒したときにもらえるお金の変域
+    otherMobkillReward: { min: 0, max: 0, xp: 0 }, //その他のエンティティを倒したときにもらえる報酬の変域
 };

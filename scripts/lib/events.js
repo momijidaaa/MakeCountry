@@ -9,19 +9,57 @@ import { getShopData, getSignTexts, isShopOwner } from "./chest_shop";
 import { nameSet } from "./nameset";
 import { JobLevel } from "./jobslevel";
 
-system.runInterval(() => {
-    const permission = 'break';
-    for (const player of world.getPlayers()) {
-        const { x: px, y: py, z: pz } = player.location;
-        if (!player.isOnGround) {
-            for (let j = 1; j < 15; j++) {
-                let finish = false;
-                if (finish) break;
-                for (let i = -1; i < 2; i += 2) {
+world.afterEvents.worldLoad.subscribe(() => {
+    system.runInterval(() => {
+        const permission = 'break';
+        for (const player of world.getPlayers()) {
+            const { x: px, y: py, z: pz } = player.location;
+            if (!player.isOnGround) {
+                for (let j = 1; j < 15; j++) {
+                    let finish = false;
+                    if (finish) break;
+                    for (let i = -1; i < 2; i += 2) {
+                        try {
+                            const block = player.dimension.getBlock({ x: px + i, y: py - j, z: pz });
+                            if (block?.isValid) {
+                                const { x, z } = block.location;
+                                if (block.typeId == "minecraft:farmland") {
+                                    const cannot = CheckPermissionFromLocation(player, x, z, block.dimension.id, permission);
+                                    if (cannot) {
+                                        player.addEffect(`slow_falling`, 1, { amplifier: 15 / j, showParticles: false });
+                                        if (!player?.startFallY) {
+                                            player.startFallY = py;
+                                        };
+                                        finish = true;
+                                        break;
+                                    };
+                                };
+                            }
+                        } catch (error) {
+                        };
+                        try {
+                            const block2 = player.dimension.getBlock({ x: px, y: py - j, z: pz + i });
+                            if (block2?.isValid) {
+                                const { x: x2, z: z2 } = block2.location;
+                                if (block2.typeId == "minecraft:farmland") {
+                                    const cannot = CheckPermissionFromLocation(player, x2, z2, block.dimension.id, permission);
+                                    if (cannot) {
+                                        player.addEffect(`slow_falling`, 1, { amplifier: 15 / j, showParticles: false });
+                                        if (!player?.startFallY) {
+                                            player.startFallY = py;
+                                        };
+                                        finish = true;
+                                        break;
+                                    };
+                                };
+                            };
+                        } catch (error) {
+                        };
+                    };
                     try {
-                        const block = player.dimension.getBlock({ x: px + i, y: py - j, z: pz });
-                        if (block?.isValid()) {
-                            const { x, z } = block.location;
+                        const block = player.dimension.getBlock({ x: px, y: py - j, z: pz });
+                        if (block?.isValid) {
+                            const { x, y, z } = block.location;
                             if (block.typeId == "minecraft:farmland") {
                                 const cannot = CheckPermissionFromLocation(player, x, z, block.dimension.id, permission);
                                 if (cannot) {
@@ -33,64 +71,28 @@ system.runInterval(() => {
                                     break;
                                 };
                             };
-                        }
-                    } catch (error) {
-                    };
-                    try {
-                        const block2 = player.dimension.getBlock({ x: px, y: py - j, z: pz + i });
-                        if (block2?.isValid) {
-                            const { x: x2, z: z2 } = block2.location;
-                            if (block2.typeId == "minecraft:farmland") {
-                                const cannot = CheckPermissionFromLocation(player, x2, z2, block.dimension.id, permission);
-                                if (cannot) {
-                                    player.addEffect(`slow_falling`, 1, { amplifier: 15 / j, showParticles: false });
-                                    if (!player?.startFallY) {
-                                        player.startFallY = py;
-                                    };
-                                    finish = true;
-                                    break;
-                                };
-                            };
                         };
                     } catch (error) {
                     };
-                };
-                try {
-                    const block = player.dimension.getBlock({ x: px, y: py - j, z: pz });
-                    if (block?.isValid()) {
-                        const { x, y, z } = block.location;
-                        if (block.typeId == "minecraft:farmland") {
-                            const cannot = CheckPermissionFromLocation(player, x, z, block.dimension.id, permission);
-                            if (cannot) {
-                                player.addEffect(`slow_falling`, 1, { amplifier: 15 / j, showParticles: false });
-                                if (!player?.startFallY) {
-                                    player.startFallY = py;
-                                };
-                                finish = true;
-                                break;
-                            };
-                        };
-                    };
-                } catch (error) {
                 };
             };
-        };
-        if (player.isOnGround && !player.isInWater && !player.isGliding) {
-            if (player?.startFallY) {
-                let damage = Math.floor(player.startFallY - py - 3);
-                if (damage > 0) {
-                    player.applyDamage(damage, { cause: EntityDamageCause.fall });
+            if (player.isOnGround && !player.isInWater && !player.isGliding) {
+                if (player?.startFallY) {
+                    let damage = Math.floor(player.startFallY - py - 3);
+                    if (damage > 0) {
+                        player.applyDamage(damage, { cause: EntityDamageCause.fall });
+                    };
+                    player.startFallY = null;
                 };
+            };
+            if (player.isInWater) {
+                player.startFallY = null;
+            };
+            if (player.isGliding) {
                 player.startFallY = null;
             };
         };
-        if (player.isInWater) {
-            player.startFallY = null;
-        };
-        if (player.isGliding) {
-            player.startFallY = null;
-        };
-    };
+    });
 });
 
 world.afterEvents.entityHurt.subscribe(ev => {
@@ -238,7 +240,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
         if ('upper_block_bit' in states && states['upper_block_bit'] === true) {
             system.run(() => {
                 system.run(() => {
-                    const item = block.dimension.getEntities({ location: block.location, maxDistance: 5, type: `minecraft:item` }).find(item => item.getComponent(`item`).isValid() && item.getComponent(`item`).itemStack.typeId == itemTypeId);
+                    const item = block.dimension.getEntities({ location: block.location, maxDistance: 5, type: `minecraft:item` }).find(item => item.getComponent(`item`).isValid && item.getComponent(`item`).itemStack.typeId == itemTypeId);
                     if (item) item.remove();
                 });
                 const door = block.below();
@@ -394,9 +396,11 @@ world.beforeEvents.playerPlaceBlock.subscribe((ev) => {
     return;
 });
 
-world.beforeEvents.itemUseOn.subscribe((ev) => {
+world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission = `place`
-    const { source: player, block } = ev;
+    const { player, block } = ev;
+    const container = player.getComponent("inventory").container;
+    if(!container.getItem(player.selectedSlotIndex)) return;
     const { x, z } = block.location;
     const now = Date.now();
     if (player?.itemUseOnInfo) {

@@ -12,7 +12,7 @@
     ふぁいと！！💪
  */
 
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 
 import "./lib/commands";
 
@@ -45,7 +45,7 @@ import "./lib/fixdata";
 const version = "ver.KaroEarth"
 
 
-world.afterEvents.worldInitialize.subscribe(() => {
+world.afterEvents.worldLoad.subscribe(() => {
     world.sendMessage({ translate: `world.message.addon`, with: [version] });
 });
 
@@ -62,3 +62,7 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
 });
 
 import "./plugin_config";
+
+system.beforeEvents.watchdogTerminate.subscribe((ev) => {
+    ev.cancel = true;
+})

@@ -7,7 +7,7 @@ import config from "../config";
 import { itemIdToPath } from "../texture_config";
 import { typeIdToID } from "./typeIds";
 
-world.afterEvents.worldInitialize.subscribe(() => {
+world.afterEvents.worldLoad.subscribe(() => {
     if (!DyProp.getDynamicProperty(`player_market_commons`)) DyProp.setDynamicProperty(`player_market_commons`, `[]`);
 });
 
@@ -70,6 +70,7 @@ export function PlayerMarketCheckSold(player) {
     let string = '';
     let addMoney = 0;
     for (const history of soldHistory) {
+        if (!history.item?.lore) history.item.lore = []
         string += `>>${history.user}§r §a+§e${history.price}§r\n${history.item?.name ? `${history.item.name}§r(${history.item.typeId})` : history.item.typeId} * ${history.item.amount}\n${history.item?.lore.join('§r\n')}\n\n\n`;
         addMoney += history.price;
     };

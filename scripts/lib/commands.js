@@ -12,7 +12,7 @@ import { ShopCommonsMenu } from "./shop";
 import { Invade } from "./war";
 import { plotMainForm } from "./plot_from";
 import { country, playerHandler } from "../api/api";
-
+import { HomeManager } from "../api/home";
 
 class ChatHandler {
     constructor(event, isScript) {
@@ -148,13 +148,16 @@ class ChatHandler {
                     this.checkChunk();
                     break;
                 case "sethome":
-                    this.setHome();
+                    this.setHome(args);
                     break;
                 case "home":
-                    this.teleportHome();
+                    this.teleportHome(args);
+                    break;
+                case "deletehome":
+                    this.deleteHome(args);
                     break;
                 case "checkhome":
-                    this.checkHome();
+                    this.homeList();
                     break;
                 case "adminchunk":
                     this.setAdminChunk(args);
@@ -414,66 +417,31 @@ class ChatHandler {
         };
     };
 
-    setHome() {
-        const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
-        if (this.sender.hasTag(`mc_notp`)) {
-            return;
-        };
-        const check = CheckPermission(this.sender, `setHome`);
-        if (check) {
-            if (chunkData?.special) {
-                this.sender.sendMessage({ translate: `command.sethome.error.special`, with: { rawtext: [{ translate: `special.name` }] } });
-                return;
-            };
-            this.sender.sendMessage({ translate: `command.sethome.error.thischunk` });
-            return;
-        };
-        this.sender.sendMessage({ translate: `command.sethome.result`, with: [`${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)}(${this.sender.dimension.id.replace(`minecraft:`, ``)})`, config.prefix] });
-        this.sender.setDynamicProperty("homePoint", `${Math.floor(this.sender.location.x)} ${Math.floor(this.sender.location.y)} ${Math.floor(this.sender.location.z)} ${this.sender.dimension.id}`);
+    setHome(args) {
+        const home = new HomeManager(this.sender);
+        const name = args.length == 0 ? 'default' : args[0];
+        home.setHome(name);
         return;
     };
 
-    teleportHome() {
-        if (config.combatTagNoTeleportValidity) {
-            if (this.sender.hasTag(`mc_combat`)) {
-                this.sender.sendMessage({ translate: `teleport.error.combattag` });
-                return;
-            };
-        };
-        if (this.sender.hasTag(`mc_notp`)) {
-            return;
-        };
-        if (config.invaderNoTeleportValidity) {
-            if (this.sender.getTags().find(tag => tag.startsWith(`war`))) {
-                this.sender.sendMessage({ translate: `teleport.error.invader` });
-                return;
-            };
-        };
-        const homePoint = this.sender.getDynamicProperty("homePoint");
-        if (!homePoint) {
-            this.sender.sendMessage({ translate: `command.error.nosethome` });
-            return;
-        };
-        let [x, y, z, dimension] = homePoint.split(" ");
-        [x, y, z] = [x, y, z].map(Number);
-        const check = CheckPermissionFromLocation(this.sender, x, z, dimension, `setHome`);
-        if (check) {
-            this.sender.sendMessage({ translate: `command.home.error.thischunk` });
-            return;
-        };
-        this.sender.teleport({ x, y, z }, { dimension: world.getDimension(dimension.replace(`minecraft:`, ``)) });
+    teleportHome(args) {
+        const home = new HomeManager(this.sender);
+        const name = args.length == 0 ? 'default' : args[0];
+        home.teleportHome(name);
         return;
     };
 
-    checkHome() {
-        const homePoint = this.sender.getDynamicProperty("homePoint");
-        if (!homePoint) {
-            this.sender.sendMessage({ translate: `command.error.nosethome` });
-        } else {
-            let [x, y, z, dimension] = homePoint.split(" ");
-            const homePointString = `${x},${y},${z}(${dimension.replace(`minecraft:`, ``)})`
-            this.sender.sendMessage({ translate: `command.checkhome.result`, with: [homePointString] });
-        };
+    deleteHome(args) {
+        const home = new HomeManager(this.sender);
+        const name = args.length == 0 ? 'default' : args[0];
+        home.deleteHome(name);
+        return;
+    };
+
+    homeList() {
+        const home = new HomeManager(this.sender);
+        home.listHomes();
+        return;
     };
 
     setAdminChunk(args) {
@@ -899,6 +867,7 @@ class ChatHandler {
         { translate: `command.help.cc` }, { text: `\n` },
         { translate: `command.help.sethome` }, { text: `\n` },
         { translate: `command.help.home` }, { text: `\n` },
+        { translate: `command.help.deletehome` }, { text: `\n` },
         { translate: `command.help.checkhome` }, { text: `\n` },
         { translate: `command.help.adminchunk` }, { text: `\n` },
         { translate: `command.help.adminc` }, { text: `\n` },

@@ -5,7 +5,7 @@ import config from '../config.js';
 const teleportRequests = new Map();
 const timeoutHandlers = new Map();
 
-world.afterEvents.worldInitialize.subscribe(() => {
+world.afterEvents.worldLoad.subscribe(() => {
     const players = world.getPlayers();
     for (const player of players) {
         teleportRequests.set(player.name, []);

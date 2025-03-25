@@ -12,7 +12,6 @@
             "minecraft:food": {
                 "nutrition": 12,
                 "can_always_eat": true
-
             },
             "minecraft:use_animation": "eat"
         }

@@ -23,9 +23,15 @@
                 "item": "minecraft:milk_bucket"
             }
         },
-        "result": {
-            "item": "mc:softcream",
-            "count": 1
-        }
+        "result": [
+            {
+                "item": "mc:softcream",
+                "count": 1
+            },
+            {
+                "item": "minecraft:bucket",
+                "count": 1
+            }
+        ]
     }
 }

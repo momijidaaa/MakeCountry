@@ -8,6 +8,7 @@ import { nameSet } from "./nameset";
 import { ChestFormData } from "./chest-ui";
 import { kingdomsSettingForm, resourcePointConverter } from "./kingdoms_form";
 import { country } from "../api/api";
+import { RewardBuff } from "../api/rewardbuff";
 
 /**
  * 
@@ -292,6 +293,18 @@ export function playerRoleChangeForm(player, member, countryData) {
 export function playerMainMenu(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.mainmenu.title` });
+    const rewardBuff = new RewardBuff();
+    const jobsBuffs = rewardBuff.getAllBuffs();
+    const keys = Object.keys(jobsBuffs);
+    let body = `§b-JobsBuffList-§r\n`;
+    for (const key of keys) {
+        let buffLore = `[${key}]\n`
+        for (const buff of jobsBuffs[key]) {
+            buffLore += `§ax ${buff.multiplier} §e[${buff.remainingTime}s]§r\n`
+        };
+        body += buffLore;
+    };
+    form.body(body);
     form.button({ translate: `form.mainmenu.button.profile` });
     form.button({ translate: `form.mainmenu.button.sendmoney` });
     form.button({ translate: `form.mainmenu.button.join` });

@@ -20,6 +20,9 @@ export default {
     //二つ名の初期のやつ(後)
     initialPennameAfter: "鯖民",
 
+    //最大Home数
+    maxHomeCount: 3,
+
     //名前の上に国名表記するかどうか
     countryNameDisplayOnPlayerNameTag: true,
 
