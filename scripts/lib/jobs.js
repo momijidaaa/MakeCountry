@@ -6,7 +6,12 @@ import playerFishingAfterEvent from "./fishingEvent";
 import { JobLevel } from "./jobslevel";
 import { RewardBuff } from "../api/rewardbuff";
 
-const buff = new RewardBuff();
+let buff
+
+world.afterEvents.worldLoad.subscribe(() => {
+    buff = new RewardBuff();
+});
+
 world.afterEvents.playerBreakBlock.subscribe((ev) => {
     if (!jobs_config.validity) return;
     const { brokenBlockPermutation, player } = ev;
