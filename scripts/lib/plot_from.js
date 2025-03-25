@@ -1513,9 +1513,14 @@ export function playerAddPlotForm(player, chunkId, plotAdmin, serch = false, key
         enable: false,
     };
     if (!plot?.players) plot.players = [];
+    /**
+     * @type {Array<Player>}
+     */
+    let showPlayers = [];
     for (const p of players) {
         if (plot.players.find(d => d?.id == p.id)) continue;
         form.button(`${p.name}§r\n${p.id}`);
+        showPlayers.push(p);
     };
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -1530,7 +1535,7 @@ export function playerAddPlotForm(player, chunkId, plotAdmin, serch = false, key
             };
             default: {
                 //プレイヤー追加しよう
-                const target = players[rs.selection - 1];
+                const target = showPlayers[rs.selection - 1];
                 plot.players.push({ id: target.id, permissions: [] });
                 chunkData.plot = plot;
                 StringifyAndSavePropertyData(chunkId, chunkData);

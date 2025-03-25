@@ -4476,9 +4476,14 @@ export function playerAddPlotGroupForm(player, plotGroupId, plotAdmin, serch = f
         return;
     };
     if (!plot?.players) plot.players = [];
+    /**
+     * @type {Array<Player>}
+     */
+    let showPlayers = [];
     for (const p of players) {
         if (plot.players.find(d => d?.id == p.id)) continue;
         form.button(`${p.name}§r\n${p.id}`);
+        showPlayers.push(p);
     };
     form.show(player).then(rs => {
         if (rs.canceled) {
@@ -4493,7 +4498,7 @@ export function playerAddPlotGroupForm(player, plotGroupId, plotAdmin, serch = f
             };
             default: {
                 //プレイヤー追加しよう
-                const target = players[rs.selection - 1];
+                const target = showPlayers[rs.selection - 1];
                 plot.players.push({ id: target.id, permissions: [] });
                 StringifyAndSavePropertyData(`plotgroup_${plotGroupId}`, plot);
                 plotGroupEditPlayersListForm(player, plotGroupId, plotAdmin);
