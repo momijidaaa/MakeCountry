@@ -98,7 +98,7 @@ export default {
     slimeKillReward: { min: 0.2, max: 2, xp: 0.2 }, //スライムを倒したときにもらえる報酬の変域
     spiderKillReward: { min: 10, max: 30, xp: 0.78 }, //クモを倒したときにもらえる報酬の変域
     cave_spiderKillReward: { min: 10, max: 30, xp: 0.98 }, //洞窟クモを倒したときにもらえる報酬の変域
-    creeper_spiderKillReward: { min: 15, max: 30, xp: 0.98 }, //クリーパーを倒したときにもらえる報酬の変域
+    creeperKillReward: { min: 15, max: 30, xp: 0.98 }, //クリーパーを倒したときにもらえる報酬の変域
     endermanKillReward: { min: 15, max: 30, xp: 1.3 }, //エンダーマンを倒したときにもらえる報酬の変域
     endermiteKillReward: { min: 15, max: 30, xp: 0.4 }, //エンダーマイトを倒したときにもらえる報酬の変域
     evocation_illagerKillReward: { min: 15, max: 35, xp: 1.3 }, //エヴォーカーを倒したときにもらえる報酬の変域
