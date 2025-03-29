@@ -236,6 +236,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
         location: block.location,
         cancel: cannot
     };
+    /*
     if (cannot) {
         if ('upper_block_bit' in states && states['upper_block_bit'] === true) {
             system.run(() => {
@@ -263,6 +264,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             return;
         };
     };
+    */
     ev.cancel = cannot;
 
     if (cannot) {
@@ -579,7 +581,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     }
 
     if (ev.isFirstEvent) player.sendMessage({ translate: `cannot.permission.${permission}` });
-    if ('open_bit' in block.permutation.getAllStates()) {
+    /*if ('open_bit' in block.permutation.getAllStates()) {
         const playerLocation = player.location;
         player.runCommand(`tp ${Math.floor(playerLocation.x * 100) / 100} 1000 ${Math.floor(playerLocation.z * 100) / 100}`);
         if (!player?.clicktp) {
@@ -589,7 +591,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                 player.teleport(playerLocation);
             }, 5);
         };
-    };
+    };*/
 });
 
 world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
