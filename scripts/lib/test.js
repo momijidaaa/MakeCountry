@@ -5,6 +5,7 @@ import * as DyProp from "./DyProp";
 import { ActionFormData, FormCancelationReason, uiManager } from "@minecraft/server-ui";
 import { itemIdToPath } from "../texture_config";
 import { updateRanking } from "./ranking";
+import { fixCountryData } from "./fixdata";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -216,6 +217,10 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             updateRanking();
             break;
         };
+        case 'karo:fixcountry': {
+            fixCountryData();
+            break;
+        }
     };
 });
 
