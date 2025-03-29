@@ -23,7 +23,7 @@ export function fixCountryData() {
         const allianceIds = countryData.alliance ?? [];
         let aliveAllianceCountryIds = [];
         for (const a of allianceIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveAllianceCountryIds.push(a);
@@ -34,7 +34,7 @@ export function fixCountryData() {
         const hostilityIds = countryData.hostility ?? [];
         let aliveHostilityCountryIds = [];
         for (const a of hostilityIds) {
-            const hostilityCountryData = GetAndParsePropertyData(a);
+            const hostilityCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!hostilityCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveHostilityCountryIds.push(a);
@@ -45,7 +45,7 @@ export function fixCountryData() {
         const allianceRequestReceiveIds = countryData.allianceRequestReceive ?? [];
         let aliveAllianceRequestReceiveCountryIds = [];
         for (const a of allianceRequestReceiveIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveAllianceRequestReceiveCountryIds.push(a);
@@ -56,7 +56,7 @@ export function fixCountryData() {
         const AllianceRequestSendIds = countryData.allianceRequestSend ?? [];
         let aliveAllianceRequestSendCountryIds = [];
         for (const a of AllianceRequestSendIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveAllianceRequestSendCountryIds.push(a);
@@ -67,7 +67,7 @@ export function fixCountryData() {
         const ApplicationPeaceRequestReceiveIds = countryData.applicationPeaceRequestReceive ?? [];
         let aliveApplicationPeaceRequestReceiveIds = [];
         for (const a of ApplicationPeaceRequestReceiveIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveApplicationPeaceRequestReceiveIds.push(a);
@@ -78,7 +78,7 @@ export function fixCountryData() {
         const ApplicationPeaceRequestSendIds = countryData.applicationPeaceRequestSend ?? [];
         let alivApplicationPeaceRequestSendIds = [];
         for (const a of ApplicationPeaceRequestSendIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 alivApplicationPeaceRequestSendIds.push(a);
@@ -89,7 +89,7 @@ export function fixCountryData() {
         const MergeRequestSendIds = countryData.mergeRequestSend ?? [];
         let aliveMergeRequestSendIds = [];
         for (const a of MergeRequestSendIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveMergeRequestSendIds.push(a);
@@ -100,7 +100,7 @@ export function fixCountryData() {
         const MergeRequestReceiveIds = countryData.mergeRequestReceive ?? [];
         let aliveMergeRequestReceiveIds = [];
         for (const a of MergeRequestReceiveIds) {
-            const allianceCountryData = GetAndParsePropertyData(a);
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
             if(!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveMergeRequestReceiveIds.push(a);

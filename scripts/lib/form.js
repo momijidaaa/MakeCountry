@@ -2327,8 +2327,8 @@ export function AddAllianceListForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.check.alliance.send.title` });
     let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
-    let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(id));
-    let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(id));
+    let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(Number(id.split('_')[1])));
+    let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(Number(id.split('_')[1])));
     form.button({ translate: `mc.button.close` });
     let lands = [];
     for (const countryId of filtered2) {
