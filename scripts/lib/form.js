@@ -2333,6 +2333,10 @@ export function AddAllianceListForm(player) {
     let lands = [];
     for (const countryId of filtered2) {
         const countryData = GetAndParsePropertyData(countryId);
+        if(!countryData?.id) {
+            console.log(countryId);
+            continue;
+        }
         lands.push(countryData.id);
         form.button(`${countryData.name}\nID: ${countryData.id}`);
     };
