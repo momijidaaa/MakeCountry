@@ -3,9 +3,9 @@ export default {
     prefix: `?`,
     //プレイヤーの初期の所持金
     initialMoney: 2000,
-    //所持金をスコアボードで変更できるようにするか(オンラインのプレイヤーのみ)
+    //所持金をスコアボードに代入できるようにするか(オンラインのプレイヤーのみ)
     getMoneyByScoreboard: false,
-    //所持金と連動するスコアボードのオブジェクト名
+    //所持金を代入するスコアボードのオブジェクト名
     moneyScoreboardName: `mc_money`,
     //平和主義切り替えのクールタイム(徴税タイミングごとに-1)
     peaceChangeCooltime: 3,

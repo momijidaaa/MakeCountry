@@ -1,6 +1,5 @@
 import { system, world } from "@minecraft/server";
-import { GetAndParsePropertyData, GetPlayerChunkPropertyId, getTimeBefore, StringifyAndSavePropertyData } from "./util";
-import * as DyProp from "./DyProp";
+import { GetAndParsePropertyData, GetPlayerChunkPropertyId, getTimeBefore } from "./util";
 import config from "../config";
 import { DeleteCountry } from "./land";
 import { DynamicProperties } from "../api/dyp";
@@ -115,7 +114,7 @@ export function tax() {
         if (!playerData.country) continue;
         const countryDataBase = new DynamicProperties('country');
         const rawCountryData = countryDataBase.get(`country_${playerData.country}`);
-        if(!rawCountryData) continue;
+        if (!rawCountryData) continue;
         const countryData = JSON.parse(rawCountryData);
         if (!countryData) continue;
         if (countryData?.taxInstitutionIsPer) {
@@ -188,3 +187,14 @@ export function tax() {
         countryDataBase.set(`country_${countryData.id}`, JSON.stringify(countryData));
     };
 };
+
+world.afterEvents.worldLoad.subscribe(() => {
+    if (!config.getMoneyByScoreboard) return;
+    if (!world.scoreboard.getObjective(config.moneyScoreboardName)) world.scoreboard.addObjective(config.moneyScoreboardName)
+    for (const player of world.getPlayers()) {
+        const playerDataBase = new DynamicProperties('player');
+        const rawData = playerDataBase.get(`player_${sender.id}`);
+        const playerData = JSON.parse(rawData);
+        player.runCommand(`scoreboard players set money ${Math.floor(playerData.money)}`);
+    };
+});
