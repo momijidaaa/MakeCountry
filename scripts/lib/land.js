@@ -4,6 +4,7 @@ import { CheckPermission, GetAndParsePropertyData, GetChunkPropertyId, GetPlayer
 import config from "../config";
 import { nameSet } from "./nameset";
 import { country } from "../api/api";
+import { DynamicProperties } from "../api/dyp";
 
 /**
  * 国を作る
@@ -176,22 +177,27 @@ export function calculationCountryPower(countryId) {
  * @param {string} countryId 
  */
 export function DeleteCountry(countryId) {
-    const countryData = GetAndParsePropertyData(`country_${countryId}`);
-    const ownerData = GetAndParsePropertyData(`player_${countryData?.owner}`);
-    if (ownerData) {
+    const countryDataBase = new DynamicProperties('country');
+    const rawCountryData = countryDataBase.get(`country_${countryId}`);
+    const countryData = JSON.parse(rawCountryData);
+    const playerDataBase = new DynamicProperties('player');
+    const rawOwnerData = playerDataBase.get(`player_${countryData?.owner}`);
+    if (rawOwnerData) {
+        const ownerData = JSON.parse(rawOwnerData);
         ownerData.money = ownerData?.money + countryData?.money + countryData?.resourcePoint;
-        StringifyAndSavePropertyData(`player_${ownerData.id}`, ownerData);
+        playerDataBase.set(`player_${ownerData.id}`, JSON.stringify(ownerData));
     };
     system.runTimeout(() => {
         if (countryData?.members) {
             try {
                 for (const m of countryData?.members ?? []) {
                     try {
-                        const playerData = GetAndParsePropertyData(`player_${m}`);
+                        const playerRawData = playerDataBase.get(`player_${m}`)
+                        const playerData = JSON.parse(playerRawData);
                         if (playerData) {
                             playerData.roles = [];
                             playerData.country = undefined;
-                            StringifyAndSavePropertyData(`player_${m}`, playerData);
+                            playerDataBase.set(`player_${m}`, JSON.stringify(playerData));
                         };
                     } catch (error) {
                     };
@@ -202,18 +208,24 @@ export function DeleteCountry(countryId) {
     });
     system.runTimeout(() => {
         try {
-            const ids = DyProp.DynamicPropertyIds().filter(id => id.startsWith("chunk_"));
-            for (let i = 0; i < ids.length; i++) {
-                const id = ids[i];
-                /**
-                 * @type {{plot: {},countryId: undefined|number}}
-                 */
-                const chunkData = GetAndParsePropertyData(id);
-                if (chunkData) {
-                    if (chunkData?.countryId != Number(countryId)) continue;
-                    StringifyAndSavePropertyData(id);
-                };
-            };
+            const chunkDataBase = new DynamicProperties('chunk')
+            system.runJob(findAndDeleteChunks(chunkDataBase, countryId))
+            function* findAndDeleteChunks(chunkDataBase, targetCountryId) {
+                const ids = chunkDataBase.idList;
+                for (let i = 0; i < ids.length; i++) {
+                    const id = ids[i];
+                    /**
+                     * @type {{plot: {}, countryId: undefined|number}}
+                     */
+                    const chunkRawData = chunkDataBase.get(id);
+                    if (chunkRawData) {
+                        const chunkData = JSON.parse(chunkRawData);
+                        if (chunkData?.countryId != Number(targetCountryId)) continue;
+                        chunkDataBase.delete(id);
+                        yield id; // 削除したidを返す
+                    }
+                }
+            }
         } catch (error) {
         }
     })
@@ -222,9 +234,10 @@ export function DeleteCountry(countryId) {
             try {
                 for (const a of countryData?.alliance ?? []) {
                     try {
-                        const targetcountryData = GetAndParsePropertyData(`country_${a}`);
+                        const targetcountryRawData = countryDataBase.get(`country_${a}`);
+                        const targetcountryData = JSON.parse(targetcountryRawData);
                         targetcountryData.alliance = targetcountryData.alliance.filter(id => id != Number(countryId));
-                        StringifyAndSavePropertyData(`country_${a}`, targetcountryData);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(targetcountryData));
                     } catch (error) {
                     }
                 };
@@ -248,9 +261,11 @@ export function DeleteCountry(countryId) {
     system.runTimeout(() => {
         if (countryData?.roles) {
             try {
+                const roleDataBase = new DynamicProperties('role');
+
                 for (const r of countryData?.roles ?? []) {
                     try {
-                        DyProp.setDynamicProperty(`role_${r}`);
+                        roleDataBase.delete(`role_${r}`);
                     } catch (error) {
                     };
                 };
@@ -263,9 +278,10 @@ export function DeleteCountry(countryId) {
             try {
                 for (const a of countryData?.allianceRequestSend ?? []) {
                     try {
-                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        const aRawCountry = countryDataBase.get(`country_${a}`);
+                        const aCountry = JSON.parse(aRawCountry);
                         aCountry.allianceRequestReceive = aCountry.allianceRequestReceive.filter(r => r != countryData.id);
-                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                     } catch (error) {
                     };
                 };
@@ -278,10 +294,11 @@ export function DeleteCountry(countryId) {
             try {
                 for (const a of countryData?.allianceRequestReceive ?? []) {
                     try {
-                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        const aRawCountry = countryDataBase.get(`country_${a}`);
+                        const aCountry = JSON.parse(aRawCountry);
                         if (aCountry) {
                             aCountry.allianceRequestSend = aCountry.allianceRequestSend.filter(r => r != countryData.id);
-                            StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                            countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                         };
                     } catch (error) {
                     };
@@ -294,10 +311,11 @@ export function DeleteCountry(countryId) {
         if (countryData?.applicationPeaceRequestSend) {
             for (const a of countryData?.applicationPeaceRequestSend ?? []) {
                 try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
+                    const aRawCountry = countryDataBase.get(`country_${a}`);
+                    const aCountry = JSON.parse(aRawCountry);
                     if (aCountry) {
                         aCountry.applicationPeaceRequestReceive = aCountry.applicationPeaceRequestReceive.filter(r => r != countryData.id);
-                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                     };
                 } catch (error) {
                 };
@@ -308,10 +326,11 @@ export function DeleteCountry(countryId) {
         if (countryData?.applicationPeaceRequestReceive) {
             for (const a of countryData?.applicationPeaceRequestReceive ?? []) {
                 try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
+                    const aRawCountry = countryDataBase.get(`country_${a}`);
+                    const aCountry = JSON.parse(aRawCountry);
                     if (aCountry) {
                         aCountry.applicationPeaceRequestSend = aCountry.applicationPeaceRequestSend.filter(r => r != countryData.id);
-                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                     };
                 } catch (error) {
                 };
@@ -322,10 +341,11 @@ export function DeleteCountry(countryId) {
         if (countryData?.declarationSend) {
             for (const a of countryData?.declarationSend ?? []) {
                 try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
+                    const aRawCountry = countryDataBase.get(`country_${a}`);
+                    const aCountry = JSON.parse(aRawCountry);
                     if (aCountry) {
                         aCountry.declarationReceive = aCountry.declarationReceive.filter(r => r != countryData.id);
-                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                     };
                 } catch (error) {
                 };
@@ -336,10 +356,11 @@ export function DeleteCountry(countryId) {
         if (countryData?.declarationReceive) {
             for (const a of countryData?.declarationReceive ?? []) {
                 try {
-                    const aCountry = GetAndParsePropertyData(`country_${a}`);
+                    const aRawCountry = countryDataBase.get(`country_${a}`);
+                    const aCountry = JSON.parse(aRawCountry);
                     if (aCountry) {
                         aCountry.declarationSend = aCountry.declarationSend.filter(r => r != countryData.id);
-                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                     };
                 } catch (error) {
                 };
@@ -351,10 +372,11 @@ export function DeleteCountry(countryId) {
             try {
                 for (const a of countryData?.warNowCountries ?? []) {
                     try {
-                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        const aRawCountry = countryDataBase.get(`country_${a}`);
+                        const aCountry = JSON.parse(aRawCountry);
                         if (aCountry) {
                             aCountry.warNowCountries = aCountry.warNowCountries.filter(r => r != countryData.id);
-                            StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                            countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                         };
                     } catch (error) {
                     };
@@ -366,9 +388,10 @@ export function DeleteCountry(countryId) {
     system.runTimeout(() => {
         if (countryData?.plotgroup) {
             try {
+                const plotgroupDataBase = new DynamicProperties('plotgroup');
                 for (const g of countryData?.plotgroup ?? []) {
                     try {
-                        StringifyAndSavePropertyData(`plotgroup_${g}`);
+                        plotgroupDataBase.delete(`plotgroup_${g}`);
                     } catch (error) {
                     };
                 };
@@ -381,9 +404,10 @@ export function DeleteCountry(countryId) {
             try {
                 for (const a of countryData?.mergeRequestSend ?? []) {
                     try {
-                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        const aRawCountry = countryDataBase.get(`country_${a}`);
+                        const aCountry = JSON.parse(aRawCountry);
                         aCountry.mergeRequestReceive = aCountry.mergeRequestReceive.filter(r => r != countryData.id);
-                        StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                        countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                     } catch (error) {
                     };
                 };
@@ -396,10 +420,11 @@ export function DeleteCountry(countryId) {
             try {
                 for (const a of countryData?.mergeRequestReceive ?? []) {
                     try {
-                        const aCountry = GetAndParsePropertyData(`country_${a}`);
+                        const aRawCountry = countryDataBase.get(`country_${a}`);
+                        const aCountry = JSON.parse(aRawCountry);
                         if (aCountry) {
                             aCountry.mergeRequestSend = aCountry.mergeRequestSend.filter(r => r != countryData.id);
-                            StringifyAndSavePropertyData(`country_${a}`, aCountry);
+                            countryDataBase.set(`country_${a}`, JSON.stringify(aCountry));
                         };
                     } catch (error) {
                     };
@@ -411,7 +436,7 @@ export function DeleteCountry(countryId) {
     system.runTimeout(() => {
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `deleted.country`, with: [`${countryData?.name}`] }] });
         //ここら辺に国際組織から抜ける処理を追加しておく
-        DyProp.setDynamicProperty(`country_${countryId}`);
+        countryDataBase.delete(`country_${countryId}`);
     }, 16);
     system.runTimeout(() => {
         const players = world.getPlayers();
@@ -432,10 +457,12 @@ export function DeleteCountry(countryId) {
  * @param {string} color 
  */
 export function CreateRoleToCountry(countryId, name, permissions = [], iconTextureId = `stone`, color = `e`) {
+    const countryDataBase = new DynamicProperties('country');
     const roleId = CreateRole([{ name: name, permissions: permissions, iconTextureId: iconTextureId, color: color }])[0];
-    const countryData = GetAndParsePropertyData(`country_${countryId}`);
+    const countryRawData = countryDataBase.get(`country_${countryId}`);
+    const countryData = JSON.parse(countryRawData);
     countryData.roles.push(roleId);
-    StringifyAndSavePropertyData(`country_${countryId}`, countryData);
+    countryDataBase.set(`country_${countryId}`, countryData);
     return roleId;
 };
 
@@ -1054,7 +1081,8 @@ export function MergeCountry(fromCountryId, toCountryId) {
     });
     system.runTimeout(() => {
         try {
-            const ids = DyProp.DynamicPropertyIds().filter(id => id.startsWith("chunk_"));
+            const chunkDataBase = new DynamicProperties('chunk')
+            const ids = chunkDataBase.idList;
             for (let i = 0; i < ids.length; i++) {
                 const id = ids[i];
                 /**

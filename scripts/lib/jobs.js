@@ -1,7 +1,9 @@
 import { EnchantmentType, EnchantmentTypes, Player, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import jobs_config from "../jobs_config";
-import { ActionFormData, FormCancelationReason } from "@minecraft/server-ui";
+import { FormCancelationReason } from "@minecraft/server-ui";
+import { ActionForm } from "./form_class";
+const ActionFormData = ActionForm;
 import playerFishingAfterEvent from "./fishingEvent";
 import { JobLevel } from "./jobslevel";
 import { RewardBuff } from "../api/rewardbuff";

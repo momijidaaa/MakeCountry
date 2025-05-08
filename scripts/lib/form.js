@@ -1,6 +1,9 @@
 import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
+import { FormCancelationReason } from "@minecraft/server-ui";
+import { ActionForm, ModalForm } from "./form_class";
+const ActionFormData = ActionForm;
+const ModalFormData = ModalForm;
 import config from "../config";
 import { acceptAlliance, acceptApplicationRequest, acceptMergeRequest, AddHostilityByPlayer, createPlotGroup, CreateRoleToCountry, DeleteCountry, DeleteRole, denyAllianceRequest, denyApplicationRequest, denyMergeRequest, MakeCountry, playerChangeOwner, playerCountryInvite, playerCountryJoin, playerCountryKick, RemoveAlliance, sendAllianceRequest, sendApplicationForPeace, sendMergeRequest } from "./land";
 import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, HasPermission, isDecimalNumber, isDecimalNumberZeroOK, StringifyAndSavePropertyData } from "./util";
@@ -9,6 +12,36 @@ import { ChestFormData } from "./chest-ui";
 import { kingdomsSettingForm, resourcePointConverter } from "./kingdoms_form";
 import { country } from "../api/api";
 import { RewardBuff } from "../api/rewardbuff";
+import { DynamicProperties } from "../api/dyp";
+
+/**
+ * @type {DynamicProperties}
+ */
+let playerDataBase;
+/**
+ * @type {DynamicProperties}
+ */
+let chunkDataBase;
+/**
+ * @type {DynamicProperties}
+ */
+let countryDataBase;
+/**
+ * @type {DynamicProperties}
+ */
+let chestDataBase;
+/**
+ * @type {DynamicProperties}
+ */
+let roleDataBase;
+world.afterEvents.worldLoad.subscribe(() => {
+    playerDataBase = new DynamicProperties("player");
+    chunkDataBase = new DynamicProperties("chunk");
+    countryDataBase = new DynamicProperties("country");
+    chestDataBase = new DynamicProperties("chest");
+    roleDataBase = new DynamicProperties("role");
+});
+
 
 /**
  * 
@@ -21,7 +54,7 @@ export function chestLockForm(player, id) {
     /**
      * @type {{id: string,player: id}}
      */
-    let chestData = GetAndParsePropertyData(id);
+    let chestData = GetAndParsePropertyData(id, chestDataBase);
     let lock = true;
     if (chestData) {
         form.button({ translate: `form.button.chestlock.disabled` });
@@ -38,9 +71,9 @@ export function chestLockForm(player, id) {
         switch (rs.selection) {
             case 0: {
                 if (lock) {
-                    StringifyAndSavePropertyData(id, chestData);
+                    StringifyAndSavePropertyData(id, chestData, chestDataBase);
                 } else {
-                    DyProp.setDynamicProperty(id);
+                    chestDataBase.delete(id);
                 };
                 player.sendMessage({ translate: `updated` });
                 break;
@@ -56,11 +89,11 @@ export function chestLockForm(player, id) {
 export function settingCountryMembersForm(player) {
     const form = new ActionFormData();
     form.title({ translate: `form.setting.members.title` });
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData?.country}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+    const countryData = GetAndParsePropertyData(`country_${playerData?.country}`, countryDataBase);
     const members = [];
     countryData.members.forEach(memberId => {
-        members.push(GetAndParsePropertyData(`player_${memberId}`));
+        members.push(GetAndParsePropertyData(`player_${memberId}`, playerDataBase));
     });
     members.forEach(member => {
         form.button(`${member.name}\n${member.id}`);
@@ -121,8 +154,8 @@ export function memberSelectedShowForm(player, member, countryData) {
                     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.same` }] });
                     return;
                 };
-                const playerData = GetAndParsePropertyData(`player_${player.id}`);
-                const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+                const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+                const countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
                 if (member.id === countryData.owner) {
                     player.sendMessage({ rawtext: [{ text: `§a[MakeCountry]§r\n` }, { translate: `form.kick.error.owner` }] });
                     return;
@@ -158,7 +191,7 @@ export function memberSelectedShowForm(player, member, countryData) {
  * @param {Player} member 
  */
 export function playerOwnerChangeCheckForm(player, member, countryData) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
     const form = new ActionFormData();
     form.body({ translate: `ownerchange.check.body`, with: [member.name] });
     form.button({ translate: `mc.button.close` });
@@ -174,7 +207,7 @@ export function playerOwnerChangeCheckForm(player, member, countryData) {
                 break;
             };
             case 1: {
-                const newCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+                const newCountryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
                 playerChangeOwner(player, member, newCountryData);
                 break;
             };
@@ -220,8 +253,7 @@ export function playerKickCheckForm(player, member, countryData) {
  */
 export function playerRoleChangeForm(player, member, countryData) {
     let EnableEditRoleIds = [];
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const memberData = GetAndParsePropertyData(`player_${member.id}`);
+    const memberData = GetAndParsePropertyData(`player_${member.id}`, playerDataBase);
     if (countryData?.owner === player.id) {
         for (const role of countryData?.roles) {
             EnableEditRoleIds.push(role);
@@ -229,7 +261,7 @@ export function playerRoleChangeForm(player, member, countryData) {
     } else {
         const playerAdminRoles = [];
         for (const role of countryData?.roles) {
-            const roleData = GetAndParsePropertyData(`role_${role}`);
+            const roleData = GetAndParsePropertyData(`role_${role}`, roleDataBase);
             if (roleData.permissions.includes(`admin`)) {
                 playerAdminRoles.push(role);
             } else {
@@ -255,7 +287,7 @@ export function playerRoleChangeForm(player, member, countryData) {
         const form = new ModalFormData();
         form.title({ translate: `form.role.change.title` });
         for (const roleId of EnableEditRoleIds) {
-            const role = GetAndParsePropertyData(`role_${roleId}`);
+            const role = GetAndParsePropertyData(`role_${roleId}`, roleDataBase);
             const value = memberData.roles.includes(roleId);
             if (value) memberData.roles.splice(memberData.roles.indexOf(roleId), 1);
             memberRoleExsits.push(value);
@@ -270,16 +302,16 @@ export function playerRoleChangeForm(player, member, countryData) {
             for (let i = 0; i < memberRoleExsits.length; i++) {
                 if (rs.formValues[i]) {
                     memberData.roles.push(EnableEditRoleIds[i]);
-                    const roleData = GetAndParsePropertyData(`role_${EnableEditRoleIds[i]}`);
+                    const roleData = GetAndParsePropertyData(`role_${EnableEditRoleIds[i]}`, roleDataBase);
                     roleData.members.push(`${memberData.id}`);
-                    StringifyAndSavePropertyData(`role_${EnableEditRoleIds[i]}`, roleData);
+                    StringifyAndSavePropertyData(`role_${EnableEditRoleIds[i]}`, roleData, roleDataBase);
                 } else {
-                    const roleData = GetAndParsePropertyData(`role_${EnableEditRoleIds[i]}`);
+                    const roleData = GetAndParsePropertyData(`role_${EnableEditRoleIds[i]}`, roleDataBase);
                     roleData.members.splice(roleData.members.indexOf(memberData.id), 1);
-                    StringifyAndSavePropertyData(`role_${EnableEditRoleIds[i]}`, roleData);
+                    StringifyAndSavePropertyData(`role_${EnableEditRoleIds[i]}`, roleData, roleDataBase);
                 };
             };
-            StringifyAndSavePropertyData(`player_${memberData.id}`, memberData);
+            StringifyAndSavePropertyData(`player_${memberData.id}`, memberData, playerDataBase);
             memberSelectedShowForm(player, member, countryData);
             return;
         });
@@ -330,7 +362,7 @@ export function playerMainMenu(player) {
                 break;
             };
             case 2: {
-                const playerData = GetAndParsePropertyData(`player_${player.id}`);
+                const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
                 if (playerData?.country) {
                     player.sendMessage({ translate: `already.country.join` });
                     return;
@@ -510,7 +542,7 @@ export function serchSendMoneyForm(player, keyword) {
  * @param {Player} receivePlayer 
  */
 export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
-    const sendPlayerData = GetAndParsePropertyData(`player_${sendPlayer.id}`);
+    const sendPlayerData = GetAndParsePropertyData(`player_${sendPlayer.id}`, playerDataBase);
     const form = new ModalFormData();
     form.title({ translate: `form.sendmoney.check.title` });
     form.textField({ rawtext: [{ translate: `form.sendmoney.check.label` }, { text: `: ${sendPlayerData?.money}` }] }, { translate: `input.number` });
@@ -525,8 +557,8 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
             sendPlayer.sendMessage({ translate: `input.error.notnumber` });
             return;
         };
-        const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`);
-        const sendPlayerData2 = GetAndParsePropertyData(`player_${sendPlayer.id}`);
+        const receivePlayerData = GetAndParsePropertyData(`player_${receivePlayer.id}`, playerDataBase);
+        const sendPlayerData2 = GetAndParsePropertyData(`player_${sendPlayer.id}`, playerDataBase);
         if (sendPlayerData2.money < value) {
             sendPlayer.sendMessage({ translate: `command.error.trysend.moremoney.youhave`, with: [`${sendPlayerData2.money}`] });
             return;
@@ -537,8 +569,8 @@ export function sendMoneyCheckForm(sendPlayer, receivePlayer) {
         receivePlayerData.money = Math.floor(receivePlayerData.money * 100) / 100;
         sendPlayer.sendMessage({ translate: `command.sendmoney.result.sender`, with: [receivePlayer.name, `${config.MoneyName} ${value}`] });
         receivePlayer.sendMessage({ translate: `command.sendmoney.result.receiver`, with: [sendPlayer.name, `${config.MoneyName} ${value}`] });
-        StringifyAndSavePropertyData(`player_${receivePlayer.id}`, receivePlayerData);
-        StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData2);
+        StringifyAndSavePropertyData(`player_${receivePlayer.id}`, receivePlayerData, playerDataBase);
+        StringifyAndSavePropertyData(`player_${sendPlayer.id}`, sendPlayerData2, playerDataBase);
         return;
     });
 };
@@ -555,7 +587,7 @@ export function inviteForm(player, serch = false, keyword = ``) {
         return;
     };
     const form = new ActionFormData();
-    let players = world.getPlayers().filter(p => !GetAndParsePropertyData(`player_${p.id}`)?.country);
+    let players = world.getPlayers().filter(p => !GetAndParsePropertyData(`player_${p.id}`, playerDataBase)?.country);
     players.filter(p => p.id !== player.id);
     form.title({ translate: `form.sendinvite.list.title` })
     form.button({ translate: `form.invite.button.serch` });
@@ -633,7 +665,7 @@ export function sendInviteCheckForm(sendPlayer, receivePlayer) {
  * @param {Player} player 
  */
 export function showProfileForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
     const showProfile = [
         { translate: `msg.name` }, { text: `${playerData?.name} §r\n` },
         { translate: `msg.lv` }, { text: `${player.level} §r\n` },
@@ -699,11 +731,11 @@ export function joinTypeSelectForm(player) {
  */
 export function joinCheckFromInviteForm(player, countryData) {
     try {
-        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`, playerDataBase);
         const membersId = countryData.members.filter(m => m !== ownerData.id);
         let membersName = [];
         membersId.forEach(member => {
-            const memberData = GetAndParsePropertyData(`player_${member}`);
+            const memberData = GetAndParsePropertyData(`player_${member}`, playerDataBase);
             membersName.push(memberData.name);
         });
         let money = `show.private`;
@@ -715,7 +747,7 @@ export function joinCheckFromInviteForm(player, countryData) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`, countryDataBase);
             if (subCountryData) {
                 allianceCountryName.push(subCountryData.name);
             };
@@ -723,7 +755,7 @@ export function joinCheckFromInviteForm(player, countryData) {
         const hostilityIds = countryData.hostility;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`, countryDataBase);
             if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
@@ -731,7 +763,7 @@ export function joinCheckFromInviteForm(player, countryData) {
         const warNowIds = countryData.warNowCountries;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`, countryDataBase);
             if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
@@ -742,9 +774,9 @@ export function joinCheckFromInviteForm(player, countryData) {
                 { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
-                { text: `${GetAndParsePropertyData(`role_${countryData.ownerRole}`).name}: ${ownerData.name}` }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.ownerRole}`, roleDataBase).name}: ${ownerData.name}` }, { text: `\n§r` },
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
-                { text: `${GetAndParsePropertyData(`role_${countryData.peopleRole}`).name}: ${membersName.join(`§r , `)}` }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.peopleRole}`, roleDataBase).name}: ${membersName.join(`§r , `)}` }, { text: `\n§r` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
                 { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
@@ -757,7 +789,7 @@ export function joinCheckFromInviteForm(player, countryData) {
                 { translate: 'form.showcountry.option.days', with: [`${countryData.days}`] }, { text: `\n§r` },
             ]
         };
-        const playerData = GetAndParsePropertyData(`player_${player.id}`);
+        const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
         const form = new ActionFormData();
         form.title(countryData.name);
         form.body(showBody);
@@ -770,8 +802,8 @@ export function joinCheckFromInviteForm(player, countryData) {
             };
             switch (rs.selection) {
                 case 0: {
-                    playerData.invite.splice(playerData.invite.indexOf(countryData.id), 1);
-                    StringifyAndSavePropertyData(`player_${playerData.id}`, playerData);
+                    playerData.invite.filter(i => i != countryData.id);
+                    StringifyAndSavePropertyData(`player_${playerData.id}`, playerData, playerDataBase);
                     playerCountryJoin(player, countryData.id);
                     return;
                 };
@@ -793,11 +825,11 @@ export function joinCheckFromInviteForm(player, countryData) {
  */
 export function joinCheckFromListForm(player, countryData) {
     try {
-        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`, playerDataBase);
         const membersId = countryData.members.filter(m => m !== ownerData.id);
         let membersName = [];
         membersId.forEach(member => {
-            const memberData = GetAndParsePropertyData(`player_${member}`);
+            const memberData = GetAndParsePropertyData(`player_${member}`, playerDataBase);
             membersName.push(memberData.name);
         });
         let money = `show.private`;
@@ -809,7 +841,7 @@ export function joinCheckFromListForm(player, countryData) {
         const allianceIds = countryData.alliance;
         let allianceCountryName = [];
         allianceIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`, countryDataBase);
             if (subCountryData) {
                 allianceCountryName.push(subCountryData.name);
             };
@@ -817,7 +849,7 @@ export function joinCheckFromListForm(player, countryData) {
         const hostilityIds = countryData.hostility;
         let hostilityCountryName = [];
         hostilityIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`, countryDataBase);
             if (subCountryData) {
                 hostilityCountryName.push(subCountryData.name);
             };
@@ -825,7 +857,7 @@ export function joinCheckFromListForm(player, countryData) {
         const warNowIds = countryData.warNowCountries;
         let warNowCountryName = [];
         warNowIds.forEach(id => {
-            const subCountryData = GetAndParsePropertyData(`country_${id}`);
+            const subCountryData = GetAndParsePropertyData(`country_${id}`, countryDataBase);
             if (subCountryData) {
                 warNowCountryName.push(subCountryData.name);
             };
@@ -836,9 +868,9 @@ export function joinCheckFromListForm(player, countryData) {
                 { translate: `form.showcountry.option.name`, with: [countryData.name] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.lore`, with: [countryData.lore] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.id`, with: [`${countryData.id}`] }, { text: `\n§r` },
-                { text: `${GetAndParsePropertyData(`role_${countryData.ownerRole}`).name}: ${ownerData.name}` }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.ownerRole}`, roleDataBase).name}: ${ownerData.name}` }, { text: `\n§r` },
                 { translate: `form.showcountry.option.memberscount`, with: [`${countryData.members.length}`] }, { text: `\n§r` },
-                { text: `${GetAndParsePropertyData(`role_${countryData.peopleRole}`).name}: ${membersName.join(`§r , `)}` }, { text: `\n§r` },
+                { text: `${GetAndParsePropertyData(`role_${countryData.peopleRole}`, roleDataBase).name}: ${membersName.join(`§r , `)}` }, { text: `\n§r` },
                 { translate: `form.showcountry.option.territories`, with: [`${countryData.territories.length}`] }, { text: `\n§r` },
                 { translate: `form.showcountry.option.money`, with: { rawtext: [{ translate: `${money}` }] } }, { text: `\n§r` },
                 { translate: `form.showcountry.option.resourcepoint`, with: { rawtext: [{ translate: `${resourcePoint}` }] } }, { text: `\n§r` },
@@ -883,17 +915,17 @@ export function joinCheckFromListForm(player, countryData) {
  * @param {Player} player 
  */
 export function countryInvitesList(player) {
-    let playerData = GetAndParsePropertyData(`player_${player.id}`);
+    let playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
     const countriesData = [];
     for (const id of playerData?.invite) {
-        const d = GetAndParsePropertyData(`country_${id}`);
+        const d = GetAndParsePropertyData(`country_${id}`, countryDataBase);
         if (!d) {
-            playerData?.invite.splice(playerData.invite.indexOf(id), 1);
+            playerData?.invite.filter(i => i != id);
             continue;
         };
         countriesData.push(d);
     };
-    StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+    StringifyAndSavePropertyData(`player_${player.id}`, playerData, playerDataBase);
     const form = new ActionFormData();
     if (countriesData.length === 0) {
         form.body({ translate: `no.invite.country` });
@@ -922,7 +954,7 @@ export function countryInvitesList(player) {
  */
 export function allowJoinCountriesList(player) {
     const countriesData = [];
-    for (const id of DyProp.DynamicPropertyIds().filter(b => b.startsWith(`country_`))) {
+    for (const id of countryDataBase.idList) {
         const d = GetAndParsePropertyData(id);
         if (!d.invite) countriesData.push(d);
     };
@@ -953,8 +985,8 @@ export function allowJoinCountriesList(player) {
  * @param {Player} player 
  */
 export function treasuryMainForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
     const form = new ActionFormData();
     form.title({ translate: `form.treasurymain.title` });
     form.body({ rawtext: [{ translate: `treasurybudget.body` }, { text: `${config.MoneyName} ${countryData.money}\n` }, { translate: `resourcepoint.body` }, { text: `${countryData.resourcePoint}` }] });
@@ -984,8 +1016,8 @@ export function treasuryMainForm(player) {
  * @param {Player} player 
  */
 export function treasurybudgetSelectForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
     const form = new ActionFormData();
     form.title({ translate: `treasurybudget` });
     form.body({ rawtext: [{ translate: `treasurybudget` }, { text: `${config.MoneyName} ${countryData.money}` }] });
@@ -1015,7 +1047,7 @@ export function treasurybudgetSelectForm(player) {
  * @param {Player} player 
  */
 export function treasurybudgetDepositForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
     const form = new ModalFormData();
     form.title({ translate: `treasurybudget.deposit` });
     form.textField({ rawtext: [{ translate: `deposit` }, { text: `: ${playerData.money}` }] }, { translate: `input.number` });
@@ -1029,8 +1061,8 @@ export function treasurybudgetDepositForm(player) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
         };
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
-        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`, countryDataBase);
         let hasMoney = playerData2.money;
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.money` });
@@ -1038,8 +1070,8 @@ export function treasurybudgetDepositForm(player) {
         };
         playerData2.money = (Math.floor(playerData2.money * 100) / 100) - needMoney;
         countryData2.money = (Math.floor(countryData2.money * 100) / 100) + needMoney;
-        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
-        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2, playerDataBase);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2, countryDataBase);
         treasurybudgetSelectForm(player);
         return;
     });
@@ -1051,8 +1083,8 @@ export function treasurybudgetDepositForm(player) {
  * @param {Player} player 
  */
 export function treasurybudgetWithdrawForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
     const form = new ModalFormData();
     form.title({ translate: `treasurybudget.withdraw` });
     form.textField({ rawtext: [{ translate: `withdraw` }, { text: `: ${countryData.money}` }] }, { translate: `input.number` });
@@ -1066,8 +1098,8 @@ export function treasurybudgetWithdrawForm(player) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
         };
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
-        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`, countryDataBase);
         let hasMoney = countryData2.money;
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.treasurybudget` });
@@ -1075,8 +1107,8 @@ export function treasurybudgetWithdrawForm(player) {
         };
         playerData2.money = (Math.floor(playerData2.money * 100) / 100) + needMoney;
         countryData2.money = (Math.floor(countryData2.money * 100) / 100) - needMoney;
-        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
-        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2, playerDataBase);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2, countryDataBase);
         treasurybudgetSelectForm(player);
         return;
     });
@@ -1088,8 +1120,8 @@ export function treasurybudgetWithdrawForm(player) {
  * @param {Player} player 
  */
 export function resourcepointSelectForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
     const form = new ActionFormData();
     form.title({ translate: `resourcepoint` });
     form.body({ rawtext: [{ translate: `resourcepoint` }, { text: `${config.MoneyName} ${countryData.resourcePoint}` }] });
@@ -1119,7 +1151,7 @@ export function resourcepointSelectForm(player) {
  * @param {Player} player 
  */
 export function resourcepointDepositForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
     const form = new ModalFormData();
     form.title({ translate: `resourcepoint.conversion` });
     form.textField({ rawtext: [{ translate: `conversion` }, { text: ` : ${playerData.money}` }] }, { translate: `input.number` });
@@ -1133,9 +1165,9 @@ export function resourcepointDepositForm(player) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
         };
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
         let hasMoney = playerData2.money;
-        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`, countryDataBase);
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.money` });
             return;
@@ -1144,8 +1176,8 @@ export function resourcepointDepositForm(player) {
         playerData2.money -= needMoney;
         playerData2.money = Math.floor(playerData2.money * 100) / 100;
         countryData2.money = Math.floor(countryData2.money * 100) / 100;
-        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
-        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2, playerDataBase);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2, countryDataBase);
         resourcepointSelectForm(player);
         return;
     });
@@ -1157,8 +1189,8 @@ export function resourcepointDepositForm(player) {
  * @param {Player} player 
  */
 export function resourcepointWithdrawForm(player) {
-    const playerData = GetAndParsePropertyData(`player_${player.id}`);
-    const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+    const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+    const countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
     const form = new ModalFormData();
     form.title({ translate: `resourcepoint.withdraw` });
     form.textField({ rawtext: [{ translate: `withdraw` }, { text: ` : ${countryData.resourcePoint}` }] }, { translate: `input.number` });
@@ -1172,8 +1204,8 @@ export function resourcepointWithdrawForm(player) {
             player.sendMessage({ translate: `input.error.notnumber` });
             return;
         };
-        const playerData2 = GetAndParsePropertyData(`player_${player.id}`);
-        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`);
+        const playerData2 = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+        const countryData2 = GetAndParsePropertyData(`country_${playerData2.country}`, countryDataBase);
         let hasMoney = countryData2.resourcePoint;
         if (hasMoney < needMoney) {
             player.sendMessage({ translate: `error.notenough.resourcepoint` });
@@ -1183,8 +1215,8 @@ export function resourcepointWithdrawForm(player) {
         playerData2.money += needMoney;
         playerData2.money = Math.floor(playerData2.money * 100) / 100;
         countryData2.money = Math.floor(countryData2.money * 100) / 100;
-        StringifyAndSavePropertyData(`player_${player.id}`, playerData2);
-        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2);
+        StringifyAndSavePropertyData(`player_${player.id}`, playerData2, playerDataBase);
+        StringifyAndSavePropertyData(`country_${playerData2.country}`, countryData2, countryDataBase);
         resourcepointSelectForm(player);
         return;
     });
@@ -1256,8 +1288,8 @@ export function settingCountry(player) {
             break;
         };
         case 'kingdoms': {
-            const playerData = GetAndParsePropertyData('player_' + player.id);
-            const countryData = GetAndParsePropertyData('country_' + playerData.country);
+            const playerData = GetAndParsePropertyData('player_' + player.id, playerDataBase);
+            const countryData = GetAndParsePropertyData('country_' + playerData.country, countryDataBase);
             const form = new ChestFormData();
             form.setTitle([{ text: `§a§l<${countryData.name}§r§a§l> §6` }, { translate: 'form.setting.title' }]);
             form.setPattern([0, 0], [
@@ -1306,13 +1338,13 @@ export function settingCountry(player) {
  */
 export function settingCountryInfoForm(player, countryData = undefined) {
     try {
-        const playerData = GetAndParsePropertyData(`player_${player.id}`);
-        if (!countryData) countryData = GetAndParsePropertyData(`country_${playerData.country}`);
-        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`);
+        const playerData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
+        if (!countryData) countryData = GetAndParsePropertyData(`country_${playerData.country}`, countryDataBase);
+        const ownerData = GetAndParsePropertyData(`player_${countryData.owner}`, playerDataBase);
         const membersId = countryData.members.filter(m => m !== ownerData.id);
         let membersName = [];
         membersId.forEach(member => {
-            const memberData = GetAndParsePropertyData(`player_${member}`);
+            const memberData = GetAndParsePropertyData(`player_${member}`, playerDataBase);
             membersName.push(memberData.name);
         });
         let money = `show.private`;
@@ -1940,7 +1972,7 @@ export function sendMergeRequestListForm(player) {
     let mergeRequestSend = playerCountryData?.mergeRequestSend ?? [];
     const form = new ActionFormData();
     form.title({ translate: `form.merge.send.title` });
-    let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
+    let countryIds = countryDataBase.idList.filter(id => id != `country_${playerData.country}`);
     let filtered1 = countryIds.filter(id => !mergeRequestSend.includes(id) && GetAndParsePropertyData(id)?.days >= config.mergeProtectionDuration);
     form.button({ translate: `mc.button.close` });
     let lands = [];
@@ -2326,14 +2358,14 @@ export function AddAllianceListForm(player) {
     let allianceCountryIds = playerCountryData.alliance;
     const form = new ActionFormData();
     form.title({ translate: `form.check.alliance.send.title` });
-    let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
+    let countryIds = countryDataBase.idList.filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
     let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(Number(id.split('_')[1])));
     let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(Number(id.split('_')[1])));
     form.button({ translate: `mc.button.close` });
     let lands = [];
     for (const countryId of filtered2) {
         const countryData = GetAndParsePropertyData(countryId);
-        if(!countryData?.id) {
+        if (!countryData?.id) {
             console.log(countryId);
             continue;
         }
@@ -2709,7 +2741,7 @@ export function AddHostilityListForm(player) {
     let allianceCountryIds = playerCountryData.alliance;
     const form = new ActionFormData();
     form.title({ translate: `form.hostility.add.title` });
-    let countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
+    let countryIds = countryDataBase.idList.filter(id => id.startsWith(`country_`)).filter(id => id != `country_${playerData.country}`);
     let filtered1 = countryIds.filter(id => !hostilityCountryIds.includes(id));
     let filtered2 = filtered1.filter(id => !allianceCountryIds.includes(id));
     let lands = [];
@@ -3326,7 +3358,7 @@ export function countryList(player, al = false) {
         const form = new ActionFormData();
         form.title({ translate: `form.countrylist.title` });
         let countryIds
-        if (!al) countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith('country'));
+        if (!al) countryIds = countryDataBase.idList;
         if (al) countryIds = GetAndParsePropertyData('country_' + GetAndParsePropertyData('player_' + player.id).country).alliance.map(alliance => `country_${alliance}`);
         let countries = [];
         countryIds.forEach(id => {
@@ -4074,8 +4106,10 @@ export function roleAddPlotGroupForm(player, plotGroupId, plotAdmin, search = fa
         return;
     };
     if (!plot?.roles) plot.roles = [];
+    let aliveRoles = [];
     for (const r of roles) {
         if (plot.roles.find(d => d?.id == r.id)) continue;
+        aliveRoles.push(r)
         form.button(`${r?.name}§r\nID: ${r?.id}`);
     };
     form.show(player).then(rs => {
@@ -4091,7 +4125,7 @@ export function roleAddPlotGroupForm(player, plotGroupId, plotAdmin, search = fa
             };
             default: {
                 //ロール追加しよう
-                const target = roles[rs.selection - 1];
+                const target = aliveRoles[rs.selection - 1];
                 plot.roles.push({ id: target.id, permissions: [] });
                 StringifyAndSavePropertyData(`plotgroup_${plotGroupId}`, plot);
                 plotGroupEditRolesListForm(player, plotGroupId, plotAdmin);
@@ -4266,7 +4300,7 @@ export function countryAddPlotGroupForm(player, plotGroupId, plotAdmin, search =
     const form = new ActionFormData();
     form.title({ translate: `form.plot.addcountry.list.title` });
     form.button({ translate: `form.plot.addcountry.button.serch` });
-    const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
+    const countryIds = countryDataBase.idList;
     let countries = [];
     countryIds.forEach(id => {
         countries[countries.length] = GetAndParsePropertyData(id);
@@ -4305,7 +4339,7 @@ export function countryAddPlotGroupForm(player, plotGroupId, plotAdmin, search =
             };
             default: {
                 //国追加しよう
-                const target = countries[rs.selection - 1];
+                const target = aliveCountriesData[rs.selection - 1];
                 plot.countries.push({ id: target.id, permissions: [] });
                 StringifyAndSavePropertyData(`plotgroup_${plotGroupId}`, plot);
                 plotGroupEditCountriesListForm(player, plotGroupId, plotAdmin);

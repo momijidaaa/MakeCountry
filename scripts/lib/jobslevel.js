@@ -1,4 +1,4 @@
-import { Player, system, world } from "@minecraft/server";
+import { Player, system } from "@minecraft/server";
 import jobs_config from "../jobs_config";
 
 export class JobLevel {

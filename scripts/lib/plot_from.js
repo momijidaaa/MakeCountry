@@ -1,10 +1,14 @@
-import { ActionFormData, FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
-import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isDecimalNumberZeroOK, StringifyAndSavePropertyData } from "./util";
+import { FormCancelationReason } from "@minecraft/server-ui";
+import { ActionForm, ModalForm} from "./form_class";
+const ActionFormData = ActionForm;
+const ModalFormData = ModalForm;
+import { CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isDecimalNumberZeroOK, StringifyAndSavePropertyData } from "./util";
 import { Player, system, world } from "@minecraft/server";
 import { addPlotToGroup, createPlot, createPlotToGroup } from "./land";
 import * as DyProp from "./DyProp";
 import config from "../config";
-import { plotGroupEditMainFormPlotAdmin, plotGroupEditMainFormPlotOwner } from "./form";
+import { plotGroupEditMainFormPlotOwner } from "./form";
+import { DynamicProperties } from "../api/dyp";
 
 const landPermissions = [
     `place`,
@@ -1019,8 +1023,10 @@ export function roleAddPlotForm(player, chunkId, plotAdmin, search = false, keyw
         enable: false,
     };
     if (!plot?.roles) plot.roles = [];
+    let aliveRoles = [];
     for (const r of roles) {
         if (plot.roles.find(d => d?.id == r.id)) continue;
+        aliveRoles.push(r);
         form.button(`${r?.name}§r\nID: ${r?.id}`);
     };
     form.show(player).then(rs => {
@@ -1036,7 +1042,7 @@ export function roleAddPlotForm(player, chunkId, plotAdmin, search = false, keyw
             };
             default: {
                 //ロール追加しよう
-                const target = roles[rs.selection - 1];
+                const target = aliveRoles[rs.selection - 1];
                 plot.roles.push({ id: target.id, permissions: [] });
                 chunkData.plot = plot;
                 StringifyAndSavePropertyData(chunkId, chunkData);
@@ -1245,7 +1251,8 @@ export function countryAddPlotForm(player, chunkId, plotAdmin, search = false, k
     const form = new ActionFormData();
     form.title({ translate: `form.plot.addcountry.list.title` });
     form.button({ translate: `form.plot.addcountry.button.serch` });
-    const countryIds = DyProp.DynamicPropertyIds().filter(c => c.startsWith(`country_`));
+    const countryDataBase = new DynamicProperties('country')
+    const countryIds = countryDataBase.idList;
     let countries = [];
     countryIds.forEach(id => {
         countries[countries.length] = GetAndParsePropertyData(id);
@@ -1295,7 +1302,7 @@ export function countryAddPlotForm(player, chunkId, plotAdmin, search = false, k
             };
             default: {
                 //国追加しよう
-                const target = countries[rs.selection - 1];
+                const target = aliveCountriesData[rs.selection - 1];
                 plot.countries.push({ id: target.id, permissions: [] });
                 chunkData.plot = plot;
                 StringifyAndSavePropertyData(chunkId, chunkData);

@@ -1,30 +1,31 @@
 import { world } from "@minecraft/server";
-import * as DyProp from "./DyProp";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
+import { DynamicProperties } from "../api/dyp";
 
 world.afterEvents.worldLoad.subscribe(() => {
     fixCountryData();
 });
 
 export function fixCountryData() {
+    const countryDataBase = new DynamicProperties("country");
     /**
- * @type {Array<string>}
- */
-    const countryIds = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`));
+     * @type {Array<string>}
+     */
+    const countryIds = countryDataBase.idList;
     const checkCountryIds = countryIds;
     const aliveCountryIds = countryIds.map(a => Number(a.split('_')[1]));
     for (const id of checkCountryIds) {
-        const countryData = GetAndParsePropertyData(id);
+        const countryData = GetAndParsePropertyData(id, countryDataBase);
 
-        if(!countryData) {
-            DyProp.setDynamicProperty(id);
+        if (!countryData) {
+            countryDataBase.delete(id);
             continue;
         }
         const allianceIds = countryData.alliance ?? [];
         let aliveAllianceCountryIds = [];
         for (const a of allianceIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveAllianceCountryIds.push(a);
             };
@@ -34,8 +35,8 @@ export function fixCountryData() {
         const hostilityIds = countryData.hostility ?? [];
         let aliveHostilityCountryIds = [];
         for (const a of hostilityIds) {
-            const hostilityCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!hostilityCountryData) continue;
+            const hostilityCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!hostilityCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveHostilityCountryIds.push(a);
             };
@@ -45,8 +46,8 @@ export function fixCountryData() {
         const allianceRequestReceiveIds = countryData.allianceRequestReceive ?? [];
         let aliveAllianceRequestReceiveCountryIds = [];
         for (const a of allianceRequestReceiveIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveAllianceRequestReceiveCountryIds.push(a);
             };
@@ -56,8 +57,8 @@ export function fixCountryData() {
         const AllianceRequestSendIds = countryData.allianceRequestSend ?? [];
         let aliveAllianceRequestSendCountryIds = [];
         for (const a of AllianceRequestSendIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveAllianceRequestSendCountryIds.push(a);
             };
@@ -67,8 +68,8 @@ export function fixCountryData() {
         const ApplicationPeaceRequestReceiveIds = countryData.applicationPeaceRequestReceive ?? [];
         let aliveApplicationPeaceRequestReceiveIds = [];
         for (const a of ApplicationPeaceRequestReceiveIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveApplicationPeaceRequestReceiveIds.push(a);
             };
@@ -78,8 +79,8 @@ export function fixCountryData() {
         const ApplicationPeaceRequestSendIds = countryData.applicationPeaceRequestSend ?? [];
         let alivApplicationPeaceRequestSendIds = [];
         for (const a of ApplicationPeaceRequestSendIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 alivApplicationPeaceRequestSendIds.push(a);
             };
@@ -89,8 +90,8 @@ export function fixCountryData() {
         const MergeRequestSendIds = countryData.mergeRequestSend ?? [];
         let aliveMergeRequestSendIds = [];
         for (const a of MergeRequestSendIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveMergeRequestSendIds.push(a);
             };
@@ -100,14 +101,14 @@ export function fixCountryData() {
         const MergeRequestReceiveIds = countryData.mergeRequestReceive ?? [];
         let aliveMergeRequestReceiveIds = [];
         for (const a of MergeRequestReceiveIds) {
-            const allianceCountryData = GetAndParsePropertyData(`country_${a}`);
-            if(!allianceCountryData) continue;
+            const allianceCountryData = GetAndParsePropertyData(`country_${a}`, countryDataBase);
+            if (!allianceCountryData) continue;
             if (aliveCountryIds.includes(a)) {
                 aliveMergeRequestReceiveIds.push(a);
             };
         };
         countryData.mergeRequestReceive = aliveMergeRequestReceiveIds;
 
-        StringifyAndSavePropertyData(id, countryData);
+        StringifyAndSavePropertyData(id, countryData, countryDataBase);
     };
 };

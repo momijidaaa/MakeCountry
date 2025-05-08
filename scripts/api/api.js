@@ -1,5 +1,3 @@
-import { Player } from "@minecraft/server";
-
 /**
  * 許容されるイベント名を列挙
  * @typedef {keyof EventPayloads} EventName

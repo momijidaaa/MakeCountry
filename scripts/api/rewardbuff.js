@@ -1,19 +1,20 @@
-import * as DyProp from "../lib/DyProp";
+import { DynamicProperties } from "./dyp";
+const buffData = new DynamicProperties("rewardBuff");
 
 export class RewardBuff {
   constructor() {
-    this.dyProp = DyProp;
+    this.dyProp = buffData;
     this.key = "rewardBuffs";
     this.buffs = this._loadBuffs(); // 初回のみ DyProp からロード
   }
 
   _loadBuffs() {
-    const data = this.dyProp.getDynamicProperty(this.key, "string");
+    const data = this.dyProp.get(this.key);
     return data ? JSON.parse(data) : {}; // { job: [{ multiplier, expireTime }, ...] }
   }
 
   _saveBuffs() {
-    this.dyProp.setDynamicProperty(this.key, JSON.stringify(this.buffs));
+    this.dyProp.set(this.key, JSON.stringify(this.buffs));
   }
 
   addBuff(job, multiplier, durationMinutes) {

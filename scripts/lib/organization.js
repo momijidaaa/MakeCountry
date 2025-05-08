@@ -1,5 +1,6 @@
 import { world } from "@minecraft/server";
-import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
+import { ModalForm} from "./form_class";
+const ModalFormData = ModalForm;
 import { GetAndParsePropertyData } from "./util";
 
 export function createOrganizationForm(player) {

@@ -2,10 +2,13 @@ import { Player, ScriptEventSource, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import { changeOwnerScriptEvent, DeleteCountry, playerCountryJoin } from "./land";
 import * as DyProp from "./DyProp";
-import { ActionFormData, FormCancelationReason, uiManager } from "@minecraft/server-ui";
+import { FormCancelationReason } from "@minecraft/server-ui";
+import { ActionForm } from "./form_class";
+const ActionFormData = ActionForm;
 import { itemIdToPath } from "../texture_config";
 import { updateRanking } from "./ranking";
 import { fixCountryData } from "./fixdata";
+import { DynamicProperties } from "../api/dyp";
 
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
@@ -159,7 +162,8 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             break;
         };
         case `karo:playercount`: {
-            const count = DyProp.DynamicPropertyIds().filter(d => d.startsWith(`player_`)).length;
+            const playerDataBase = new DynamicProperties('player');
+            const count = playerDataBase.idList.length;
             console.log(`${count}`);
             sourceEntity?.sendMessage(`${count}`);
             break;
@@ -182,7 +186,8 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             const [from, to] = message.split(' ');
             const fromNum = Number(from);
             const toNum = Number(to);
-            DyProp.DynamicPropertyIds().filter(id => id.startsWith(`chunk_`)).map(id => {
+            const chunkDataBase = new DynamicProperties('chunk');
+            chunkDataBase.idList.map(id => {
                 /**
                  * @type {{plot: {},countryId: undefined|number}}
                  */
@@ -196,18 +201,36 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             break;
         };
         case 'karo:chunkdeleter': {
-            const ids = DyProp.DynamicPropertyIds().filter(id => id.startsWith(`chunk_`))
+            const chunkDataBase = new DynamicProperties('chunk')
+            const countryDataBase = new DynamicProperties('country')
+            const ids = chunkDataBase.idList;
+            const countryIds = countryDataBase.idList;
+            const aliveCountryIds = [];
+            for (const id of countryIds) {
+                const rawData = countryDataBase.get(id);
+                if (rawData) {
+                    aliveCountryIds.push(Number(id.split(`_`)[1]))
+                }
+            }
             for (let i = 0; i < ids.length; i++) {
                 system.runTimeout(() => {
                     const id = ids[i];
-                    /**
-                     * @type {{plot: {},countryId: undefined|number}}
-                     */
-                    const chunkData = GetAndParsePropertyData(id);
-                    if (!chunkData?.countryId || chunkData?.countryId == 0) {
-                        if (chunkData?.special) {
-                            StringifyAndSavePropertyData(id);
+                    const chunkRawData = chunkDataBase.get(id);
+                    if (chunkRawData) {
+                        /**
+                         * @type {{plot: {},countryId: undefined|number}}
+                         */
+                        const chunkData = JSON.parse(chunkRawData);
+                        if (!chunkData?.countryId || chunkData?.countryId == 0) {
+                            if (!chunkData?.special) {
+                                chunkDataBase.delete(id);
+                            };
                         };
+                        if (!aliveCountryIds.includes(chunkData?.countryId) && chunkData?.countryId != 0) {
+                            if (!chunkData?.special) {
+                                chunkDataBase.delete(id);
+                            };
+                        }
                     };
                 }, Math.floor(i / 50));
             };

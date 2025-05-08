@@ -1,17 +1,20 @@
-import { world, system } from "@minecraft/server";
+import { world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { GetAndParsePropertyData } from "./util";
 import config from "../config";
+import { DynamicProperties } from "../api/dyp";
 
-world.afterEvents.worldLoad.subscribe(() => {
+world.afterEvents.entityLoad.subscribe((ev) => {
+    if (ev.entity.typeId != "mc:text") return;
     updateRanking();
 });
 
 export function updateRanking() {
     const texts = world.getDimension(`overworld`).getEntities({ type: `mc:text` });
-    const allKeys = DyProp.DynamicPropertyIds();
-    const players = allKeys.filter(key => key.startsWith(`player_`)).map(key => GetAndParsePropertyData(key)).filter(p => p?.name && !isNaN(parseInt(p?.money)));
-    const countries = allKeys.filter(key => key.startsWith(`country_`)).map(key => GetAndParsePropertyData(key));
+    const playerDataBase = new DynamicProperties('player');
+    const countryDataBase = new DynamicProperties('country');
+    const players = playerDataBase.idList.map(key => GetAndParsePropertyData(key)).filter(p => p?.name && !isNaN(parseInt(p?.money)));
+    const countries = countryDataBase.idList.map(key => GetAndParsePropertyData(key));
     for (const text of texts) {
         switch (true) {
             case text.hasTag(`text:baltop`): {

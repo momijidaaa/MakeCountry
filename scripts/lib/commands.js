@@ -1,6 +1,7 @@
 import { Player, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
-import { CheckPermission, CheckPermissionFromLocation, ConvertChunk, GetAndParsePropertyData, GetChunkPropertyId, GetPlayerChunkPropertyId, isDecimalNumberZeroOK, isNumber, StringifyAndSavePropertyData } from "./util";
+import { DynamicProperties } from "../api/dyp";
+import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isNumber, StringifyAndSavePropertyData } from "./util";
 import { GenerateChunkData, playerCountryLeave } from "./land";
 import { MakeCountryForm, countryList, joinTypeSelectForm, playerMainMenu, settingCountry } from "./form";
 import { jobsForm } from "./jobs";
@@ -29,8 +30,10 @@ class ChatHandler {
          * @type {string}
          */
         this.prefix = config.prefix;
-        this.playerData = GetAndParsePropertyData(`player_${this.sender.id}`);
-        this.playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        const playerDataBase = new DynamicProperties("player");
+        const countryDataBase = new DynamicProperties("country");
+        this.playerData = GetAndParsePropertyData(`player_${this.sender.id}`, playerDataBase);
+        this.playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`, countryDataBase);
         this.script = isScript;
     }
 
@@ -64,6 +67,7 @@ class ChatHandler {
         if (isCanceled) return;
         eventData.cancel = undefined;
         playerHandler.afterEvents.chat.emit(eventData);
+        const playerDataBase = new DynamicProperties("player");
         switch (chatType) {
             case `general`: {
                 world.sendMessage([{ text: `[§${this.playerCountryData?.color ?? `a`}` }, { translate: land }, { text: `${penname}§r] §7${this.sender.name}§f: ${this.message}` }]);
@@ -76,7 +80,7 @@ class ChatHandler {
                 };
                 const players = world.getPlayers();
                 for (const player of players) {
-                    const pData = GetAndParsePropertyData(`player_${player.id}`);
+                    const pData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
                     if (pData?.country == this.playerData?.country) {
                         player.sendMessage([{ text: `[§aCC§r] §7${this.sender.name}§f: §a${this.message}` }]);
                     };
@@ -90,7 +94,7 @@ class ChatHandler {
                 };
                 const players = world.getPlayers();
                 for (const player of players) {
-                    const pData = GetAndParsePropertyData(`player_${player.id}`);
+                    const pData = GetAndParsePropertyData(`player_${player.id}`, playerDataBase);
                     const alliance = this.playerCountryData.alliance ?? [];
                     if (alliance.includes(pData?.country ?? 0) || pData?.country == this.playerData.country) {
                         player.sendMessage([{ text: `[§2AC§r] §7${this.sender.name}§f: §a${this.message}` }]);
@@ -355,7 +359,7 @@ class ChatHandler {
             }
             this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `system.setup.complete` }] });
             this.sender.addTag("mc_admin");
-            world.setDynamicProperty(`start`, `true`)
+            world.setDynamicProperty(`start2`, `true`)
             return;
         }, 1);
     };
@@ -399,6 +403,7 @@ class ChatHandler {
     };
 
     checkChunk() {
+        const chunkDataBase = new DynamicProperties("chunk");
         const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
         if (!chunkData || (!chunkData.special && !chunkData.countryId)) {
             this.sender.sendMessage({ translate: `command.checkchunk.result.wilderness`, with: { rawtext: [{ translate: `wilderness.name` }] } });
@@ -445,6 +450,7 @@ class ChatHandler {
     };
 
     setAdminChunk(args) {
+        const chunkDataBase = new DynamicProperties("chunk")
         if (!this.sender.hasTag("mc_admin")) {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
@@ -465,7 +471,7 @@ class ChatHandler {
                 system.runTimeout(() => {
                     this.sender.sendMessage({ translate: `command.setadminchunk.result`, with: { rawtext: [{ translate: `special.name` }] } });
                     const chunk = GenerateChunkData(chunks[i].chunkX, chunks[i].chunkZ, this.sender.dimension.id, undefined, undefined, 10000, true);
-                    StringifyAndSavePropertyData(chunk.id, chunk);
+                    StringifyAndSavePropertyData(chunk.id, chunk, chunkDataBase);
                     return;
                 }, i)
             }
@@ -474,11 +480,13 @@ class ChatHandler {
         const { x, z } = this.sender.location;
         this.sender.sendMessage({ translate: `command.setadminchunk.result`, with: { rawtext: [{ translate: `special.name` }] } });
         const chunk = GenerateChunkData(x, z, this.sender.dimension.id, undefined, undefined, 10000, true);
-        StringifyAndSavePropertyData(chunk.id, chunk);
+        StringifyAndSavePropertyData(chunk.id, chunk, chunkDataBase);
         return;
     };
 
     resetChunk(args) {
+        const chunkDataBase = new DynamicProperties("chunk");
+        const countryDataBase = new DynamicProperties("country");
         if (!this.sender.hasTag("mc_admin")) {
             this.sender.sendMessage({ translate: `command.permission.error` });
             return;
@@ -499,40 +507,40 @@ class ChatHandler {
             for (let i = 0; i < chunks.length; i++) {
                 system.runTimeout(() => {
                     const chunkId = `chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`;
-                    let chunkData = GetAndParsePropertyData(chunkId);
+                    let chunkData = GetAndParsePropertyData(chunkId, chunkDataBase);
                     if (chunkData) {
                         if (chunkData?.countryId) {
-                            const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`);
+                            const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`, countryDataBase);
                             if (countryData) {
                                 countryData.territories.splice(countryData.territories.indexOf(chunkId), 1);
                                 let chunkPrice = config.defaultChunkPrice / 2;
                                 if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
                                 countryData.money += chunkPrice;
-                                StringifyAndSavePropertyData(`country_${chunkData?.countryId}`, countryData);
+                                StringifyAndSavePropertyData(`country_${chunkData?.countryId}`, countryData, countryDataBase);
                             };
                         };
                     };
-                    DyProp.setDynamicProperty(chunkId);
+                    chunkDataBase.delete(chunkId);
                     this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { rawtext: [{ translate: `wilderness.name` }] } });
                 }, i)
             }
             return;
         }
         const chunkId = GetPlayerChunkPropertyId(this.sender);
-        const chunkData = GetAndParsePropertyData(chunkId);
+        const chunkData = GetAndParsePropertyData(chunkId, chunkDataBase);
         if (chunkData) {
             if (chunkData?.countryId) {
-                const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`);
+                const countryData = GetAndParsePropertyData(`country_${chunkData?.countryId}`, countryDataBase);
                 if (countryData) {
                     countryData.territories.splice(countryData.territories.indexOf(chunkId), 1);
                     let chunkPrice = config.defaultChunkPrice / 2;
                     if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
                     countryData.money += chunkPrice;
-                    StringifyAndSavePropertyData(`country_${chunkData?.countryId}`, countryData);
+                    StringifyAndSavePropertyData(`country_${chunkData?.countryId}`, countryData, countryDataBase);
                 };
             };
         };
-        DyProp.setDynamicProperty(chunkId);
+        chunkDataBase.delete(chunkId);
         this.sender.sendMessage({ translate: `command.resetchunk.result`, with: { rawtext: [{ translate: `wilderness.name` }] } });
     };
 
@@ -542,6 +550,9 @@ class ChatHandler {
      * @returns 
      */
     buyChunk(args) {
+        const chunkDataBase = new DynamicProperties("chunk");
+        const playerDataBase = new DynamicProperties("player");
+        const countryDataBase = new DynamicProperties("country");
         if (!this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.buychunk.error.notjoin.country` });
             return;
@@ -562,7 +573,7 @@ class ChatHandler {
             let chunkPrice = config.defaultChunkPrice;
             for (let i = 0; i < chunks.length; i++) {
                 system.runTimeout(() => {
-                    let chunkData = GetAndParsePropertyData(`chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`);
+                    let chunkData = GetAndParsePropertyData(`chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`, chunkDataBase);
                     if (!chunkData) chunkData = GenerateChunkData(chunks[i].chunkX * 16, chunks[i].chunkZ * 16, dimension);
                     if (chunkData && chunkData.price) chunkPrice = chunkData.price;
                     const cannotBuy = CheckPermission(this.sender, `buyChunk`);
@@ -579,7 +590,7 @@ class ChatHandler {
                         return;
                     };
                     if (chunkData.owner) {
-                        const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`);
+                        const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`, playerDataBase);
                         this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.hasowner`, with: [ownerData.name] });
                         return;
                     };
@@ -599,7 +610,7 @@ class ChatHandler {
                         this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
                         return;
                     };
-                    const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+                    const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`, countryDataBase);
                     const eventData = {
                         player: this.sender,
                         cancel: false,
@@ -619,15 +630,15 @@ class ChatHandler {
                     chunkData.countryId = this.playerData.country;
                     playerCountryData.resourcePoint -= chunkPrice;
                     playerCountryData.territories.push(chunkData.id);
-                    StringifyAndSavePropertyData(chunkData.id, chunkData);
-                    StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
+                    StringifyAndSavePropertyData(chunkData.id, chunkData, chunkDataBase);
+                    StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData, countryDataBase);
                     this.sender.sendMessage({ translate: `command.buychunk.result`, with: [`${playerCountryData.resourcePoint}`] });
                     return;
                 }, i);
             };
             return;
         };
-        let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender));
+        let chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.sender), chunkDataBase);
         const { x, z } = this.sender.location;
         if (!chunkData) chunkData = GenerateChunkData(x, z, dimension);
         let chunkPrice = config.defaultChunkPrice;
@@ -646,7 +657,7 @@ class ChatHandler {
             return;
         };
         if (chunkData.owner) {
-            const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`);
+            const ownerData = GetAndParsePropertyData(`player_${chunkData.owner}`, playerDataBase);
             this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.hasowner`, with: [ownerData.name] });
             return;
         };
@@ -666,7 +677,7 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.buychunk.error.thischunk.othercountry`, with: { rawtext: [{ translate: `${chunkData.countryId}` }] } });
             return;
         };
-        const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`, countryDataBase);
         const eventData = {
             player: this.sender,
             cancel: false,
@@ -686,13 +697,16 @@ class ChatHandler {
         chunkData.countryId = this.playerData.country;
         playerCountryData.resourcePoint -= chunkPrice;
         playerCountryData.territories.push(chunkData.id);
-        StringifyAndSavePropertyData(chunkData.id, chunkData);
-        StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
+        StringifyAndSavePropertyData(chunkData.id, chunkData, chunkDataBase);
+        StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData, countryDataBase);
         this.sender.sendMessage({ translate: `command.buychunk.result`, with: [`${playerCountryData.resourcePoint}`] });
         return;
     };
 
     sellChunk(args) {
+        const chunkDataBase = new DynamicProperties("chunk");
+        const playerDataBase = new DynamicProperties("player");
+        const countryDataBase = new DynamicProperties("country");
         if (!this.playerData.country) {
             this.sender.sendMessage({ translate: `command.sellchunk.error.notjoin.country` });
             return;
@@ -713,7 +727,7 @@ class ChatHandler {
             let chunkPrice = config.defaultChunkPrice / 2;
             for (let i = 0; i < chunks.length; i++) {
                 system.runTimeout(() => {
-                    let chunkData = GetAndParsePropertyData(`chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`);
+                    let chunkData = GetAndParsePropertyData(`chunk_${chunks[i].chunkX}_${chunks[i].chunkZ}_${dimension.replace(`minecraft:`, ``)}`, chunkDataBase);
                     if (!chunkData) chunkData = GenerateChunkData(chunks[i].chunkX * 16, chunks[i].chunkZ * 16, dimension);
                     if (chunkData && chunkData.price) chunkPrice = chunkData.price / 2;
                     const cannotSell = CheckPermission(this.sender, `sellChunk`);
@@ -738,7 +752,7 @@ class ChatHandler {
                         this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.already` }] });
                         return;
                     };
-                    const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+                    const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`, countryDataBase);
                     if (playerCountryData.territories.length < 2) {
                         this.sender.sendMessage({ translate: `command.sellchunk.error.morechunk`, with: [`${chunkPrice}`] });
                         return;
@@ -747,8 +761,8 @@ class ChatHandler {
                     chunkData.countryId = undefined;
                     playerCountryData.resourcePoint += chunkPrice;
                     playerCountryData.territories.splice(playerCountryData.territories.indexOf(chunkData.id), 1);
-                    StringifyAndSavePropertyData(chunkData.id, chunkData);
-                    StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
+                    StringifyAndSavePropertyData(chunkData.id, chunkData, chunkDataBase);
+                    StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData, countryDataBase);
                     this.sender.sendMessage({ translate: `command.sellchunk.result`, with: [`${playerCountryData.resourcePoint}`] });
                     return;
                 }, i)
@@ -780,7 +794,7 @@ class ChatHandler {
             this.sender.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.error.already` }] });
             return;
         };
-        const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        const playerCountryData = GetAndParsePropertyData(`country_${this.playerData.country}`, countryDataBase);
         if (playerCountryData.territories.length < 2) {
             this.sender.sendMessage({ translate: `command.sellchunk.error.morechunk`, with: [`${chunkPrice}`] });
             return;
@@ -789,8 +803,8 @@ class ChatHandler {
         chunkData.countryId = undefined;
         playerCountryData.resourcePoint += chunkPrice;
         playerCountryData.territories.splice(playerCountryData.territories.indexOf(chunkData.id), 1);
-        StringifyAndSavePropertyData(chunkData.id, chunkData);
-        StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData);
+        StringifyAndSavePropertyData(chunkData.id, chunkData, chunkDataBase);
+        StringifyAndSavePropertyData(`country_${playerCountryData.id}`, playerCountryData, countryDataBase);
         this.sender.sendMessage({ translate: `command.sellchunk.result`, with: [`${playerCountryData.resourcePoint}`] });
         return;
     };
@@ -936,11 +950,12 @@ class ChatHandler {
     };
 
     leaveCountry() {
+        const countryDataBase = new DynamicProperties("country");
         if (!this.playerData?.country) {
             this.sender.sendMessage({ translate: `command.leavecountry.error.no.belong.country` })
             return;
         };
-        const countryData = GetAndParsePropertyData(`country_${this.playerData?.country}`);
+        const countryData = GetAndParsePropertyData(`country_${this.playerData?.country}`, countryDataBase);
         if (this.playerData.id === countryData?.owner) {
             this.sender.sendMessage({ translate: `command.leavecountry.error.your.owner` })
             return;
@@ -976,6 +991,7 @@ class ChatHandler {
     };
 
     chome() {
+        const countryDataBase = new DynamicProperties("country");
         if (this.sender.hasTag(`mc_notp`)) {
             return;
         };
@@ -983,7 +999,7 @@ class ChatHandler {
             this.sender.sendMessage({ translate: `command.chome.error.notjoin.country` });
             return;
         };
-        const countryData = GetAndParsePropertyData(`country_${this.playerData.country}`);
+        const countryData = GetAndParsePropertyData(`country_${this.playerData.country}`, countryDataBase);
         if (!countryData?.spawn || !countryData?.publicSpawn) {
             return;
         };
@@ -1026,7 +1042,11 @@ class ChatHandler {
         return;
     };
     map() {
+        const chunkDataBase = new DynamicProperties("chunk");
         const playerCurrentChunk = GetPlayerChunkPropertyId(this.sender);
+        const alliance = this.playerCountryData?.alliance ?? [];
+        const hostility = this.playerCountryData?.hostility ?? [];
+        const friendly = this.playerCountryData?.friendly ?? [];
         let [chunk, currentX, currentZ, dimension] = playerCurrentChunk.split(`_`);
         let currentXNum = Number(currentX);
         let currentZNum = Number(currentZ);
@@ -1038,12 +1058,21 @@ class ChatHandler {
                 let chunkX = currentXNum + i;
                 let chunkZ = currentZNum + j;
                 let chunkId = `${chunk}_${chunkX}_${chunkZ}_${dimension}`;
-                let chunkData = GetAndParsePropertyData(`${chunkId}`);
+                let chunkData = GetAndParsePropertyData(`${chunkId}`, chunkDataBase);
                 let colorCode = "f"
                 if (chunkData?.countryId) {
                     colorCode = "e";
                     if (chunkData?.countryId === playerCountryId && playerCountryId != 0) {
                         colorCode = "a";
+                    };
+                    if (alliance.includes(chunkData?.countryId)) {
+                        colorCode = "b";
+                    };
+                    if (hostility.includes(chunkData?.countryId)) {
+                        colorCode = "c";
+                    };
+                    if (friendly.includes(chunkData?.countryId)) {
+                        colorCode = "d";
                     };
                 };
                 if (i === 0 && j === 0) {
@@ -1083,16 +1112,16 @@ class ChatHandler {
             };
             const loreArray = item.getLore();
             if (loreArray.includes(`§c§r§d${this.sender.name}(${this.sender.id})`)) {
-                item.setLore(loreArray.splice(loreArray.indexOf(`§c§r§d${this.sender.name}(${this.sender.id})`), 1));
+                item.setLore(loreArray.filter(lore => lore != `§c§r§d${this.sender.name}(${this.sender.id})`));
                 container.setItem(this.sender.selectedSlotIndex, item);
                 return;
             };
-            if (loreArray.includes(`§c§r§d`)) {
-                item.setLore(loreArray.splice(loreArray.indexOf(`§c§r§d`), 1));
-                container.setItem(this.sender.selectedSlotIndex, item);
+            if (loreArray.find(lore => lore.includes(`§c§r§d`))) {
+                //item.setLore(loreArray.filter(lore => !lore.includes(`§c§r§d`)));
+                //container.setItem(this.sender.selectedSlotIndex, item);
                 return;
             };
-            loreArray.unshift(`§c§r§d${this.sender.name}(${this.sender.id})`);
+            loreArray.unshift(`§c§r§d${this.sender.name}(${sender.id})`);
             item.setLore(loreArray);
             container.setItem(this.sender.selectedSlotIndex, item);
         };
@@ -1146,6 +1175,28 @@ system.afterEvents.scriptEventReceive.subscribe(event => {
     const scriptCommandHandler = new ChatHandler(event, true);
     scriptCommandHandler.handleCommand();
 });
+
+/*
+system.beforeEvents.startup.subscribe(event => {
+    const customCommandNames = ["setup",""];
+    for (const customCommandName of customCommandNames) {
+        event.customCommandRegistry.registerCommand(
+            {
+                name: `mc:${customCommandName}`,
+                permissionLevel: CommandPermissionLevel.Any,
+            },
+            (origin, ...args) => {
+                if (origin.sourceType != CustomCommandSource.Entity) return;
+                ev.sender = origin.sourceEntity;
+                ev.id = `mc_cmd:${customCommandName}`;
+                ev.message = args.join(" ");
+                const customCommandHandler = new ChatHandler(ev, true);
+                customCommandHandler.handleCommand();
+            }
+        )
+    }
+});
+*/
 
 /**
  * 

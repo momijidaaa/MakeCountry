@@ -114,7 +114,7 @@ world.afterEvents.playerBreakBlock.subscribe((ev) => {
     const { brokenBlockPermutation, player } = ev;
     if (brokenBlockPermutation.type.id === `minecraft:cocoa` && brokenBlockPermutation.getState(`age`) === 2) {
         const randomNum = getWeight(1, 10000);
-        if (randomNum < 10) {
+        if (randomNum < 50) {
             const coffee_beans = new ItemStack(`mc:coffee_beans`);
             player.dimension.spawnItem(coffee_beans, player.location);
         };

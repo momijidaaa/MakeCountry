@@ -3,6 +3,7 @@ import { GetAndParsePropertyData, GetPlayerChunkPropertyId, getTimeBefore, Strin
 import * as DyProp from "./DyProp";
 import config from "../config";
 import { DeleteCountry } from "./land";
+import { DynamicProperties } from "../api/dyp";
 
 let taxTimerString
 
@@ -12,13 +13,11 @@ const nowChunkPlotName = new Map();
 world.afterEvents.worldLoad.subscribe(() => {
     taxTimerString = world.getDynamicProperty(`taxTimer`) ?? `${config.taxTimer}`;
     world.setDynamicProperty(`taxTimer`, taxTimerString);
-    if (!DyProp.getDynamicProperty(`voteData`)) DyProp.setDynamicProperty(`voteData`, `{}`);
-    if (!DyProp.getDynamicProperty(`loginData`)) DyProp.setDynamicProperty(`loginData`, `{}`);
 });
 
 world.afterEvents.worldLoad.subscribe(() => {
     system.runInterval(() => {
-        if (!world.getDynamicProperty(`start`)) return;
+        if (!world.getDynamicProperty(`start2`)) return;
         for (const p of world.getPlayers()) {
             const playerLastInCountryId = nowCountryId.get(p.id) ?? 0;
             const chunkId = GetPlayerChunkPropertyId(p);
@@ -76,7 +75,7 @@ world.afterEvents.worldLoad.subscribe(() => {
 world.afterEvents.worldLoad.subscribe(() => {
     system.runInterval(() => {
         if (!config.taxValidity) return;
-        if (!world.getDynamicProperty(`start`)) return;
+        if (!world.getDynamicProperty(`start2`)) return;
         if (config.taxTypeIsTimeSet) {
             const zikan = new Date();
             const hour = zikan.getHours();
@@ -106,13 +105,18 @@ world.afterEvents.worldLoad.subscribe(() => {
 })
 
 export function tax() {
+    const playerDataBase = new DynamicProperties('player');
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `tax.time` }] });
-    for (const pId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`player_`))) {
-        const playerData = GetAndParsePropertyData(pId);
+    for (const pId of playerDataBase.idList) {
+        const rawData = playerDataBase.get(pId);
+        const playerData = JSON.parse(rawData);
         playerData.days += 1;
-        StringifyAndSavePropertyData(pId, playerData);
+        playerDataBase.set(pId, JSON.stringify(playerData));
         if (!playerData.country) continue;
-        const countryData = GetAndParsePropertyData(`country_${playerData.country}`);
+        const countryDataBase = new DynamicProperties('country');
+        const rawCountryData = countryDataBase.get(`country_${playerData.country}`);
+        if(!rawCountryData) continue;
+        const countryData = JSON.parse(rawCountryData);
         if (!countryData) continue;
         if (countryData?.taxInstitutionIsPer) {
             if (playerData.money < 0) {
@@ -121,8 +125,8 @@ export function tax() {
             let taxValue = playerData.money * (countryData.taxPer / 100);
             playerData.money -= taxValue;
             countryData.money += taxValue;
-            StringifyAndSavePropertyData(pId, playerData);
-            StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+            playerDataBase.set(pId, JSON.stringify(playerData));
+            countryDataBase.set(`country_${countryData.id}`, JSON.stringify(countryData))
         } else {
             if (playerData.money < countryData.taxPer) {
                 if (playerData.money < 0) {
@@ -136,23 +140,26 @@ export function tax() {
                 playerData.money -= countryData.taxPer;
                 countryData.money += countryData.taxPer;
             };
-            StringifyAndSavePropertyData(pId, playerData);
-            StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+            playerDataBase.set(pId, JSON.stringify(playerData));
+            countryDataBase.set(`country_${countryData.id}`, JSON.stringify(countryData))
         };
     };
     let deleteCount = 0;
-    for (const cId of DyProp.DynamicPropertyIds().filter(id => id.startsWith(`country_`))) {
-        const countryData = GetAndParsePropertyData(cId);
+    const countryDataBase = new DynamicProperties('country');
+    for (const cId of countryDataBase.idList) {
+        const rawCountryData = countryDataBase.get(cId);
+        const countryData = JSON.parse(rawCountryData);
         if (0 < countryData?.peaceChangeCooltime) {
             countryData.peaceChangeCooltime -= 1;
         };
         if (!countryData?.days) countryData.days = 0;
         countryData.days += 1;
         if (countryData.days < config.NonMaintenanceCostAccrualPeriod) {
-            StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+            countryDataBase.set(`country_${countryData.id}`, JSON.stringify(countryData));
             continue;
         };
-        const ownerData = GetAndParsePropertyData(`player_${countryData?.owner}`);
+        const ownerRawData = playerDataBase.get(`player_${countryData?.owner}`);
+        const ownerData = JSON.parse(ownerRawData)
         if (ownerData?.lastLogined) {
             if (Date.now() - ownerData.lastLogined >= config.autoDeleteAfterFinalLogined * 24 * 60 * 60 * 1000) {
                 system.runTimeout(() => {
@@ -167,7 +174,7 @@ export function tax() {
         if (typeof countryData?.money == "number") {
             if (countryData.money < upkeepCosts) {
                 countryData.money = 0;
-                StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+                countryDataBase.set(`country_${countryData.id}`, JSON.stringify(countryData));
                 system.runTimeout(() => {
                     DeleteCountry(countryData.id);
                 }, deleteCount);
@@ -178,16 +185,6 @@ export function tax() {
         } else {
             countryData.money = 0;
         };
-        StringifyAndSavePropertyData(`country_${countryData.id}`, countryData);
+        countryDataBase.set(`country_${countryData.id}`, JSON.stringify(countryData));
     };
 };
-
-world.afterEvents.worldLoad.subscribe(() => {
-    system.runInterval(() => {
-        const zikan = new Date();
-        if (zikan.getHours() == 0 && zikan.getMinutes() == 0) {
-            DyProp.setDynamicProperty(`voteData`, `{}`);
-            DyProp.setDynamicProperty(`loginData`, `{}`);
-        };
-    }, 20 * 60);
-});

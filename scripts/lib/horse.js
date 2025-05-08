@@ -1,4 +1,4 @@
-import { world, system, Player, EntityRideableComponent, Vector } from "@minecraft/server"
+import { world, system, Player, EntityRideableComponent } from "@minecraft/server"
 import { random, t } from "./utils/util";
 import { parseId } from "./utils/foamatter";
 import { Vec3 } from "./utils/vec3";

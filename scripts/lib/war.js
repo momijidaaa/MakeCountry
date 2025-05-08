@@ -133,7 +133,7 @@ export async function Invade(player) {
         cancel: false
     };
     const isCanceled = country.beforeEvents.startInvade.emit(eventData);
-    if(isCanceled) return;
+    if (isCanceled) return;
     eventData.cancel = undefined;
     playerCountryData.invadeCooltime = date + (config.invadeCooltime * 1000);
     playerCountryData.peaceChangeCooltime = config.invadePeaceChangeCooltime;
@@ -225,10 +225,10 @@ world.afterEvents.entityDie.subscribe((ev) => {
     warCountry.delete(key);
     world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.won`, with: [`§r${playerCountryData.name}§r`, `${invadeCountryData.name}§r`] }] });
     system.runTimeout(() => {
-        if(invadeCountryData.territories.length == 0) {
+        if (invadeCountryData.territories.length == 0) {
             DeleteCountry(invadeCountryData.id);
         };
-    },10);
+    }, 10);
 });
 
 world.afterEvents.entityDie.subscribe((ev) => {
@@ -295,6 +295,8 @@ world.beforeEvents.playerLeave.subscribe((ev) => {
          */
         const warData = warCountry.get(`${playerData.country}`);
         const playerCountryData = GetAndParsePropertyData(`country_${playerData.country}`);
+        const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
+        playerCountryData.invadeCooltime = date + (config.invadeLostCoolTime * 1000);
         const warCountryData = GetAndParsePropertyData(`country_${warData.country}`);
         const core = world.getEntity(warData.core);
         if (core) {
@@ -303,6 +305,7 @@ world.beforeEvents.playerLeave.subscribe((ev) => {
         wars.delete(key);
         warCountry.delete(`${playerData.country}`);
         world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.guard`, with: [`§r${warCountryData.name}§r`, `${playerCountryData.name}§r`] }] });
+        StringifyAndSavePropertyData(`country_${playerData.country}`, playerCountryData);
     });
 });
 
@@ -335,71 +338,71 @@ world.afterEvents.entityDie.subscribe((ev) => {
 });
 
 world.afterEvents.worldLoad.subscribe(() => {
-system.runInterval(() => {
-    const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
-    for (const key of warCountry.keys()) {
-        const data = warCountry.get(key);
-        if (data.time < date) {
-            warCountry.delete(key);
-            wars.delete(`${data.key}`);
-            const playerCountryData = GetAndParsePropertyData(`country_${key}`);
-            const warCountryData = GetAndParsePropertyData(`country_${data.country}`);
-            const core = world.getEntity(data.core);
-            if (core) {
-                core.remove();
+    system.runInterval(() => {
+        const date = new Date(Date.now() + ((config.timeDifference * 60) * 60 * 1000)).getTime();
+        for (const key of warCountry.keys()) {
+            const data = warCountry.get(key);
+            if (data.time < date) {
+                warCountry.delete(key);
+                wars.delete(`${data.key}`);
+                const playerCountryData = GetAndParsePropertyData(`country_${key}`);
+                const warCountryData = GetAndParsePropertyData(`country_${data.country}`);
+                const core = world.getEntity(data.core);
+                if (core) {
+                    core.remove();
+                };
+                world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.guard`, with: [`§r${warCountryData.name}§r`, `${playerCountryData.name}§r`] }] });
             };
-            world.sendMessage({ rawtext: [{ text: `§a[MakeCountry]\n` }, { translate: `invade.guard`, with: [`§r${warCountryData.name}§r`, `${playerCountryData.name}§r`] }] });
         };
-    };
-}, 20);
+    }, 20);
 });
 
 world.afterEvents.worldLoad.subscribe(() => {
-system.runInterval(() => {
-    const cores = world.getDimension("overworld").getEntities({ type: `mc:core` });
-    for (const core of cores) {
-        for (const player of core.dimension.getPlayers({ maxDistance: config.maxDropDistance, location: core.location })) {
-            const container = player.getComponent(`inventory`).container;
-            const selectItem = container.getItem(player.selectedSlotIndex);
-            const equippable = player.getComponent(`equippable`);
-            const chestItem = equippable.getEquipment(EquipmentSlot.Chest);
-            if (selectItem) {
-                const selectItemStackTypeId = selectItem.typeId;
-                let cleared = false;
-                if (selectItemStackTypeId != `minecraft:mace` && selectItemStackTypeId != `minecraft:trident` && selectItemStackTypeId != `minecraft:ender_pearl`) continue;
-                for (let i = 9; i < container.size; i++) {
-                    if (!container.getItem(i)) {
+    system.runInterval(() => {
+        const cores = world.getDimension("overworld").getEntities({ type: `mc:core` });
+        for (const core of cores) {
+            for (const player of core.dimension.getPlayers({ maxDistance: config.maxDropDistance, location: core.location })) {
+                const container = player.getComponent(`inventory`).container;
+                const selectItem = container.getItem(player.selectedSlotIndex);
+                const equippable = player.getComponent(`equippable`);
+                const chestItem = equippable.getEquipment(EquipmentSlot.Chest);
+                if (selectItem) {
+                    const selectItemStackTypeId = selectItem.typeId;
+                    let cleared = false;
+                    if (selectItemStackTypeId != `minecraft:mace` && selectItemStackTypeId != `minecraft:trident` && selectItemStackTypeId != `minecraft:ender_pearl`) continue;
+                    for (let i = 9; i < container.size; i++) {
+                        if (!container.getItem(i)) {
+                            container.setItem(player.selectedSlotIndex);
+                            container.setItem(i, selectItem);
+                            cleared = true;
+                            break;
+                        };
+                    };
+                    if (!cleared) {
                         container.setItem(player.selectedSlotIndex);
-                        container.setItem(i, selectItem);
-                        cleared = true;
-                        break;
+                        const { x, y, z } = player.location;
+                        player.dimension.spawnItem(selectItem, { x, y: y + 5, z });
                     };
                 };
-                if (!cleared) {
-                    container.setItem(player.selectedSlotIndex);
-                    const { x, y, z } = player.location;
-                    player.dimension.spawnItem(selectItem, { x, y: y + 5, z });
-                };
-            };
-            if (chestItem) {
-                const equippableItemStackTypeId = chestItem.typeId;
-                let cleared = false;
-                if (equippableItemStackTypeId != `minecraft:elytra`) continue;
-                for (let i = 9; i < container.size; i++) {
-                    if (!container.getItem(i)) {
+                if (chestItem) {
+                    const equippableItemStackTypeId = chestItem.typeId;
+                    let cleared = false;
+                    if (equippableItemStackTypeId != `minecraft:elytra`) continue;
+                    for (let i = 9; i < container.size; i++) {
+                        if (!container.getItem(i)) {
+                            equippable.setEquipment(EquipmentSlot.Chest);
+                            container.setItem(i, chestItem);
+                            cleared = true;
+                            break;
+                        };
+                    };
+                    if (!cleared) {
                         equippable.setEquipment(EquipmentSlot.Chest);
-                        container.setItem(i, chestItem);
-                        cleared = true;
-                        break;
+                        const { x, y, z } = player.location;
+                        player.dimension.spawnItem(chestItem, { x, y: y + 5, z });
                     };
-                };
-                if (!cleared) {
-                    equippable.setEquipment(EquipmentSlot.Chest);
-                    const { x, y, z } = player.location;
-                    player.dimension.spawnItem(chestItem, { x, y: y + 5, z });
                 };
             };
         };
-    };
-});
+    });
 })

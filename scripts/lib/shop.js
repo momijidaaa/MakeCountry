@@ -1,7 +1,9 @@
 import { ItemStack, Player, system } from "@minecraft/server";
 import { ChestFormData } from "./chest-ui";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
-import { FormCancelationReason, ModalFormData } from "@minecraft/server-ui";
+import { FormCancelationReason } from "@minecraft/server-ui";
+import { ModalForm} from "./form_class";
+const ModalFormData = ModalForm;
 import config from "../config";
 import { itemIdToPath } from "../texture_config";
 import shop_config from "../shop_config";

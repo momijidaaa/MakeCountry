@@ -1,5 +1,4 @@
 import { world } from "@minecraft/server";
-const startId = "DyProp_"
 
 /**
  * 
@@ -7,6 +6,34 @@ const startId = "DyProp_"
  * @param {String|undefined} value
  */
 export function setDynamicProperty(id, value = undefined) {
+    if (!value) {
+        if (id.includes('_')) {
+            const key = id.split('_')[0];
+            const pattern = `dyp#${key}#${id}#dy`;
+
+            const existingKeys = [];
+            for (let i = 0; i < 10000; i++) {
+                const test = world.getDynamicProperty(`${pattern}${i}`);
+                if (!test) break;
+                existingKeys.push(i);
+            }
+
+            for (let i = 0; i < existingKeys.length; i++) {
+                world.setDynamicProperty(`${pattern}${i}`, undefined);
+            }
+        } else {
+            const pattern = `dyp#${id}#dy`;
+            const existingKeys = [];
+            for (let i = 0; i < 10000; i++) {
+                const test = world.getDynamicProperty(`${pattern}${i}`);
+                if (!test) break;
+                existingKeys.push(i);
+            }
+            for (let i = 0; i < existingKeys.length; i++) {
+                world.setDynamicProperty(`${pattern}${i}`, undefined);
+            }
+        }
+    }
     const pattern = `DyProp_${id}_dy`;
     if (typeof value !== 'string' && value) {
         console.warn("Input must be a string");

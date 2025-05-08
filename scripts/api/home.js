@@ -27,7 +27,8 @@ export class HomeManager {
      */
     setHome(name = "default") {
         if (this.player.hasTag("mc_notp")) return;
-        if (CheckPermission(this.player, "setHome")) return;
+        const location = this.player.location;
+        if (CheckPermissionFromLocation(this.player, location.x, location.z, this.player.dimension.id, "setHome")) return;
 
         if (!/^[\w\dぁ-んァ-ヶ一-龠]+$/.test(name) || name.length > 12) {
             this.player.sendMessage({ translate: "command.sethome.error.invalidname" });

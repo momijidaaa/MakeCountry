@@ -1,5 +1,8 @@
 import { world, system, Player } from '@minecraft/server';
-import { ActionFormData, ModalFormData, FormCancelationReason } from '@minecraft/server-ui';
+import { FormCancelationReason } from "@minecraft/server-ui";
+import { ActionForm, ModalForm } from "./form_class";
+const ActionFormData = ActionForm;
+const ModalFormData = ModalForm;
 import config from '../config.js';
 
 const teleportRequests = new Map();
@@ -71,8 +74,8 @@ const showRequestSendMenu = (sender) => {
     };
 
     const modalForm = new ModalFormData()
-        .title({ translate: `form.teleport.button.send` })
-        .dropdown({ translate: `players.list` }, otherPlayers, 0);
+    modalForm.title({ translate: `form.teleport.button.send` })
+    modalForm.dropdown({ translate: `players.list` }, otherPlayers, 0);
 
     modalForm.show(sender).then((rs) => {
         if (rs.canceled) {
@@ -111,7 +114,7 @@ function showRequestAcceptMenu(sender) {
     const requests = teleportRequests.get(sender.name) || [];
 
     const form = new ActionFormData()
-        .title({ translate: `form.teleport.button.receive` });
+    form.title({ translate: `form.teleport.button.receive` });
     form.button({ translate: `mc.button.back` });
     for (const playerName of requests) {
         form.button({ translate: `mc.button.accept.request`, with: [`${playerName}`] });
@@ -187,3 +190,27 @@ world.afterEvents.playerJoin.subscribe((ev) => {
     const { playerName } = ev;
     teleportRequests.set(playerName, []);
 });
+
+
+/**
+ * @param {Player} sender
+ */
+export function AcceptTeleportRequest(sender) {
+    const requests = teleportRequests.get(sender.name) || [];
+
+    const playerName = requests[requests.length - 1];
+    if (teleportRequests.get(sender.name).includes(playerName)) {
+        findPlayerByName(playerName)?.teleport(sender.location, { dimension: sender.dimension });
+
+        sender.sendMessage({ translate: `accept.request.message` });
+
+        const updatedRequests = requests.filter((value) => value !== playerName);
+        teleportRequests.set(sender.name, updatedRequests);
+
+        const timeoutId = timeoutHandlers.get(`${playerName}=>${sender.name}`);
+        system.clearRun(timeoutId);
+        timeoutHandlers.delete(`${playerName}=>${sender.name}`);
+    } else {
+        sender.sendMessage({ translate: `application.deadline.message` });
+    };
+};

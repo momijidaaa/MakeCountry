@@ -1,4 +1,4 @@
-import { system, world } from "@minecraft/server";
+import { system } from "@minecraft/server";
 
 system.beforeEvents.startup.subscribe((ev) => {
     const { blockComponentRegistry } = ev;

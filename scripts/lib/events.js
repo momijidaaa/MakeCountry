@@ -1,4 +1,4 @@
-import { BlockPermutation, EntityDamageCause, GameMode, Player, system, world } from "@minecraft/server";
+import { EntityDamageCause, GameMode, Player, system, world } from "@minecraft/server";
 import { CheckPermissionFromLocation, GetAndParsePropertyData, getRandomInteger, StringifyAndSavePropertyData } from "./util";
 import * as DyProp from "./DyProp";
 import config from "../config";
@@ -8,6 +8,7 @@ import { chestShopConfig } from "../chest_shop_config";
 import { getShopData, getSignTexts, isShopOwner } from "./chest_shop";
 import { nameSet } from "./nameset";
 import { JobLevel } from "./jobslevel";
+import { DynamicProperties } from "../api/dyp";
 
 world.afterEvents.worldLoad.subscribe(() => {
     system.runInterval(() => {
@@ -198,8 +199,9 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
     };
 
     if (chestLockData) {
+        const chestDataBase = new DynamicProperties("chest");
         if (isChest && chestLockData.player === player.id) {
-            system.runTimeout(() => DyProp.setDynamicProperty(chestId));
+            system.runTimeout(() => chestDataBase.delete(chestId));
         } else if (isChest) {
             if (player.hasTag(`adminmode`)) return;
             player.breakInfo = {
@@ -224,7 +226,7 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
             const ownerName = GetAndParsePropertyData(`player_${chestLockData.player}`).name;
             player.sendMessage({ translate: 'message.thischest.islocked', with: [ownerName] });
         } else {
-            system.runTimeout(() => DyProp.setDynamicProperty(chestId));
+            system.runTimeout(() => chestDataBase.delete(chestId));
         }
         return;
     }
@@ -236,9 +238,8 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
         location: block.location,
         cancel: cannot
     };
-    /*
     if (cannot) {
-        if ('upper_block_bit' in states && states['upper_block_bit'] === true) {
+        /*if ('upper_block_bit' in states && states['upper_block_bit'] === true) {
             system.run(() => {
                 system.run(() => {
                     const item = block.dimension.getEntities({ location: block.location, maxDistance: 5, type: `minecraft:item` }).find(item => item.getComponent(`item`).isValid && item.getComponent(`item`).itemStack.typeId == itemTypeId);
@@ -262,9 +263,8 @@ world.beforeEvents.playerBreakBlock.subscribe(async (ev) => {
                 }, 5);
             };
             return;
-        };
+        };*/
     };
-    */
     ev.cancel = cannot;
 
     if (cannot) {
@@ -402,7 +402,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
     const permission = `place`
     const { player, block } = ev;
     const container = player.getComponent("inventory").container;
-    if(!container.getItem(player.selectedSlotIndex)) return;
+    if (!container.getItem(player.selectedSlotIndex)) return;
     const { x, z } = block.location;
     const now = Date.now();
     if (player?.itemUseOnInfo) {
@@ -489,6 +489,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
             const chestLockData = GetAndParsePropertyData(chestId);
             if (chestLockData) {
                 const isOwner = chestLockData.player === playerId; // 所有者かどうか
+                const chestDataBase = new DynamicProperties("chest");
                 if (isChest) {
                     if (isOwner && !isSneaking) return;
                     if (isOwner && isSneaking && !selectedItem) {
@@ -514,7 +515,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
                     return;
                 }
                 if (!isChest) {
-                    DyProp.setDynamicProperty(chestId); // データの保存
+                    chestDataBase.delete(chestId);
                 }
             } else if (isSneaking && isChest && !selectedItem) {
                 ev.cancel = true;
@@ -563,6 +564,16 @@ world.beforeEvents.playerInteractWithBlock.subscribe((ev) => {
         system.run(() => {
             // 農家ジョブの報酬
             if (block.typeId === 'minecraft:sweet_berry_bush' && player.hasTag('mcjobs_farmer') && growth > 1 && !player.isSneaking) {
+                const container = player.getComponent("inventory").container;
+                const item = container.getItem(player.selectedSlotIndex);
+                if(growth != 3) {
+                    if(item && item?.typeId == "minecraft:bone_meal") {
+                        return;
+                    }
+                }
+                if(item && item?.typeId.includes("minecraft:bucket")) {
+                    return;
+                }
                 if (CheckPermissionFromLocation(player, x, z, dimensionId, `place`)) return;
                 //block.setPermutation(block.permutation.withState(`growth`, 0));
                 const playerData = GetAndParsePropertyData(`player_${playerId}`);
@@ -609,18 +620,25 @@ world.beforeEvents.playerInteractWithEntity.subscribe((ev) => {
 world.afterEvents.playerSpawn.subscribe((ev) => {
     const { player, initialSpawn } = ev;
     if (initialSpawn) {
-        const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
+        const playerDataBase = new DynamicProperties("player");
+        const dataCheck = playerDataBase.get(`player_${player.id}`);
         if (dataCheck) {
             const playerData = JSON.parse(dataCheck);
             playerData.name = player.name;
             playerData.lastLogined = Date.now();
             playerData.money = Math.floor(playerData.money);
-            StringifyAndSavePropertyData(`player_${player.id}`, playerData);
+            StringifyAndSavePropertyData(`player_${player.id}`, playerData, playerDataBase);
             if (config.countryNameDisplayOnPlayerNameTag) {
                 nameSet(player);
             };
             return;
         };
+        const beforeData = playerDataBase.get(`player_${player.id}`);
+        if (beforeData) {
+            playerDataBase.set(`player_${player.id}`, beforeData);
+            return;
+        };
+
         const newPlayerData = {
             name: player.name,
             id: player.id,
@@ -634,39 +652,6 @@ world.afterEvents.playerSpawn.subscribe((ev) => {
                 inviteReceiveMessage: true,
             }
         };
-        StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
+        StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData, playerDataBase);
     };
 });
-
-try {
-    const players = world.getAllPlayers();
-    for (const player of players) {
-        const dataCheck = DyProp.getDynamicProperty(`player_${player.id}`);
-        if (dataCheck) {
-            player.setDynamicProperty(`nowCountryId`);
-            if (config.countryNameDisplayOnPlayerNameTag) {
-                nameSet(player);
-            };
-        } else {
-            let moneyValue = config.initialMoney;
-            if (config.getMoneyByScoreboard) {
-                const scoreboard = world.scoreboard.getObjective(config.moneyScoreboardName) || world.scoreboard.addObjective(config.moneyScoreboardName);
-                const scoreValue = scoreboard.getScore(player);
-                if (scoreValue) moneyValue = scoreValue;
-            };
-            const newPlayerData = {
-                name: player.name,
-                id: player.id,
-                country: undefined,
-                money: moneyValue,
-                roles: [],
-                days: 0,
-                invite: [],
-                settings: {
-                    inviteReceiveMessage: true,
-                }
-            };
-            StringifyAndSavePropertyData(`player_${player.id}`, newPlayerData);
-        };
-    };
-} catch (error) { };

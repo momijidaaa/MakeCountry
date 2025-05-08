@@ -1,6 +1,7 @@
-import { ActionFormData, ActionFormResponse } from "@minecraft/server-ui";
+import { ActionFormResponse } from "@minecraft/server-ui";
+import { ActionForm, } from "./form_class";
+const ActionFormData = ActionForm;
 import { typeIdToID } from "./typeIds";
-import { BlockTypes, ItemStack } from "@minecraft/server";
 import { langChangeItemName } from "./util";
 
 const sizes = new Map([

@@ -2,6 +2,7 @@ import { Block, BlockTypes, Entity, Player } from "@minecraft/server";
 import * as Dyprop from "./DyProp";
 import config from "../config";
 import jobs_config from "../jobs_config";
+import { DynamicProperties } from "../api/dyp";
 
 /**
  * 指定した座標、ディメンションのチャンクのダイプロのプロパティを取得
@@ -31,10 +32,20 @@ export function GetPlayerChunkPropertyId(player) {
 /**
  * 指定したIDのダイプロのデータをJSON.parseして取得
  * @param {string} id
+ * @param {DynamicProperties} database 
  * @returns {any|undefined}
  */
-export function GetAndParsePropertyData(id) {
-    let dataString = Dyprop.getDynamicProperty(id);
+export function GetAndParsePropertyData(id, database = undefined) {
+    if (!database) {
+        if (id.includes('_')) {
+            const database = new DynamicProperties(id.split('_')[0]);
+            const data = database.get(id);
+            return data ? JSON.parse(data) : undefined;
+        }
+        const data = Dyprop.getDynamicProperty(id);
+        return data ? JSON.parse(data) : undefined;
+    }
+    let dataString = database.get(id);
     if (!dataString || typeof dataString !== "string") return undefined;
     try {
         const parseData = JSON.parse(dataString);
@@ -49,10 +60,21 @@ export function GetAndParsePropertyData(id) {
  * 指定したIDのダイプロにデータをJSON形式にして保存
  * @param {string} id
  * @param {any} data
+ * @param {DynamicProperties} database 
  * @returns 
  */
-export function StringifyAndSavePropertyData(id, data) {
-    Dyprop.setDynamicProperty(id, JSON.stringify(data));
+export function StringifyAndSavePropertyData(id, data, database = undefined) {
+    if (!database) {
+        if (id.includes('_')) {
+            const database = new DynamicProperties(id.split('_')[0]);
+            database.set(id, JSON.stringify(data));
+            return;
+        }
+        Dyprop.setDynamicProperty(id, JSON.stringify(data));
+        return;
+    }
+    database.set(id, JSON.stringify(data));
+    return;
 };
 
 /**
@@ -88,11 +110,6 @@ const checkOnlyRole = [
     `buyChunk`
 ];
 
-const restrictionPermissions = [
-    `makeCountry`,
-    `buyChunk`,
-    `sellChunk`
-];
 /**
  * 権限確認
  * @param {Player} player 
@@ -428,15 +445,19 @@ export function CheckPermissionFromLocation(player, x, z, dimensionId, permissio
             };
             return true;
         };
-        if (countryData.alliance.includes(playerData.country)) {
-            if (countryData.alliancePermission.includes(permission)) return false;
-            return true;
-        };
-        if (countryData.hostility.includes(playerData.country)) {
-            if (countryData.hostilityPermission.includes(permission)) return false;
-            return true;
-        };
-        if (countryData.neutralityPermission.includes(permission)) return false;
+        if (countryData?.alliance) {
+            if (countryData?.alliance.includes(playerData.country)) {
+                if (countryData.alliancePermission.includes(permission)) return false;
+                return true;
+            };    
+        }
+        if(countryData?.hostility) {
+            if (countryData?.hostility.includes(playerData.country)) {
+                if (countryData.hostilityPermission.includes(permission)) return false;
+                return true;
+            };    
+        }
+        if (countryData?.neutralityPermission?.includes(permission)) return false;
         return true;
     };
     return false;
@@ -532,7 +553,8 @@ export function getTimeBefore(time, minutesBefore) {
  * @returns {string}
  */
 export function playerNameToId(playerName) {
-    const playerIds = Dyprop.DynamicPropertyIds().filter(id => id.startsWith(`player_`));
+    const playerDataBase = new DynamicProperties('player');
+    const playerIds = playerDataBase.idList;
     return playerIds.find(id => playerName === GetAndParsePropertyData(id).name).split('_')[1];
 };
 
