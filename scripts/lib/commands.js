@@ -1121,7 +1121,7 @@ class ChatHandler {
                 //container.setItem(this.sender.selectedSlotIndex, item);
                 return;
             };
-            loreArray.unshift(`§c§r§d${this.sender.name}(${sender.id})`);
+            loreArray.unshift(`§c§r§d${this.sender.name}(${this.sender.id})`);
             item.setLore(loreArray);
             container.setItem(this.sender.selectedSlotIndex, item);
         };
