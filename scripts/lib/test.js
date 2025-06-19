@@ -10,6 +10,11 @@ import { updateRanking } from "./ranking";
 import { fixCountryData } from "./fixdata";
 import { DynamicProperties } from "../api/dyp";
 
+let playerDataBase
+world.afterEvents.worldLoad.subscribe(() => {
+    playerDataBase = new DynamicProperties("player");
+})
+
 system.afterEvents.scriptEventReceive.subscribe((ev) => {
     if (ev.sourceType !== ScriptEventSource.Entity || !(ev.sourceEntity instanceof Player)) return;
     const { sourceEntity, message } = ev;
@@ -244,8 +249,28 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
             fixCountryData();
             break;
         }
+        case 'karo:resetservermoney': {
+            system.runJob(resetMoney(playerDataBase.idList));
+            break;
+        }
     };
 });
+
+/**
+ * プレイヤーのお金をリセットするジェネレーター関数
+ * @param {Array<string>} keys 
+ */
+function* resetMoney(keys) {
+    for (const key of keys) {
+        const rawData = playerDataBase.get(key);
+        if (!rawData) continue;
+        const data = JSON.parse(rawData);
+        data.money = 0;
+        playerDataBase.set(key, JSON.stringify(data));
+        console.log(data.name)
+        yield key; // 処理済みのキーを返す
+    }
+}
 
 /**
  * 

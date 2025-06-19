@@ -1,7 +1,9 @@
 import { CommandPermissionLevel, CustomCommandParamType, Player, system, world } from "@minecraft/server";
 import { DynamicProperties } from "../dyp";
+import { GenerateChunkData } from "../../lib/land";
 import { CheckPermission, GetAndParsePropertyData, GetPlayerChunkPropertyId, isNumber, StringifyAndSavePropertyData } from "../../lib/util";
 import config from "../../config";
+import { country } from "../api";
 
 system.beforeEvents.startup.subscribe((event) => {
     event.customCommandRegistry.registerCommand(

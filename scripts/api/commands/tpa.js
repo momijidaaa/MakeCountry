@@ -35,7 +35,8 @@ system.beforeEvents.startup.subscribe((event) => {
                     };
                 };
                 if (args.length != 0) {
-                    teleportRequest(sender, args[0].name);
+                    if (args[0].length == 0) return;
+                    teleportRequest(sender, args[0][0].name);
                     return;
                 };
                 tpaMainForm(sender);

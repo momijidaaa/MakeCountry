@@ -3504,7 +3504,7 @@ export function showCountryInfo(player, countryData, al = false) {
 export function settingCountryRoleForm(player) {
     const cannot = CheckPermission(player, 'admin');
     if (cannot) {
-        this.sender.sendMessage({ translate: `command.permission.error` });
+        player.sendMessage({ translate: `no.permission` });
         return;
     };
     try {

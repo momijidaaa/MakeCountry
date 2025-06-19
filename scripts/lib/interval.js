@@ -1,5 +1,6 @@
 import { system, world } from "@minecraft/server";
-import { GetAndParsePropertyData, GetPlayerChunkPropertyId, getTimeBefore } from "./util";
+import { GetAndParsePropertyData, GetPlayerChunkPropertyId, getTimeBefore, StringifyAndSavePropertyData } from "./util";
+import * as DyProp from "./DyProp";
 import config from "../config";
 import { DeleteCountry } from "./land";
 import { DynamicProperties } from "../api/dyp";

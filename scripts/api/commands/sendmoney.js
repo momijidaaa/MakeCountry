@@ -26,13 +26,13 @@ system.beforeEvents.startup.subscribe((event) => {
                  * @type {Player}
                  */
                 //const targetPlayer = world.getDimension(this.sender.dimension.id).getEntities({ type: "minecraft:player", name: targetName })[0];
-                const targetPlayer = args[1];
+                const targetPlayer = args[1][0];
 
                 if (!targetPlayer) {
                     sender.sendMessage({ translate: `command.error.notarget.this.dimension` });
                     return;
                 };
-                if (targetPlayer.id == this.sender.id) {
+                if (targetPlayer.id == sender.id) {
                     sender.sendMessage({ translate: `command.error.trysend.moremoney.yourself` })
                     return;
                 };
@@ -49,7 +49,7 @@ system.beforeEvents.startup.subscribe((event) => {
                 playerData.money -= Math.floor(amount);
                 StringifyAndSavePropertyData(`player_${targetPlayer.id}`, targetData);
                 StringifyAndSavePropertyData(`player_${sender.id}`, playerData);
-                sender.sendMessage({ translate: `command.sendmoney.result.sender`, with: [targetName, `${config.MoneyName} ${Math.floor(amount)}`] });
+                sender.sendMessage({ translate: `command.sendmoney.result.sender`, with: [targetPlayer.name, `${config.MoneyName} ${Math.floor(amount)}`] });
                 targetPlayer.sendMessage({ translate: `command.sendmoney.result.receiver`, with: [sender.name, `${config.MoneyName} ${Math.floor(amount)}`] });
             })
         })
@@ -79,13 +79,13 @@ system.beforeEvents.startup.subscribe((event) => {
                  * @type {Player}
                  */
                 //const targetPlayer = world.getDimension(this.sender.dimension.id).getEntities({ type: "minecraft:player", name: targetName })[0];
-                const targetPlayer = args[1];
+                const targetPlayer = args[1][0];
 
                 if (!targetPlayer) {
                     sender.sendMessage({ translate: `command.error.notarget.this.dimension` });
                     return;
                 };
-                if (targetPlayer.id == this.sender.id) {
+                if (targetPlayer.id == sender.id) {
                     sender.sendMessage({ translate: `command.error.trysend.moremoney.yourself` })
                     return;
                 };
@@ -102,7 +102,7 @@ system.beforeEvents.startup.subscribe((event) => {
                 playerData.money -= Math.floor(amount);
                 StringifyAndSavePropertyData(`player_${targetPlayer.id}`, targetData);
                 StringifyAndSavePropertyData(`player_${sender.id}`, playerData);
-                sender.sendMessage({ translate: `command.sendmoney.result.sender`, with: [targetName, `${config.MoneyName} ${Math.floor(amount)}`] });
+                sender.sendMessage({ translate: `command.sendmoney.result.sender`, with: [targetPlayer.name, `${config.MoneyName} ${Math.floor(amount)}`] });
                 targetPlayer.sendMessage({ translate: `command.sendmoney.result.receiver`, with: [sender.name, `${config.MoneyName} ${Math.floor(amount)}`] });
             })
         })

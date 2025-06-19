@@ -36,8 +36,10 @@ export class HomeManager {
         }
 
         if (Object.keys(this.homes).length >= this.maxHomes) {
-            this.player.sendMessage({ translate: "command.sethome.error.limit", with: [`${config.maxHomeCount}`] });
-            return;
+            if (!this.homes[name]) {
+                this.player.sendMessage({ translate: "command.sethome.error.limit", with: [`${config.maxHomeCount}`] });
+                return;
+            }
         }
 
         const chunkData = GetAndParsePropertyData(GetPlayerChunkPropertyId(this.player));

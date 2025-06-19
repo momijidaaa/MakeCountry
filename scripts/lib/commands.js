@@ -1,4 +1,4 @@
-import { Player, system, world } from "@minecraft/server";
+import { Player, PlayerPermissionLevel, system, world } from "@minecraft/server";
 import * as DyProp from "./DyProp";
 import { DynamicProperties } from "../api/dyp";
 import { CheckPermission, CheckPermissionFromLocation, GetAndParsePropertyData, GetPlayerChunkPropertyId, isNumber, StringifyAndSavePropertyData } from "./util";
@@ -353,7 +353,7 @@ class ChatHandler {
 
     setup() {
         system.runTimeout(() => {
-            if (!this.sender.isOp()) {
+            if (this.sender.playerPermissionLevel != PlayerPermissionLevel.Operator) {
                 this.sender.sendMessage({ translate: `command.permission.error` });
                 return;
             }

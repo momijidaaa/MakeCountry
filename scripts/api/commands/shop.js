@@ -19,7 +19,7 @@ system.beforeEvents.startup.subscribe((event) => {
                     sender.sendMessage({ translate: `no.available.shop` });
                     return;
                 };
-                ShopCommonsMenu(this.sender);
+                ShopCommonsMenu(sender);
             })
         })
     )
