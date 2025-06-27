@@ -1,26 +1,32 @@
 import { ItemStack, Player, system, world } from "@minecraft/server";
-import { ChestFormData } from "./chest-ui";
-import { GetAndParsePropertyData, isDecimalNumber, langChangeItemName, StringifyAndSavePropertyData } from "./util";
-import * as DyProp from "./DyProp";
+import { GetAndParsePropertyData, StringifyAndSavePropertyData, isDecimalNumber, langChangeItemName } from "../util";
+import { DynamicProperties } from "../../api/dyp";
+import config from "../../config";
+import { SmartPhoneHomeScreen } from "../smartphone";
+import { ChestFormData } from "../chest-ui";
+import * as DyProp from "../DyProp";
 import { FormCancelationReason } from "@minecraft/server-ui";
-import { ActionForm, ModalForm } from "./form_class";
+import { ActionForm, ModalForm } from "../form_class";
 const ActionFormData = ActionForm;
 const ModalFormData = ModalForm;
-import config from "../config";
-import { itemIdToPath } from "../texture_config";
-import { typeIdToID } from "./typeIds";
+import { itemIdToPath } from "../../texture_config";
+
+/**
+ * @type {DynamicProperties}
+ */
+let playerDataBase;
 
 world.afterEvents.worldLoad.subscribe(() => {
-    if (!DyProp.getDynamicProperty(`player_market_commons`)) DyProp.setDynamicProperty(`player_market_commons`, `[]`);
+    playerDataBase = new DynamicProperties("player");
 });
 
 /**
  * 
  * @param {Player} player 
  */
-export function PlayerMarketMainMenu(player) {
+export function KarcariApp(player) {
     const form = new ActionFormData();
-    form.title(`Player Market`);
+    form.title(`Karcari`);
     form.button({ translate: `view.products` });
     form.button({ translate: `sell.products` });
     form.button({ translate: `withdrawal.goods` });
@@ -29,10 +35,11 @@ export function PlayerMarketMainMenu(player) {
         if (rs.canceled) {
             if (rs.cancelationReason == FormCancelationReason.UserBusy) {
                 system.runTimeout(() => {
-                    PlayerMarketMainMenu(player);
+                    KarcariApp(player);
                 }, 10);
             };
             //閉じる
+            SmartPhoneHomeScreen(player);
             return;
         };
         switch (rs.selection) {
@@ -81,12 +88,12 @@ export function PlayerMarketCheckSold(player) {
     playerData.money += addMoney;
     StringifyAndSavePropertyData(`player_${player.id}`, playerData);
     const form = new ActionFormData();
-    form.title({ translate: 'sale.history' });
+    form.title({ rawtext: [{ text: 'Karcari - ' }, { translate: 'sale.history' }] });
     form.body(string);
     form.button({ translate: 'mc.button.close' });
     form.show(player).then((rs) => {
         if (rs.canceled) {
-            PlayerMarketMainMenu(player);
+            KarcariApp(player);
             return;
         };
         switch (rs.selection) {
@@ -105,7 +112,7 @@ export function PlayerMarketCheckSold(player) {
  */
 export function PlayerMarketWithdrawalGoodsMainMenu(player) {
     const form = new ActionFormData();
-    form.title(`Player Market`)
+    form.title(`Karcari`)
     form.button({ translate: `mc.button.close` });
     const data = GetAndParsePropertyData(`player_market_commons`) ?? [];
     /**
@@ -120,7 +127,7 @@ export function PlayerMarketWithdrawalGoodsMainMenu(player) {
     };
     form.show(player).then(rs => {
         if (rs.canceled) {
-            PlayerMarketMainMenu(player);
+            KarcariApp(player);
             return;
         };
         switch (rs.selection) {
@@ -153,7 +160,7 @@ export function PlayerMarketWithdrawalGoodsMainMenu(player) {
  */
 export function PlayerMarketWithdrawalGoodsSelectMenu(player, common) {
     const form = new ActionFormData();
-    form.title(`Player Market`);
+    form.title(`Karcari`);
     form.button({ translate: `mc.button.back` });
     form.button({ translate: `mc.button.withdrawal.goods` });
     form.show(player).then(rs => {
@@ -226,12 +233,12 @@ export function PlayerMarketExhibitMainMenu(player) {
     };
     form.show(player).then(rs => {
         if (rs.canceled) {
-            PlayerMarketMainMenu(player);
+            KarcariApp(player);
             return;
         };
         switch (rs.selection) {
             case 0: {
-                PlayerMarketMainMenu(player);
+                KarcariApp(player);
                 return;
             };
             default: {
@@ -263,7 +270,7 @@ export function PlayerMarketExhibitMainMenu(player) {
  */
 export function PlayerMarketExhibitSelectItemMenu(player, itemData, itemStack) {
     const form = new ModalFormData();
-    form.title(`Player Market`);
+    form.title(`Karcari`);
     form.slider(``, 1, itemData.itemStack.amount, 1);
     form.textField({ translate: `input.price` }, { translate: `price.label` });
     form.toggle({ translate: `form.button.notify` });
@@ -327,8 +334,8 @@ export function PlayerMarketExhibitSelectItemMenu(player, itemData, itemStack) {
  * 
  * @param {Player} player 
  */
-export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0) {
-    const form = new ChestFormData("large").setTitle(`Player Market`);
+function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0) {
+    const form = new ChestFormData("large").setTitle(`Karcari`);
     const data = GetAndParsePropertyData(`player_market_commons`) ?? [];
 
     /**
@@ -371,7 +378,7 @@ export function PlayerMarketCommonsMenu(player, page = 0, keyword = ``, type = 0
 
     form.show(player).then(rs => {
         if (rs.canceled) {
-            PlayerMarketMainMenu(player);
+            KarcariApp(player);
             return;
         };
         switch (rs.selection) {
@@ -420,7 +427,7 @@ export function PlayerMarketSelectCommonForm(player, common) {
         return;
     };
     const form = new ActionFormData();
-    form.title(`Player Market`);
+    form.title(`Karcari`);
     form.button({ translate: `mc.button.back` });
     form.button({ translate: `mc.button.buy` });
     form.show(player).then(rs => {

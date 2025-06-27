@@ -32,7 +32,9 @@ import "./lib/datamove";
 
 import "./api/command";
 
-const version = "ver.1.21.90.β.1.8.0"
+import "./lib/smartphone";
+
+const version = "ver.1.21.90.β.1.8.1"
 
 world.afterEvents.worldLoad.subscribe(() => {
     world.sendMessage({ translate: `world.message.addon`, with: [version] });
