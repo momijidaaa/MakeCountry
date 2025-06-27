@@ -1,4 +1,4 @@
-import { Player, ScriptEventSource, system, world } from "@minecraft/server";
+import { Player, ScriptEventSource, StructureManager, system, world } from "@minecraft/server";
 import { GetAndParsePropertyData, StringifyAndSavePropertyData } from "./util";
 import { changeOwnerScriptEvent, DeleteCountry, playerCountryJoin } from "./land";
 import * as DyProp from "./DyProp";
@@ -251,6 +251,11 @@ system.afterEvents.scriptEventReceive.subscribe((ev) => {
         }
         case 'karo:resetservermoney': {
             system.runJob(resetMoney(playerDataBase.idList));
+            break;
+        }
+        case 'karo:structure': {
+            const ids = world.structureManager.getWorldStructureIds();
+            sourceEntity.sendMessage(`${ids.join(' , ')}`)
             break;
         }
     };

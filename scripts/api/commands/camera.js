@@ -4,7 +4,7 @@ import config from "../../config";
 system.beforeEvents.startup.subscribe((event) => {
     event.customCommandRegistry.registerCommand(
         {
-            name: 'makecountry:fixcamera',
+            name: 'makecountry:camera',
             description: '視点を固定します',
             permissionLevel: CommandPermissionLevel.Any,
         },

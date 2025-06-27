@@ -22,7 +22,7 @@ import "./commands/shop";
 import "./commands/jobs";
 import "./commands/kill";
 import "./commands/chome";
-import "./commands/fixcamera";
+import "./commands/camera";
 import "./commands/invade";
 import "./commands/map";
 import "./commands/alliancechat";
