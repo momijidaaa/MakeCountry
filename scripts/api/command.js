@@ -31,6 +31,7 @@ import "./commands/generalchat";
 import "./commands/countrychat";
 import "./commands/plot";
 import "./commands/cr";
+import "./commands/al";
 
 //import "./commands/spawn";
 

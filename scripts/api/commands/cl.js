@@ -17,4 +17,19 @@ system.beforeEvents.startup.subscribe((event) => {
             })
         })
     )
+    event.customCommandRegistry.registerCommand(
+        {
+            name: 'makecountry:cl',
+            description: '国家リストを開きます',
+            permissionLevel: CommandPermissionLevel.Any
+        },
+        ((origin, ...args) => {
+            system.runTimeout(() => {
+                if (!origin?.sourceEntity || !(origin?.sourceEntity instanceof Player)) return;
+                const sender = origin.sourceEntity;
+
+                countryList(sender);
+            })
+        })
+    )
 });

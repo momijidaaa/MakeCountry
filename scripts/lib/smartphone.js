@@ -21,7 +21,7 @@ export function SmartPhoneHomeScreen(player) {
     const form = new ActionFormData();
     form.title('§s§m§a§r§t§p§h§o§n§e');
     let m = time.getMinutes();
-    form.body(`${time.getHours() + config.timeDifference}:${m < 10 ? `0${m}` : m}`)
+    form.body(`${time.getUTCHours() + config.timeDifference}:${m < 10 ? `0${m}` : m}`)
     form.button("KayKay");
     form.button("Karcari");
     form.button("Map");
