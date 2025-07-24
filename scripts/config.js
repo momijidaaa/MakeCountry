@@ -2,7 +2,7 @@ export default {
     //コマンドのプレフィックス
     prefix: `?`,
     //プレイヤーの初期の所持金
-    initialMoney: 2000,
+    initialMoney: 10000,
     //所持金をスコアボードに代入できるようにするか(オンラインのプレイヤーのみ)
     getMoneyByScoreboard: false,
     //所持金を代入するスコアボードのオブジェクト名
@@ -21,7 +21,7 @@ export default {
     initialPennameAfter: "鯖民",
 
     //最大Home数
-    maxHomeCount: 3,
+    maxHomeCount: 5,
 
     //名前の上に国名表記するかどうか
     countryNameDisplayOnPlayerNameTag: true,
@@ -113,9 +113,9 @@ export default {
     //侵略のクールタイム(秒)
     invadeCooltime: 0,
     //侵略したあとの平和主義にできない期間
-    invadePeaceChangeCooltime: 7,
+    invadePeaceChangeCooltime: 10,
     //建国後の侵略ができない、されない期間
-    invadeProtectionDuration: 7,
+    invadeProtectionDuration: 3,
     //隅からしか攻められないようにするか
     isAttackCorner: true,
     //指定した時間帯でないと戦争をできないようにするか
